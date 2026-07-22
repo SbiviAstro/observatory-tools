@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cygnus Wave Observatory Tools — Dome &amp; Roll-Off-Roof Geometry Calculators</title>
+<style>
+  :root{
+    --bg:#0a0d12; --panel:#12161d; --panel-2:#171c25; --line:#262d38;
+    --text:#e7e2d6; --text-dim:#8b93a3; --amber:#c8623f; --amber-dim:#7a3d29;
+    --green:#7fa373; --readout-bg:#0d0b09;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{background:var(--bg); color:var(--text);
+    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;}
+  a{color:var(--amber); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+
+  /* Nav */
+  nav{display:flex; align-items:center; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); background:var(--panel); position:relative; z-index:100;}
+  .nav-brand{font-family:"Courier New",monospace; font-size:13px; font-weight:700;
+    color:var(--text); letter-spacing:.04em; padding:14px 20px; flex:1;}
+  .nav-toggle{display:none; background:none; border:none; color:var(--text-dim);
+    font-size:22px; padding:10px 16px; cursor:pointer;}
+  .nav-links{display:flex; flex-wrap:wrap; padding-right:12px;}
+  .nav-links a{color:var(--text-dim); font-size:12.5px; padding:14px 8px; white-space:nowrap;}
+  .nav-links a:hover{color:var(--amber); text-decoration:none;}
+  @media(max-width:680px){
+    .nav-toggle{display:block;}
+    .nav-links{display:none; flex-direction:column; width:100%;
+      padding:0; border-top:1px solid var(--line);}
+    .nav-links.open{display:flex;}
+    .nav-links a{padding:12px 20px; border-bottom:1px solid var(--line); font-size:14px;}
+  }
+
+  /* Hero */
+  .hero{position:relative; overflow:hidden; min-height:440px;
+    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+    padding-bottom:48px; text-align:center;}
+  @media(max-width:480px){.hero{min-height:320px; padding-bottom:32px;}}
+  #starCanvas{position:absolute; inset:0; width:100%; height:100%;}
+  .dome-wrap{position:relative; z-index:2; margin-bottom:-1px; width:100%;}
+  .dome-wrap svg{display:block; margin:0 auto; width:min(800px,100vw);}
+  .hero-content{position:relative; z-index:2; max-width:640px; padding:0 20px;}
+  .hero-eyebrow{font-family:"Courier New",monospace; font-size:11px; color:var(--amber);
+    text-transform:uppercase; letter-spacing:.14em; margin-bottom:14px;}
+  .hero-title{font-size:clamp(24px,5vw,44px); font-weight:700; line-height:1.15;
+    color:var(--text); margin-bottom:14px;}
+  .hero-title em{font-style:normal; color:var(--amber);}
+  .hero-sub{font-size:clamp(14px,2vw,16px); color:var(--text-dim); line-height:1.65;
+    max-width:500px; margin:0 auto 28px;}
+  .hero-ctas{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+  .btn{display:inline-block; font-weight:700; padding:12px 22px; border-radius:6px;
+    text-decoration:none; font-size:14px; min-height:44px; line-height:20px;}
+  .btn:hover{opacity:.88; text-decoration:none;}
+  .btn-primary{background:var(--amber); color:#1a0f0a;}
+  .btn-secondary{background:transparent; color:var(--text-dim);
+    border:1px solid var(--line);}
+  .btn-secondary:hover{border-color:var(--amber); color:var(--text);}
+
+  /* Sections */
+  .section{max-width:1020px; margin:0 auto; padding:48px 24px;}
+  @media(max-width:480px){.section{padding:36px 16px;}}
+  .section-eyebrow{font-family:"Courier New",monospace; font-size:11px;
+    color:var(--amber); text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px;}
+  .section-title{font-size:clamp(20px,3vw,24px); font-weight:700; margin-bottom:8px;}
+  .section-sub{font-size:14.5px; color:var(--text-dim); line-height:1.65; max-width:540px;}
+
+  .calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:32px;}
+  @media(max-width:640px){.calc-grid{grid-template-columns:1fr;}}
+  .calc-card{background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:clamp(18px,3vw,28px); display:flex; flex-direction:column; transition:border-color .2s;}
+  .calc-card:hover{border-color:var(--amber);}
+  .calc-card-icon{width:42px; height:42px; margin-bottom:16px;}
+  .calc-card-eyebrow{font-family:"Courier New",monospace; font-size:10px; color:var(--amber);
+    text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px;}
+  .calc-card h2{font-size:17px; font-weight:700; margin-bottom:10px; color:var(--text);}
+  .calc-card p{font-size:13.5px; color:var(--text-dim); line-height:1.65; flex:1;}
+  .calc-card .card-cta{margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;}
+  .calc-card .card-cta a{font-family:"Courier New",monospace; font-size:12px;
+    color:var(--amber); font-weight:700; letter-spacing:.04em;}
+
+  /* Feature strip */
+  .features{background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .features-inner{max-width:1020px; margin:0 auto; padding:44px 24px;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  @media(max-width:680px){.features-inner{grid-template-columns:1fr; padding:32px 16px;}}
+  .feature-label{font-family:"Courier New",monospace; font-size:10px; color:var(--amber);
+    text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px;}
+  .feature h3{font-size:15px; font-weight:700; margin-bottom:8px; color:var(--text);}
+  .feature p{font-size:13px; color:var(--text-dim); line-height:1.6;}
+
+  /* Openness */
+  .openness{max-width:1020px; margin:0 auto; padding:44px 24px;
+    display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;}
+  @media(max-width:480px){.openness{padding:32px 16px;}}
+  .openness-text{flex:1; min-width:240px;}
+  .openness-text h2{font-size:20px; font-weight:700; margin-bottom:8px;}
+  .openness-text p{font-size:13.5px; color:var(--text-dim); line-height:1.65;}
+  .openness-links{display:flex; flex-direction:column; gap:10px; flex-shrink:0;}
+  .openness-links a{font-size:13.5px; color:var(--text-dim); padding:2px 0;}
+  .openness-links a:hover{color:var(--amber);}
+
+  /* Footer */
+  footer{border-top:1px solid var(--line); padding:20px 24px;
+    font-size:12px; color:var(--text-dim);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
+  footer a{color:var(--text-dim);}
+  footer a:hover{color:var(--amber);}
+
+  @media(prefers-reduced-motion:reduce){#starCanvas{display:none;}}
+</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
+<rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
+<g transform="translate(170,140) scale(1.7) rotate(-45)">
+<g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+<line x1="0" y1="-52" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="0" y2="30"/>
+<line x1="0" y1="30" x2="0" y2="54"/>
+<line x1="-42" y1="-12" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="36" y2="-8"/>
+</g>
+<g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
+<line x1="36" y1="-8" x2="50" y2="-20"/>
+<line x1="-42" y1="-12" x2="-54" y2="-2"/>
+</g>
+<circle cx="0" cy="-52" r="7" fill="#FFFFFF"/>
+<circle cx="0" cy="5" r="9" fill="#FFFFFF"/>
+<circle cx="0" cy="30" r="4" fill="#FFFFFF" opacity="0.85"/>
+<circle cx="0" cy="54" r="7" fill="#FFFFFF"/>
+<circle cx="-42" cy="-12" r="5.5" fill="#FFFFFF"/>
+<circle cx="36" cy="-8" r="5" fill="#FFFFFF"/>
+<circle cx="50" cy="-20" r="3" fill="#FFFFFF" opacity="0.75"/>
+<circle cx="-54" cy="-2" r="3" fill="#FFFFFF" opacity="0.75"/>
+<path d="M20 10 Q32 20 20 30" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
+<path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+</g>
+</svg>
+<span>CYGNUS WAVE</span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="dome-calculator.html">Dome Calculator</a>
+    <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
+    <a href="help.html">Help</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="license.html">License</a>
+    <a href="about.html">About</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <canvas id="starCanvas"></canvas>
+  <div class="dome-wrap">
+    <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
+      <line x1="0" y1="210" x2="800" y2="210" stroke="#262d38" stroke-width="1"/>
+      <rect x="190" y="175" width="420" height="35" fill="#12161d" stroke="#262d38" stroke-width="1"/>
+      <path d="M190,210 Q400,-5 610,210" fill="#0d1018" stroke="#3a4550" stroke-width="1.5"/>
+      <path d="M220,210 Q400,30 580,210" fill="none" stroke="#262d38" stroke-width="0.75" stroke-dasharray="4,6"/>
+      <path d="M260,210 Q400,68 540,210" fill="none" stroke="#262d38" stroke-width="0.75" stroke-dasharray="4,6"/>
+      <path d="M375,52 Q400,40 425,52 L425,210 L375,210 Z" fill="#0a0d12" stroke="#c8623f" stroke-width="1.5" opacity="0.9"/>
+      <line x1="400" y1="200" x2="400" y2="86" stroke="#c8623f" stroke-width="2" opacity="0.85"/>
+      <ellipse cx="400" cy="86" rx="14" ry="4" fill="none" stroke="#c8623f" stroke-width="1.5" opacity="0.85"/>
+      <circle cx="400" cy="200" r="4" fill="#e7e2d6" opacity="0.9"/>
+      <text x="180" y="205" font-family="Courier New,monospace" font-size="10" fill="#4a5568" text-anchor="end">W</text>
+      <text x="620" y="205" font-family="Courier New,monospace" font-size="10" fill="#4a5568">E</text>
+      <text x="400" y="20" font-family="Courier New,monospace" font-size="10" fill="#4a5568" text-anchor="middle">Zenith</text>
+    </svg>
+  </div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Cygnus Wave Observatory Tools</div>
+    <h1 class="hero-title">Plan your observatory<br>before you <em>build</em> it</h1>
+    <p class="hero-sub">Two free geometry calculators for astrophotographers — work out the exact numbers your mount, dome, or roll-off roof needs, and verify them in 3D before anything gets bolted down.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="dome-calculator.html">Dome Calculator</a>
+      <a class="btn btn-primary" href="ror-calculator.html">Roll-Off-Roof</a>
+      <a class="btn btn-secondary" href="help.html">Documentation</a>
+    </div>
+  </div>
+</section>
+
+<div class="section">
+  <div class="section-eyebrow">The tools</div>
+  <h2 class="section-title">Two different problems. Two calculators.</h2>
+  <p class="section-sub">A dome and a roll-off roof are fundamentally different geometry problems — they need separate tools, not one generic calculator bolted into a different shape.</p>
+  <div class="calc-grid">
+    <div class="calc-card">
+      <svg class="calc-card-icon" viewBox="0 0 44 44" fill="none">
+        <path d="M8 38 Q22 6 36 38" stroke="#c8623f" stroke-width="1.5" fill="#12161d"/>
+        <path d="M15 38 Q22 14 29 38" stroke="#3a4550" stroke-width="1" fill="none" stroke-dasharray="3,4"/>
+        <line x1="22" y1="36" x2="22" y2="18" stroke="#c8623f" stroke-width="1.5"/>
+        <circle cx="22" cy="36" r="2.5" fill="#e7e2d6"/>
+        <rect x="8" y="36" width="28" height="6" fill="#171c25" stroke="#3a4550" stroke-width="1"/>
+      </svg>
+      <div class="calc-card-eyebrow">Dome Observatories</div>
+      <h2>Dome &amp; Mount Geometry</h2>
+      <p>Converts physical measurements into the exact signed fields NINA's dome-sync tab expects. Live 3D preview shows whether the shutter actually clears the OTA at every pointing. Full-sky coverage sweep, pier-side comparison, local horizon modeling, one-click NINA settings export.</p>
+      <div class="card-cta">
+        <a href="dome-calculator.html">Open calculator →</a>
+        <a href="dome-manual.html" style="color:var(--text-dim);">Read manual →</a>
+      </div>
+    </div>
+    <div class="calc-card">
+      <svg class="calc-card-icon" viewBox="0 0 44 44" fill="none">
+        <rect x="6" y="24" width="32" height="14" fill="#12161d" stroke="#3a4550" stroke-width="1"/>
+        <rect x="6" y="8" width="32" height="16" fill="#0a0d12" stroke="#c8623f" stroke-width="1.5" rx="1"/>
+        <line x1="22" y1="30" x2="22" y2="20" stroke="#c8623f" stroke-width="1.5"/>
+        <circle cx="22" cy="30" r="2" fill="#e7e2d6"/>
+        <path d="M30 8 L44 8 L44 24 L38 24" stroke="#c8623f" stroke-width="1" stroke-dasharray="3,3" fill="none" opacity="0.6"/>
+      </svg>
+      <div class="calc-card-eyebrow">Roll-Off-Roof Observatories</div>
+      <h2>Roll-Off-Roof Geometry</h2>
+      <p>Real wall, roof, and floor/ceiling obstructions — including the parked roof itself. Up to 4 telescopes on one mount, with swing-radius clearance checked against walls and against each other. Custom building shapes, flat/peaked/wedge roof profiles, exportable horizon file for NINA or Stellarium.</p>
+      <div class="card-cta">
+        <a href="ror-calculator.html">Open calculator →</a>
+        <a href="ror-manual.html" style="color:var(--text-dim);">Read manual →</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="features">
+  <div class="features-inner">
+    <div class="feature">
+      <div class="feature-label">3D Preview</div>
+      <h3>See it before you build it</h3>
+      <p>Both tools include an interactive 3D model of your observatory — drag to orbit, scroll to zoom. The shutter or walls turn red the moment a clearance problem appears, at whatever pointing you're testing.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-label">Physics, not approximations</div>
+      <h3>Same math as NINA</h3>
+      <p>The dome calculator's azimuth math is ported from NINA's own <code style="font-size:12px;background:#0d0b09;padding:1px 5px;border-radius:3px;">DomeSynchronization.cs</code> — what you see here is what NINA actually computes, not a simplified stand-in.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-label">Runs in your browser</div>
+      <h3>No account. No data sent.</h3>
+      <p>Both tools are fully client-side HTML. Nothing you enter leaves your device. Save and load your setup as a local JSON file whenever you need to pick up where you left off.</p>
+    </div>
+  </div>
+</div>
+
+<div class="openness">
+  <div class="openness-text">
+    <h2>Open source, MPL 2.0</h2>
+    <p>Both calculators are released under the Mozilla Public License 2.0 — the same license NINA uses. The source is the HTML file itself; view source in your browser to read it. Contributions and forks welcome under those terms.</p>
+  </div>
+  <div class="openness-links">
+    <a href="license.html">→ Full license text</a>
+    <a href="about.html">→ About this project</a>
+    <a href="changelog.html">→ Version history</a>
+    <a href="contact.html">→ Report a bug</a>
+  </div>
+</div>
+
+<footer>
+  <span>&copy; 2026 Cygnus Wave. Licensed under the <a href="license.html">MPL 2.0</a>.</span>
+  <span>
+    <a href="disclaimer.html">Disclaimer</a> &nbsp;·&nbsp;
+    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
+    <a href="contact.html">Contact</a>
+  </span>
+</footer>
+
+<script>
+document.getElementById('navToggle').addEventListener('click',function(){
+  var links=document.getElementById('navLinks');
+  var open=links.classList.toggle('open');
+  this.setAttribute('aria-expanded',open);
+  this.textContent=open?'✕':'☰';
+});
+const canvas=document.getElementById('starCanvas');
+const ctx=canvas.getContext('2d');
+let stars=[],W,H;
+function init(){
+  W=canvas.width=canvas.offsetWidth;
+  H=canvas.height=canvas.offsetHeight;
+  stars=[];
+  for(let i=0;i<200;i++) stars.push({
+    x:Math.random()*W, y:Math.random()*H,
+    r:Math.random()*1.2+0.2,
+    speed:Math.random()*0.06+0.01,
+    opacity:Math.random()*0.7+0.15,
+    layer:Math.random()<0.4?1:0
+  });
+}
+function draw(t){
+  ctx.clearRect(0,0,W,H);
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#04060d'); g.addColorStop(1,'#0a0d12');
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+  for(const s of stars){
+    const oy=(s.y+(s.layer===1?t*s.speed*0.4:t*s.speed*0.15))%H;
+    ctx.beginPath(); ctx.arc(s.x,oy,s.r,0,Math.PI*2);
+    ctx.fillStyle=`rgba(210,220,235,${s.opacity})`; ctx.fill();
+  }
+  requestAnimationFrame(draw);
+}
+window.addEventListener('resize',init);
+init(); requestAnimationFrame(draw);
+</script>
+</body>
+</html>

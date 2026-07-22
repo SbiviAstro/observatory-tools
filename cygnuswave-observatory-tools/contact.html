@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Cygnus Wave Observatory Tools</title>
+<style>
+:root{
+  --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
+  --text: #e7e2d6; --text-dim: #8b93a3; --amber: #c8623f; --amber-dim: #7a3d29;
+  --green: #7fa373; --readout-bg: #0d0b09;
+}
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; background:var(--bg); color:var(--text);
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+
+/* ── Nav with hamburger ── */
+nav{ display:flex; align-items:center; gap:0; flex-wrap:wrap;
+  padding:0; border-bottom:1px solid var(--line); background:var(--panel);
+  position:relative; z-index:100; }
+nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700;
+  color:var(--text); letter-spacing:0.04em; padding:14px 20px; flex:1; }
+.nav-toggle{ display:none; background:none; border:none; color:var(--text-dim);
+  font-size:22px; padding:10px 16px; cursor:pointer; line-height:1; }
+.nav-links{ display:flex; flex-wrap:wrap; gap:0; padding:0 12px 0 0; }
+.nav-links a{ color:var(--text-dim); font-size:12.5px; padding:14px 8px;
+  white-space:nowrap; }
+.nav-links a:hover{ color:var(--amber); text-decoration:none; }
+
+@media(max-width:680px){
+  .nav-toggle{ display:block; }
+  .nav-links{ display:none; flex-direction:column; width:100%;
+    padding:0; border-top:1px solid var(--line); }
+  .nav-links.open{ display:flex; }
+  .nav-links a{ padding:12px 20px; border-bottom:1px solid var(--line); font-size:14px; }
+}
+
+/* ── Layout ── */
+.wrap{ max-width:880px; margin:0 auto; padding:0 24px 64px; }
+@media(max-width:480px){ .wrap{ padding:0 16px 48px; } }
+
+h1{ font-size:clamp(22px,5vw,28px); margin:0 0 10px; font-weight:700; }
+h2{ font-size:18px; margin:34px 0 12px; color:var(--amber); }
+h3{ font-size:15px; margin:20px 0 8px; color:var(--text); }
+p, li{ font-size:14.5px; line-height:1.7; color:var(--text-dim); }
+@media(max-width:480px){
+  h2{ font-size:16px; margin:24px 0 10px; }
+  p, li{ font-size:14px; }
+}
+
+a{ color:var(--amber); text-decoration:none; }
+a:hover{ text-decoration:underline; }
+
+.card{ background:var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding:24px 28px; margin-bottom:20px; }
+@media(max-width:480px){ .card{ padding:18px 16px; } }
+
+.eyebrow{ font-size:11px; color:var(--text-dim); text-transform:uppercase;
+  letter-spacing:0.08em; margin-bottom:6px; }
+
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line);
+  font-size:12px; color:var(--text-dim); }
+
+.btn{ display:inline-block; background:var(--amber); color:#1a0f0a; font-weight:700;
+  padding:12px 22px; border-radius:6px; text-decoration:none;
+  margin:6px 10px 6px 0; font-size:14px; min-height:44px; line-height:20px; }
+.btn:hover{ opacity:0.9; text-decoration:none; }
+.btn-secondary{ background:var(--panel-2); color:var(--text); border:1px solid var(--line); }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:640px){ .grid-2{ grid-template-columns:1fr; } }
+
+code{ background:var(--readout-bg); padding:2px 6px; border-radius:3px;
+  font-family:"Courier New",monospace; font-size:13px; }
+
+pre{ background:var(--readout-bg); border:1px solid var(--line); border-radius:6px;
+  padding:16px; overflow-x:auto; font-size:12px; line-height:1.6;
+  color:var(--text-dim); white-space:pre; -webkit-overflow-scrolling:touch; }
+
+.table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0; }
+table{ width:100%; border-collapse:collapse; min-width:360px; font-size:13px; }
+table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+
+.status-chip{ display:inline-block; background:rgba(127,216,143,0.12);
+  border:1px solid #3d5c42; color:#9fe0ac; padding:4px 10px;
+  border-radius:5px; font-size:12px; margin-bottom:20px; }
+
+</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+<nav>
+  <a href="index.html" class="brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
+<rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
+<g transform="translate(170,140) scale(1.7) rotate(-45)">
+<g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+<line x1="0" y1="-52" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="0" y2="30"/>
+<line x1="0" y1="30" x2="0" y2="54"/>
+<line x1="-42" y1="-12" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="36" y2="-8"/>
+</g>
+<g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
+<line x1="36" y1="-8" x2="50" y2="-20"/>
+<line x1="-42" y1="-12" x2="-54" y2="-2"/>
+</g>
+<circle cx="0" cy="-52" r="7" fill="#FFFFFF"/>
+<circle cx="0" cy="5" r="9" fill="#FFFFFF"/>
+<circle cx="0" cy="30" r="4" fill="#FFFFFF" opacity="0.85"/>
+<circle cx="0" cy="54" r="7" fill="#FFFFFF"/>
+<circle cx="-42" cy="-12" r="5.5" fill="#FFFFFF"/>
+<circle cx="36" cy="-8" r="5" fill="#FFFFFF"/>
+<circle cx="50" cy="-20" r="3" fill="#FFFFFF" opacity="0.75"/>
+<circle cx="-54" cy="-2" r="3" fill="#FFFFFF" opacity="0.75"/>
+<path d="M20 10 Q32 20 20 30" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
+<path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+</g>
+</svg>
+<span style="color:var(--text);">CYGNUS WAVE</span></a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="index.html">Home</a>
+    <a href="dome-calculator.html">Dome Calculator</a>
+    <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
+    <a href="help.html">Help</a>
+    <a href="changelog.html">Changelog</a>
+    <a href="license.html">License</a>
+    <a href="about.html">About</a>
+    <a href="faq.html">FAQ</a>
+    <a href="contact.html">Contact</a>
+  </div>
+</nav>
+<script>
+document.getElementById('navToggle').addEventListener('click',function(){
+  var links=document.getElementById('navLinks');
+  var open=links.classList.toggle('open');
+  this.setAttribute('aria-expanded',open);
+  this.textContent=open?'✕':'☰';
+});
+</script>
+
+<div class="wrap">
+
+<div class="eyebrow" style="margin-top:32px;">Contact</div>
+<h1>Contact &amp; Feedback</h1>
+<p>These tools are maintained by Cygnus Wave. Bug reports, feature requests, and general feedback are all welcome.</p>
+<div class="grid-2" style="margin-top:20px;">
+  <div class="card">
+    <h2 style="margin-top:0;">Bug reports &amp; feature requests</h2>
+    <p>If something doesn't calculate correctly, a label is wrong, or you have a feature idea, email us. Include which calculator you're using, what you entered, what you expected, and what you got.</p>
+    <a class="btn" href="mailto:hello@cygnuswave.io">Email us →</a>
+  </div>
+  <div class="card">
+    <h2 style="margin-top:0;">General questions</h2>
+    <p>Check the <a href="help.html">Help &amp; Manuals</a> and <a href="faq.html">FAQ</a> first — most common questions are answered there. If you're still stuck, get in touch.</p>
+  </div>
+</div>
+<h2>Useful to include in a bug report</h2>
+<ul>
+  <li>Which calculator (dome or roll-off-roof) and which version</li>
+  <li>What values you entered for the relevant fields</li>
+  <li>What result you expected and what you actually saw</li>
+  <li>Your browser and operating system, if the issue seems visual</li>
+</ul>
+<h2>Contributing</h2>
+<p>Both calculators are open source under the <a href="license.html">MPL 2.0</a>. The source code is the HTML file itself — view source in your browser to read it. If you make improvements and want to share them, get in touch.</p>
+
+<footer>
+  <p>&copy; 2026 Cygnus Wave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
+  See the <a href="disclaimer.html">Disclaimer</a> and <a href="privacy.html">Privacy Policy</a>.</p>
+</footer>
+
+</div>
+</body>
+</html>
