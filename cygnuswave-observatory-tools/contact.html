@@ -144,27 +144,130 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="eyebrow" style="margin-top:32px;">Contact</div>
 <h1>Contact &amp; Feedback</h1>
-<p>These tools are maintained by CygnusWave. Bug reports, feature requests, and general feedback are all welcome.</p>
-<div class="grid-2" style="margin-top:20px;">
-  <div class="card">
-    <h2 style="margin-top:0;">Bug reports &amp; feature requests</h2>
-    <p>If something doesn't calculate correctly, a label is wrong, or you have a feature idea, email us. Include which calculator you're using, what you entered, what you expected, and what you got.</p>
-    <a class="btn" href="mailto:hello@cygnuswave.io">Email us →</a>
+<p>Bug reports, feature requests, and general questions are all welcome. Fill in the form below and we'll get back to you.</p>
+
+<div class="grid-2" style="margin-top:24px; align-items:start;">
+
+  <div>
+    <div class="card" style="padding:28px 30px;">
+      <h2 style="margin-top:0; margin-bottom:20px;">Send a message</h2>
+
+      <div id="formSuccess" style="display:none; background:var(--panel-2); border:1px solid var(--green); border-radius:6px; padding:18px 20px; margin-bottom:20px;">
+        <p style="margin:0; color:var(--green); font-size:14.5px;">✓ Message sent — we'll get back to you soon.</p>
+      </div>
+      <div id="formError" style="display:none; background:var(--panel-2); border:1px solid #e0685c; border-radius:6px; padding:18px 20px; margin-bottom:20px;">
+        <p style="margin:0; color:#e0685c; font-size:14.5px;">Something went wrong. Please try again or email us directly at <a href="mailto:help@cygnuswave.io">help@cygnuswave.io</a>.</p>
+      </div>
+
+      <form id="contactForm">
+        <!-- Web3Forms access key — replace with your key from https://web3forms.com -->
+        <input type="hidden" name="access_key" value="91fe2721-95cb-45a8-9e5c-4e3c3eb5b25d">
+        <input type="hidden" name="subject" value="CygnusWave Observatory Tools — Contact Form">
+        <input type="hidden" name="from_name" value="CygnusWave Contact Form">
+        <input type="checkbox" name="botcheck" style="display:none;">
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Your name</label>
+          <input type="text" name="name" required placeholder="e.g. Jane Smith"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Email address</label>
+          <input type="email" name="email" required placeholder="you@example.com"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Subject</label>
+          <select name="subject_type"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+            <option value="Bug report">Bug report</option>
+            <option value="Feature request">Feature request</option>
+            <option value="General question">General question</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Which calculator?</label>
+          <select name="calculator"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+            <option value="Not applicable">Not applicable</option>
+            <option value="Dome Calculator">Dome Calculator</option>
+            <option value="Roll-Off-Roof Calculator">Roll-Off-Roof Calculator</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Message</label>
+          <textarea name="message" required rows="6" placeholder="Describe your bug, question, or idea..."
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none; resize:vertical; font-family:inherit;"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn"
+          style="background:var(--amber); color:#1a0f0a; font-weight:700; padding:12px 26px; border:none; border-radius:6px; font-size:14px; cursor:pointer; min-height:44px;">
+          Send message →
+        </button>
+      </form>
+    </div>
   </div>
-  <div class="card">
-    <h2 style="margin-top:0;">General questions</h2>
-    <p>Check the <a href="help.html">Help &amp; Manuals</a> and <a href="faq.html">FAQ</a> first — most common questions are answered there. If you're still stuck, get in touch.</p>
+
+  <div>
+    <div class="card">
+      <h2 style="margin-top:0;">Useful to include</h2>
+      <p style="margin-top:0;">For bug reports, the more detail the better:</p>
+      <ul style="margin:0; padding-left:20px;">
+        <li>Which calculator and version number (shown in the page title)</li>
+        <li>What values you entered for the relevant fields</li>
+        <li>What result you expected and what you actually saw</li>
+        <li>Your browser and OS if the issue seems visual</li>
+      </ul>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <h2 style="margin-top:0;">Direct email</h2>
+      <p style="margin-top:0;">Prefer to email directly? <a href="mailto:help@cygnuswave.io">help@cygnuswave.io</a></p>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <h2 style="margin-top:0;">Contributing</h2>
+      <p style="margin-top:0;">Both calculators are open source under the <a href="license.html">MPL 2.0</a>. The source code is the HTML file itself. If you make improvements and want to share them, get in touch or open a pull request on <a href="https://github.com/SbiviAstro/observatory-tools" target="_blank">GitHub</a>.</p>
+    </div>
   </div>
+
 </div>
-<h2>Useful to include in a bug report</h2>
-<ul>
-  <li>Which calculator (dome or roll-off-roof) and which version</li>
-  <li>What values you entered for the relevant fields</li>
-  <li>What result you expected and what you actually saw</li>
-  <li>Your browser and operating system, if the issue seems visual</li>
-</ul>
-<h2>Contributing</h2>
-<p>Both calculators are open source under the <a href="license.html">MPL 2.0</a>. The source code is the HTML file itself — view source in your browser to read it. If you make improvements and want to share them, get in touch.</p>
+
+<script>
+document.getElementById('contactForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const successEl = document.getElementById('formSuccess');
+  const errorEl = document.getElementById('formError');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  successEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  try {
+    const data = Object.fromEntries(new FormData(this));
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if(json.success){
+      successEl.style.display = 'block';
+      this.reset();
+    } else {
+      errorEl.style.display = 'block';
+    }
+  } catch(err){
+    errorEl.style.display = 'block';
+  }
+  btn.textContent = 'Send message →';
+  btn.disabled = false;
+});
+</script>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
@@ -172,5 +275,6 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </footer>
 
 </div>
+
 </body>
 </html>
