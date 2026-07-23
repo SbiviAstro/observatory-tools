@@ -148,7 +148,13 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dome Calculator</h2>
 <p>Versioned as <code>v[major].[three-digit-minor]</code> — e.g. v5.040.</p>
 
-<div class="card"><div class="eyebrow">v5.040 — Current</div>
+<div class="card"><div class="eyebrow">v5.042 — Current</div>
+<p>Metric / Imperial unit toggle added to the dome calculator, matching the ROR calculator. All non-OTA fields (dome height, mount height, N/S, E/W and Up/Down offsets, direct offsets, shutter width, wall height, GEM axis fields, dome radius) switch between mm and decimal inches. Fraction hints (to the nearest 1/16") appear beside each field in imperial mode. Summary stat chips (N/S, E/W, Up/Down, Dome Radius, GEM Axis, Lateral Axis) also update. OTA fields always remain in mm.</p></div>
+
+<div class="card"><div class="eyebrow">v5.041</div>
+<p>Three-column layout applied to the dome calculator — collapsible setup sections left (Mount Position, Dome & Rotator, Optical Axis, Sky Coverage, Local Horizon), Telescope Pointing middle (persistent/sticky), 3D Preview right (persistent/sticky). Equal <code>1fr 1fr 1fr</code> columns aligned to the header width. CygnusWave rebranded to one word throughout.</p></div>
+
+<div class="card"><div class="eyebrow">v5.040</div>
 <p>Added Subresource Integrity (SRI) hash to the Three.js CDN script tag, fetched from cdnjs's own official SRI repository. Last gap in the client-side security surface.</p></div>
 
 <div class="card"><div class="eyebrow">v5.039</div>
@@ -176,7 +182,19 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Roll-Off-Roof Calculator</h2>
 <p>Versioned as <code>v2.00.000</code>, incrementing <code>.00.001</code> per change.</p>
 
-<div class="card"><div class="eyebrow">v2.00.008 — Current</div>
+<div class="card"><div class="eyebrow">v2.00.012 — Current</div>
+<p>Fraction hints added to every non-OTA input field in imperial mode. Each cm/mm-class field now shows a small fractional-inch annotation beside it (e.g. <code>13'1 1/2"</code>) that updates live as you type. Hints are hidden in metric mode and for zero-value fields. Applies to all building, roof, mount position, height, axis offset, pier gap, and custom wall fields.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.011</div>
+<p>Imperial mode now displays fractional inches to the nearest 1/16" in the building/roof summary stat chips (Footprint, Wall Height, Roof Travel, Mount Offset). Fractions auto-reduce (8/16 → 1/2, etc.) and format as feet + inches when ≥ 12".</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.010</div>
+<p>Metric / Imperial unit toggle added to the top-right header. All non-OTA fields (building dimensions, mount positions, heights, roof heights, axis offsets, pier gap, custom wall distances) switch between cm/mm and decimal inches. OTA tube length and aperture always remain in mm. Summary stat chips also update. Internal math stays in mm throughout — conversion only at input/output.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.009</div>
+<p>In multi-telescope mode, the selected scope's pointing ray is now visible in the 3D preview — a coloured line (green = clears, red = blocked) extending from that scope's mount position in the current pointing direction. Non-selected scopes show no ray. Single-scope mode is unchanged.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.008</div>
 <p>Two bug fixes: (1) Peaked gable / wedge roof threw a <code>ReferenceError: _ps is not defined</code> — <code>clampAltToHorizon()</code> and <code>jog()</code> were using <code>_ps</code> as a free variable that only existed inside <code>computeSkyCoverage()</code>; both now call <code>getPointingScope()</code> directly. (2) In multi-telescope mode, the selected telescope's OTA tube now tracks the live pointing direction — previously all tubes pointed straight up regardless of HA/Dec. Non-selected scope tubes remain in a neutral upright pose, tinted muted brown to distinguish them from the active amber tube.</p></div>
 
 <div class="card"><div class="eyebrow">v2.00.007</div>

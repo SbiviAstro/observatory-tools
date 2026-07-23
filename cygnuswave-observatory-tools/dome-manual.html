@@ -161,6 +161,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <li>Save/Load complete setup as a portable JSON file; Reset to Defaults</li>
 </ul>
 
+<h2>Units</h2>
+<p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all dome and mount measurement fields (dome height, mount height, N/S/E/W/Up offsets, shutter width, wall height, GEM axis, dome radius) between mm and decimal inches. <strong>OTA tube length and aperture always remain in mm.</strong></p>
+<p>In imperial mode a fractional-inch hint (to the nearest 1/16") appears beside each converted field. The summary chips at the top of the page (N/S, E/W, Up/Down, Dome Radius, GEM Axis, Lateral Axis) also display in the chosen unit.</p>
+
 <h2>What this tool does</h2>
 <p>NINA can slave your dome to your telescope, but only if it knows precisely where your mount sits relative to the dome's center. Getting those numbers right by hand is easy to get wrong. This tool converts either a physical measurement or values you already have into the exact signed fields NINA's Options → Dome tab expects, then shows you live whether your shutter will actually clear the OTA at any given pointing.</p>
 

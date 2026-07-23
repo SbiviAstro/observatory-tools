@@ -163,6 +163,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <li>Save/Load, dark/light mode, Reset to Defaults</li>
 </ul>
 
+<h2>Units</h2>
+<p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all building, roof, mount position, height, axis offset, pier gap, and custom wall fields in place. <strong>OTA tube length and aperture always remain in mm</strong> regardless of the unit setting — telescope optics are always specified in millimetres.</p>
+<p>In imperial mode each field shows a fractional-inch hint (e.g. <code>13'1 1/2"</code>) beside it, updating live as you type. The summary chips at the top of the page (Footprint, Wall Height, Roof Travel, Mount Offset) also display in the chosen unit.</p>
+
 <h2>Building &amp; Mount Position</h2>
 <p>Building width, length, wall height, and mount pivot position — height above floor, and N/S and E/W offset from the building's center. All in centimetres.</p>
 
@@ -181,7 +185,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>A scaled floor plan of the building sits above the Telescopes card. Click anywhere inside the building outline to place a telescope pier at that position. Drag to reposition. Each enabled telescope appears as a colour-coded dot with a faint dashed swing-radius circle. The NS/EW number fields in the Telescopes card stay in sync — move a pier and the numbers update, or type in a number and the dot moves. Use the floor plan for initial placement and the number fields for fine-tuning.</p>
 
 <h2>Telescopes</h2>
-<p>Each telescope is on its own independent mount. Telescope 1 uses the mount type and optics from the Optical Axis card, but its own position (NS/EW from building centre, in cm) and mount height defined in the Telescopes card. Enable Telescopes 2–4 for additional mounts — each gets its own position, mount height, mount type (GEM/Alt-Az), GEM axis length or Dec horizontal offset, tube length (mm), and aperture (mm).</p>
+<p>Each telescope is on its own independent mount. Telescope 1 uses the mount type and optics from the Optical Axis card, but its own position (NS/EW from building centre, in cm) and mount height defined in the Telescopes card. Enable Telescopes 2–4 for additional mounts — each gets its own position, mount height, mount type (GEM/Alt-Az), GEM axis length or Dec horizontal offset, tube length (mm), and aperture (mm). Note: OTA tube length and aperture are always in mm even in imperial mode.</p>
 <p>Use the <strong>Pointing telescope</strong> dropdown in Step 4 to choose which mount drives the live pointing preview, obstruction check, and sky coverage sweep.</p>
 
 <h2>Swing Clearance</h2>

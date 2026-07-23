@@ -153,6 +153,7 @@
   @media(max-width:1200px){ .two-col-layout{ grid-template-columns:1fr 1fr; } .col-preview{ grid-column:1/-1; position:static; } }
   @media(max-width:800px){ .two-col-layout{ grid-template-columns:1fr; } .col-persistent,.col-preview{ position:static; } }
   @media(max-width:480px){ .section-body{ padding:14px 14px 16px; } .section-header{ padding:11px 14px; } }
+  .frac-hint{ font-family:'Courier New', monospace; opacity:0.75; }
   .layout,.left,.pointing,.horizon,.right{ display:block; }
 
 </style>
@@ -215,7 +216,11 @@
         <div class="eyebrow">Observatory Calibration Worksheet</div>
         <h1>Dome &amp; Mount Geometry → NINA Settings</h1>
       </div>
-      <div style="display:flex; gap:8px; flex-shrink:0;">
+      <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+        <div class="mount-type-toggle" style="margin:0;">
+          <button id="btnUnitMetric" class="active" onclick="setUnitSystem(false)" title="Metric units (mm)">Metric</button>
+          <button id="btnUnitImperial" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
+        </div>
         <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
         <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
         <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
@@ -303,23 +308,23 @@
         <div id="step1Measure">
           <div class="row" style="margin-top:6px;">
             <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, not the rim</span></div>
-            <div class="field"><input type="number" id="hDome" value="913"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="hDome" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Height of mount RA/Dec intersection above floor</label></div>
-            <div class="field"><input type="number" id="hMount" value="1185"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="hMount" value="1185"><span class="unit">mm</span><span class="frac-hint" id="hint_hMount" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>North/South distance</label></div>
             <div class="field">
-              <input type="number" id="nsDist" value="80">
+              <input type="number" id="nsDist" value="80"><span class="frac-hint" id="hint_nsDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:4px; white-space:nowrap; font-family:'Courier New',monospace;"></span>
               <select id="nsDir"><option value="1">is North</option><option value="-1">is South</option></select>
             </div>
           </div>
           <div class="row">
             <div><label>East/West distance</label><span class="hint">mount mark relative to dome center mark</span></div>
             <div class="field">
-              <input type="number" id="ewDist" value="0">
+              <input type="number" id="ewDist" value="0"><span class="frac-hint" id="hint_ewDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:4px; white-space:nowrap; font-family:'Courier New',monospace;"></span>
               <select id="ewDir"><option value="1">is East</option><option value="-1">is West</option></select>
             </div>
           </div>
@@ -328,15 +333,15 @@
         <div id="step1Direct" style="display:none;">
           <div class="row" style="margin-top:6px;">
             <div><label>Scope Position +N/-S</label></div>
-            <div class="field"><input type="number" id="directNS" value="80"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="directNS" value="80"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Scope Position +E/-W</label></div>
-            <div class="field"><input type="number" id="directEW" value="0"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="directEW" value="0"><span class="unit">mm</span><span class="frac-hint" id="hint_directEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Scope Position +Up/-Down</label></div>
-            <div class="field"><input type="number" id="directUD" value="272"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="directUD" value="272"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
         </div>
     </div>
@@ -347,7 +352,7 @@
 <h2><span class="step-num">2</span>Dome &amp; Rotator</h2>
         <div class="row">
           <div><label>Dome radius</label><span class="hint">measured center-to-rim, along the base</span></div>
-          <div class="field"><input type="number" id="radius" value="1040"><span class="unit">mm</span></div>
+          <div class="field"><input type="number" id="radius" value="1040"><span class="unit">mm</span><span class="frac-hint" id="hint_radius" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
         <div class="toggle-row">
           <input type="checkbox" id="haveDiameter">
@@ -355,7 +360,7 @@
         </div>
         <div class="row" style="margin-top:12px;">
           <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
-          <div class="field"><input type="number" id="shutterWidth" value="500"><span class="unit">mm</span></div>
+          <div class="field"><input type="number" id="shutterWidth" value="500"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
         <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
           <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
@@ -367,7 +372,7 @@
         </div>
         <div class="row" style="margin-top:12px;">
           <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts — only affects the 3D preview, not the NINA math</span></div>
-          <div class="field"><input type="number" id="wallHeight" value="913"><span class="unit">mm</span></div>
+          <div class="field"><input type="number" id="wallHeight" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
     </div>
   </details>
@@ -387,7 +392,7 @@
               <label>GEM Axis Length (raw)</label>
               <span class="hint">Slew RA to ±90° from the meridian and measure the lateral distance from the RA axis to the center of the OTA aperture.</span>
             </div>
-            <div class="field"><input type="number" id="gemRaw" value="280"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="gemRaw" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemRaw" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="toggle-row" id="guidescopeToggleRow">
             <input type="checkbox" id="hasGuidescope">
@@ -396,12 +401,12 @@
           <div class="sub-fields" id="guidescopeFields" style="display:none;">
             <div class="row">
               <div><label>OTA-to-guidescope aperture distance</label></div>
-              <div class="field"><input type="number" id="guideDist" value="140"><span class="unit">mm</span></div>
+              <div class="field"><input type="number" id="guideDist" value="140"><span class="unit">mm</span><span class="frac-hint" id="hint_guideDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
             </div>
           </div>
           <div class="row" id="gemDirectRow" style="display:none;">
             <div><label>GEM Axis Length</label></div>
-            <div class="field"><input type="number" id="gemDirect" value="280"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="gemDirect" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemDirect" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
         </div>
 
@@ -665,6 +670,90 @@
 <script>
 function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
 
+// ── Unit system ──────────────────────────────────────────────────────────────
+// All internal math runs in mm. OTA fields (otaLength, otaAperture, ota2Length,
+// ota2Aperture) are always mm regardless of unit mode.
+let useImperial = false;
+const IN_TO_MM = 25.4;
+
+// All non-OTA mm field IDs
+const DOME_MM_FIELD_IDS = [
+  'hDome','hMount','nsDist','ewDist','directNS','directEW','directUD',
+  'shutterWidth','wallHeight','gemRaw','guideDist','gemDirect','radius'
+];
+
+function unitLabel(){ return useImperial ? 'in' : 'mm'; }
+
+function toFracInches(totalInches){
+  const neg = totalInches < 0;
+  const abs = Math.abs(totalInches);
+  const feet  = Math.floor(abs / 12);
+  const rem   = abs - feet * 12;
+  let whole   = Math.floor(rem);
+  let sixteenths = Math.round((rem - whole) * 16);
+  if(sixteenths === 16){ whole++; sixteenths = 0; }
+  if(whole === 12){ return (neg ? '-' : '') + (feet+1) + "'0\""; }
+  let fracStr = '';
+  if(sixteenths > 0){
+    let n = sixteenths, d = 16;
+    const g = [8,4,2,1].find(x => n%x===0 && d%x===0);
+    n /= g; d /= g;
+    fracStr = ` ${n}/${d}`;
+  }
+  const base = feet > 0 ? `${feet}'${whole}${fracStr}"` : `${whole}${fracStr}"`;
+  return (neg ? '-' : '') + base;
+}
+function mmToFrac(mm){ return toFracInches(mm / IN_TO_MM); }
+function fmtUnit(mm){ return useImperial ? mmToFrac(mm) : mm + ' mm'; }
+
+function updateFracHints(){
+  DOME_MM_FIELD_IDS.forEach(id => {
+    const hint = document.getElementById('hint_' + id);
+    if(!hint) return;
+    if(!useImperial){ hint.style.display = 'none'; return; }
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inches = parseFloat(el.value);
+    if(isNaN(inches) || inches === 0){ hint.style.display = 'none'; return; }
+    hint.textContent = toFracInches(inches);
+    hint.style.display = 'inline';
+  });
+}
+
+function refreshDomeUnitLabels(){
+  const lbl = unitLabel();
+  DOME_MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const span = el.parentElement.querySelector('.unit');
+    if(span) span.textContent = lbl;
+  });
+}
+
+function setUnitSystem(imperial){
+  if(imperial === useImperial) return;
+  const factor = imperial ? (1/IN_TO_MM) : IN_TO_MM;
+  useImperial = imperial;
+  DOME_MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const v = parseFloat(el.value);
+    if(!isNaN(v)) el.value = (v * factor).toFixed(imperial ? 4 : 0);
+  });
+  refreshDomeUnitLabels();
+  document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
+  document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
+  updateFracHints();
+  compute();
+}
+
+// Override num() for dome mm fields to return mm regardless of mode
+function numMmDome(id){
+  return num(id) * (useImperial ? IN_TO_MM : 1);
+}
+
+
+
 let lastShutterFits = true;
 
 function updateStatusBanner(){
@@ -779,42 +868,42 @@ function compute(){
   let ns, ew, ud, gem, lateral;
 
   if(entryMode === 'direct'){
-    ns = num('directNS');
-    ew = num('directEW');
-    ud = num('directUD');
-    gem = mountType === 'GEM' ? num('gemDirect') : 0;
+    ns = numMmDome('directNS');
+    ew = numMmDome('directEW');
+    ud = numMmDome('directUD');
+    gem = mountType === 'GEM' ? numMmDome('gemDirect') : 0;
     lateral = computeSignedLateral();
   } else {
-    const hDome = num('hDome');
-    const hMount = num('hMount');
+    const hDome = numMmDome('hDome');
+    const hMount = numMmDome('hMount');
     ud = hMount - hDome;
-    ns = num('nsDist') * parseFloat(document.getElementById('nsDir').value);
-    ew = num('ewDist') * parseFloat(document.getElementById('ewDir').value);
+    ns = numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value);
+    ew = numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value);
     gem = 0;
     if(mountType === 'GEM'){
-      gem = num('gemRaw');
+      gem = numMmDome('gemRaw');
       if(document.getElementById('hasGuidescope').checked){
-        gem += 0.5 * num('guideDist');
+        gem += 0.5 * numMmDome('guideDist');
       }
     }
     lateral = computeSignedLateral();
   }
 
-  let radius = num('radius');
+  let radius = numMmDome('radius');
   if(document.getElementById('haveDiameter').checked) radius = radius / 2;
 
   document.getElementById('outMountType').textContent = mountType === 'GEM' ? 'Equatorial' : 'Alt/Az or Fork on Wedge';
-  document.getElementById('outNS').textContent = fmt(ns, ' mm');
+  document.getElementById('outNS').textContent = useImperial ? mmToFrac(ns) : fmt(ns, ' mm');
   document.getElementById('outNS').classList.toggle('zero', ns===0);
-  document.getElementById('outEW').textContent = fmt(ew, ' mm');
+  document.getElementById('outEW').textContent = useImperial ? mmToFrac(ew) : fmt(ew, ' mm');
   document.getElementById('outEW').classList.toggle('zero', ew===0);
-  document.getElementById('outUD').textContent = fmt(ud, ' mm');
+  document.getElementById('outUD').textContent = useImperial ? mmToFrac(ud) : fmt(ud, ' mm');
   document.getElementById('outUD').classList.toggle('zero', ud===0);
-  document.getElementById('outRadius').textContent = (Math.round(radius*100)/100) + ' mm';
+  document.getElementById('outRadius').textContent = fmtUnit(Math.round(radius*100)/100);
 
-  document.getElementById('outGem').textContent = mountType === 'GEM' ? (Math.round(gem*100)/100) + ' mm' : '0 mm (Alt/Az)';
+  document.getElementById('outGem').textContent = mountType === 'GEM' ? fmtUnit(Math.round(gem*100)/100) : (useImperial ? '0" (Alt/Az)' : '0 mm (Alt/Az)');
 
-  document.getElementById('outLateral').textContent = fmt(lateral, ' mm');
+  document.getElementById('outLateral').textContent = useImperial ? mmToFrac(lateral) : fmt(lateral, ' mm');
   document.getElementById('outLateral').classList.toggle('zero', lateral===0);
 
   const res = entryMode === 'direct' ? num('azTolDirect') : num('rotatorRes');
@@ -833,6 +922,7 @@ function compute(){
 
   computeLiveDomeAim();
   if(typeof skyCoverageExpanded !== 'undefined' && skyCoverageExpanded) computeSkyCoverage();
+  updateFracHints();
 }
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
@@ -1533,26 +1623,26 @@ function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, t
 function getGeometryInputs(){
   const mountType = document.getElementById('btnGEM').classList.contains('active') ? 'GEM' : 'AltAz';
   const off = entryMode === 'direct' ? {
-    ns: num('directNS'), ew: num('directEW'), ud: num('directUD'),
-    gem: mountType==='GEM' ? num('gemDirect') : 0,
+    ns: numMmDome('directNS'), ew: numMmDome('directEW'), ud: numMmDome('directUD'),
+    gem: mountType==='GEM' ? numMmDome('gemDirect') : 0,
     lateral: 0,
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   } : {
-    ns: num('nsDist') * parseFloat(document.getElementById('nsDir').value),
-    ew: num('ewDist') * parseFloat(document.getElementById('ewDir').value),
-    ud: num('hMount') - num('hDome'),
-    gem: (mountType==='GEM') ? (num('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*num('guideDist') : 0)) : 0,
+    ns: numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value),
+    ew: numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value),
+    ud: numMmDome('hMount') - numMmDome('hDome'),
+    gem: (mountType==='GEM') ? (numMmDome('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*numMmDome('guideDist') : 0)) : 0,
     lateral: 0,
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   };
-  let radius = num('radius');
+  let radius = numMmDome('radius');
   if(document.getElementById('haveDiameter').checked) radius = radius / 2;
   return {
     mountType, off, radius, lat: num('lat'),
     dualSaddleActive: document.getElementById('hasDualSaddle').checked,
     rawLateral: computeRawLateral(),
     centerScope: document.getElementById('centerScope').value,
-    shutterWidthMm: num('shutterWidth'),
+    shutterWidthMm: numMmDome('shutterWidth'),
     otaApertureMm: num('otaAperture'),
     ota2ApertureMm: num('ota2Aperture')
   };
@@ -2037,21 +2127,21 @@ function computeSkyCoverage(){
 function computeLiveDomeAim(){
   const mountType = document.getElementById('btnGEM').classList.contains('active') ? 'GEM' : 'AltAz';
   const off = entryMode === 'direct' ? {
-    ns: num('directNS'),
-    ew: num('directEW'),
-    ud: num('directUD'),
-    gem: mountType==='GEM' ? num('gemDirect') : 0,
+    ns: numMmDome('directNS'),
+    ew: numMmDome('directEW'),
+    ud: numMmDome('directUD'),
+    gem: mountType==='GEM' ? numMmDome('gemDirect') : 0,
     lateral: computeSignedLateral(),
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   } : {
-    ns: num('nsDist') * parseFloat(document.getElementById('nsDir').value),
-    ew: num('ewDist') * parseFloat(document.getElementById('ewDir').value),
-    ud: num('hMount') - num('hDome'),
-    gem: (mountType==='GEM') ? (num('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*num('guideDist') : 0)) : 0,
+    ns: numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value),
+    ew: numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value),
+    ud: numMmDome('hMount') - numMmDome('hDome'),
+    gem: (mountType==='GEM') ? (numMmDome('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*numMmDome('guideDist') : 0)) : 0,
     lateral: computeSignedLateral(),
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   };
-  let radius = num('radius');
+  let radius = numMmDome('radius');
   if(document.getElementById('haveDiameter').checked) radius = radius / 2;
 
   const lat = num('lat');
@@ -2151,7 +2241,7 @@ function computeLiveDomeAim(){
   }
 
   if(!three) initThree();
-  updateThreeScene(origin, direction, hit, radius, num('shutterWidth'), num('wallHeight'), num('otaLength'), num('otaAperture'), dualSaddleActive, origin2, num('ota2Length'), num('ota2Aperture'), hit2, origin1, hit1, lat, horizonClamped);
+  updateThreeScene(origin, direction, hit, radius, numMmDome('shutterWidth'), numMmDome('wallHeight'), num('otaLength'), num('otaAperture'), dualSaddleActive, origin2, num('ota2Length'), num('ota2Aperture'), hit2, origin1, hit1, lat, horizonClamped);
   updateStatusBanner();
 }
 

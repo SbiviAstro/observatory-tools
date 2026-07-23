@@ -131,6 +131,7 @@
     .section-header{ padding:12px 14px; }
   }
   /* Remove the old multi-column layout */
+  .frac-hint{ font-family:'Courier New', monospace; opacity:0.75; }
   .layout, .left, .pointing, .horizon{ display:block; }
 
 
@@ -214,7 +215,11 @@
         <div class="eyebrow">Observatory Calibration Worksheet</div>
         <h1>Roll-Off-Roof Observatory → Sky Coverage &amp; Horizon Planner</h1>
       </div>
-      <div style="display:flex; gap:8px; flex-shrink:0;">
+      <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+        <div class="mount-type-toggle" style="margin:0;">
+          <button id="btnUnitMetric" class="active" onclick="setUnitSystem(false)" title="Metric units (cm / mm)">Metric</button>
+          <button id="btnUnitImperial" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always in mm">Imperial</button>
+        </div>
         <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
         <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
         <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
@@ -270,27 +275,27 @@
         <p class="step-note">Measured from the building's true geometric center on the floor (not magnetic north). Positive North offset means the mount is closer to the North wall.</p>
         <div class="row">
           <div><label>Building width (East/West)</label></div>
-          <div class="field"><input type="number" id="bWidth" value="400"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="bWidth" value="400"><span class="unit">cm</span><span class="frac-hint" id="hint_bWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
           <div><label>Building length (North/South)</label></div>
-          <div class="field"><input type="number" id="bLength" value="400"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="bLength" value="400"><span class="unit">cm</span><span class="frac-hint" id="hint_bLength" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
           <div><label>Wall height (floor to top of wall)</label></div>
-          <div class="field"><input type="number" id="wallHeight" value="240"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="wallHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
           <div><label>Mount RA/Dec intersection height above floor</label></div>
-          <div class="field"><input type="number" id="mountHeight" value="120"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="mountHeight" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_mountHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
           <div><label>Mount North/South offset from center</label><span class="hint">positive = North of center</span></div>
-          <div class="field"><input type="number" id="mountNS" value="0"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="mountNS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_mountNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
           <div><label>Mount East/West offset from center</label><span class="hint">positive = East of center</span></div>
-          <div class="field"><input type="number" id="mountEW" value="0"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="mountEW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_mountEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
       <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
 <h2>Building Shape</h2>
@@ -316,7 +321,7 @@
           </div>
           <div class="row">
             <div><label>Roof span</label><span class="hint">width of the roof structure, for the peaked-roof taper</span></div>
-            <div class="field"><input type="number" id="customRoofSpan" value="4000"><span class="unit">mm</span></div>
+            <div class="field"><input type="number" id="customRoofSpan" value="4000"><span class="unit">mm</span><span class="frac-hint" id="hint_customRoofSpan" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
         </div>
       <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
@@ -333,7 +338,7 @@
         </div>
         <div class="row">
           <div><label>Roof travel distance</label><span class="hint">how far the roof slides past that wall</span></div>
-          <div class="field"><input type="number" id="roofTravel" value="420"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="roofTravel" value="420"><span class="unit">cm</span><span class="frac-hint" id="hint_roofTravel" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="mount-type-toggle">
           <button id="btnRoofFlat" class="active">Flat roof</button>
@@ -343,28 +348,28 @@
         <div id="roofFlatFields">
           <div class="row">
             <div><label>Parked roof height</label><span class="hint">usually close to wall height; taller if on a raised track</span></div>
-            <div class="field"><input type="number" id="roofHeight" value="250"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="roofHeight" value="250"><span class="unit">cm</span><span class="frac-hint" id="hint_roofHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
         </div>
         <div id="roofPeakFields" style="display:none;">
           <div class="row">
             <div><label>Eave height</label><span class="hint">roof height at the sides, where it meets the walls</span></div>
-            <div class="field"><input type="number" id="eaveHeight" value="240"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="eaveHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_eaveHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <div class="row">
             <div><label>Ridge height</label><span class="hint">peak height, running the length of the roll-off travel</span></div>
-            <div class="field"><input type="number" id="ridgeHeight" value="310"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="ridgeHeight" value="310"><span class="unit">cm</span><span class="frac-hint" id="hint_ridgeHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <p class="step-note" style="margin-top:8px;">The ridge is assumed to run parallel to the roll-off direction — obstruction is higher looking toward the middle of the roof's width and lower looking toward its edges, tapering linearly between ridge and eave.</p>
         </div>
         <div id="roofWedgeFields" style="display:none;">
           <div class="row">
             <div><label>Low side height</label></div>
-            <div class="field"><input type="number" id="wedgeLowHeight" value="240"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="wedgeLowHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_wedgeLowHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <div class="row">
             <div><label>High side height</label></div>
-            <div class="field"><input type="number" id="wedgeHighHeight" value="310"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="wedgeHighHeight" value="310"><span class="unit">cm</span><span class="frac-hint" id="hint_wedgeHighHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <div class="toggle-row">
             <input type="checkbox" id="wedgeFlip">
@@ -386,13 +391,13 @@
         <div id="gemFields">
           <div class="row">
             <div><label>GEM Axis Length</label><span class="hint">RA axis to OTA aperture center</span></div>
-            <div class="field"><input type="number" id="gemAxis" value="28"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="gemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_gemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
         </div>
         <div id="altAzFields" style="display:none;">
           <div class="row">
             <div><label>Dec Horizontal Offset</label></div>
-            <div class="field"><input type="number" id="decHoriz" value="0"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="decHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_decHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
         </div>
         <div class="row" style="margin-top:12px;">
@@ -415,15 +420,15 @@
           <div class="eyebrow" style="margin-bottom:10px;">Telescope 1</div>
           <div class="row">
             <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
-            <div class="field"><input type="number" id="scope1NS" value="0"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="scope1NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <div class="row">
             <div><label>East/West position from building center</label><span class="hint">positive = East of center</span></div>
-            <div class="field"><input type="number" id="scope1EW" value="0"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="scope1EW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <div class="row">
             <div><label>Mount height above floor</label></div>
-            <div class="field"><input type="number" id="scope1MountH" value="120"><span class="unit">cm</span></div>
+            <div class="field"><input type="number" id="scope1MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
           </div>
           <p class="step-note" style="margin:8px 0 0; color:var(--text-dim);">Mount type and OTA dimensions come from Step 3 above. The Step 1 N/S, E/W, and height fields separately drive the live pointing preview and 3D scene.</p>
         </div>
@@ -436,15 +441,15 @@
           <div id="scope2Fields" style="display:none; padding-left:4px;">
             <div class="row">
               <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
-              <div class="field"><input type="number" id="scope2NS" value="0"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope2NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>East/West position from building center</label><span class="hint">positive = East of center</span></div>
-              <div class="field"><input type="number" id="scope2EW" value="100"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope2EW" value="100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>Mount height above floor</label></div>
-              <div class="field"><input type="number" id="scope2MountH" value="120"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope2MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="mount-type-toggle" style="margin-bottom:8px;">
               <button id="scope2BtnGEM" class="active" onclick="setScope2MountType('GEM')">GEM</button>
@@ -453,13 +458,13 @@
             <div id="scope2GEMFields">
               <div class="row">
                 <div><label>GEM Axis Length</label></div>
-                <div class="field"><input type="number" id="scope2GemAxis" value="28"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope2GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div id="scope2AltAzFields" style="display:none;">
               <div class="row">
                 <div><label>Dec Horizontal Offset</label></div>
-                <div class="field"><input type="number" id="scope2DecHoriz" value="0"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope2DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div class="row">
@@ -481,15 +486,15 @@
           <div id="scope3Fields" style="display:none; padding-left:4px;">
             <div class="row">
               <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
-              <div class="field"><input type="number" id="scope3NS" value="0"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope3NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>East/West position from building center</label></div>
-              <div class="field"><input type="number" id="scope3EW" value="-100"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope3EW" value="-100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>Mount height above floor</label></div>
-              <div class="field"><input type="number" id="scope3MountH" value="120"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope3MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="mount-type-toggle" style="margin-bottom:8px;">
               <button id="scope3BtnGEM" class="active" onclick="setScope3MountType('GEM')">GEM</button>
@@ -498,13 +503,13 @@
             <div id="scope3GEMFields">
               <div class="row">
                 <div><label>GEM Axis Length</label></div>
-                <div class="field"><input type="number" id="scope3GemAxis" value="28"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope3GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div id="scope3AltAzFields" style="display:none;">
               <div class="row">
                 <div><label>Dec Horizontal Offset</label></div>
-                <div class="field"><input type="number" id="scope3DecHoriz" value="0"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope3DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div class="row">
@@ -526,15 +531,15 @@
           <div id="scope4Fields" style="display:none; padding-left:4px;">
             <div class="row">
               <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
-              <div class="field"><input type="number" id="scope4NS" value="100"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope4NS" value="100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>East/West position from building center</label></div>
-              <div class="field"><input type="number" id="scope4EW" value="0"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope4EW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="row">
               <div><label>Mount height above floor</label></div>
-              <div class="field"><input type="number" id="scope4MountH" value="120"><span class="unit">cm</span></div>
+              <div class="field"><input type="number" id="scope4MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
             </div>
             <div class="mount-type-toggle" style="margin-bottom:8px;">
               <button id="scope4BtnGEM" class="active" onclick="setScope4MountType('GEM')">GEM</button>
@@ -543,13 +548,13 @@
             <div id="scope4GEMFields">
               <div class="row">
                 <div><label>GEM Axis Length</label></div>
-                <div class="field"><input type="number" id="scope4GemAxis" value="28"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope4GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div id="scope4AltAzFields" style="display:none;">
               <div class="row">
                 <div><label>Dec Horizontal Offset</label></div>
-                <div class="field"><input type="number" id="scope4DecHoriz" value="0"><span class="unit">cm</span></div>
+                <div class="field"><input type="number" id="scope4DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
               </div>
             </div>
             <div class="row">
@@ -565,7 +570,7 @@
 
         <div class="row" style="margin-top:14px;">
           <div><label>Minimum gap between swing circles</label><span class="hint">walkway clearance between any two telescope's swing radii</span></div>
-          <div class="field"><input type="number" id="minScopeGap" value="50"><span class="unit">cm</span></div>
+          <div class="field"><input type="number" id="minScopeGap" value="50"><span class="unit">cm</span><span class="frac-hint" id="hint_minScopeGap" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
     </div>
   </details>
@@ -799,10 +804,174 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
-// Telescope measurements are entered in cm (smaller, more natural numbers
-// for OTA-scale hardware) while the rest of the app works in mm — convert
-// at the point of reading so the internal math stays in one consistent unit.
-function numCm(id){ return num(id) * 10; }
+
+// ── Unit system ──────────────────────────────────────────────────────────────
+// All internal math runs in mm. Fields are entered in the user's chosen unit.
+// OTA fields (tube length, aperture) are always mm regardless of unit mode.
+// Switching units converts all field values in place.
+let useImperial = false; // false = metric (cm/mm), true = imperial (in)
+
+// 1 inch = 25.4 mm. cm fields: 1 cm = 10 mm. Imperial shows inches.
+const IN_TO_MM = 25.4;
+const CM_TO_MM = 10;
+
+// Read a "cm-class" field → mm (internal). In metric: value × 10. In imperial: value × 25.4.
+function numCm(id){ return num(id) * (useImperial ? IN_TO_MM : CM_TO_MM); }
+// Read a "mm-class" field (customRoofSpan, wallDist) → mm. In imperial: value × 25.4.
+function numMmField(id){ return num(id) * (useImperial ? IN_TO_MM : 1); }
+
+function unitLabel(){ return useImperial ? 'in' : 'cm'; }
+function unitLabelMm(){ return useImperial ? 'in' : 'mm'; }
+
+// Update all fraction hint spans — called whenever a field changes or unit mode switches.
+// In metric mode: hints hidden. In imperial mode: shows e.g. 13'1 1/2" beside the field.
+function updateFracHints(){
+  const show = useImperial;
+  // cm-class fields: value is in inches, mult = IN_TO_MM → back to mm → toFracInches
+  CM_FIELD_IDS.forEach(id => {
+    const hint = document.getElementById('hint_' + id);
+    if(!hint) return;
+    if(!show){ hint.style.display = 'none'; return; }
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inches = parseFloat(el.value);
+    hint.textContent = isNaN(inches) ? '' : toFracInches(inches);
+    hint.style.display = inches === 0 ? 'none' : 'inline';
+  });
+  // mm-class fields: value is in inches too when imperial
+  [...MM_FIELD_IDS, ...[0,1,2,3,4,5].map(i => `wallDist${i}`)].forEach(id => {
+    const hint = document.getElementById('hint_' + id);
+    if(!hint) return;
+    if(!show){ hint.style.display = 'none'; return; }
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inches = parseFloat(el.value);
+    hint.textContent = isNaN(inches) ? '' : toFracInches(inches);
+    hint.style.display = inches === 0 ? 'none' : 'inline';
+  });
+}
+
+// Convert decimal inches to feet + fractional-inch string (sixteenths).
+// e.g. 157.48 → 13'1 1/2"   94.49 → 7'10 1/2"   13.5 → 1'1 1/2"
+function toFracInches(totalInches){
+  const neg = totalInches < 0;
+  const abs = Math.abs(totalInches);
+  const feet  = Math.floor(abs / 12);
+  const rem   = abs - feet * 12;
+  let whole   = Math.floor(rem);
+  let sixteenths = Math.round((rem - whole) * 16);
+  if(sixteenths === 16){ whole++; sixteenths = 0; }
+  if(whole === 12){ return (neg ? '-' : '') + (feet+1) + "'0\""; }
+  let fracStr = '';
+  if(sixteenths > 0){
+    let n = sixteenths, d = 16;
+    const g = [8,4,2,1].find(x => n%x===0 && d%x===0);
+    n /= g; d /= g;
+    fracStr = ` ${n}/${d}`;
+  }
+  const base = feet > 0 ? `${feet}'${whole}${fracStr}"` : `${whole}${fracStr}"`;
+  return (neg ? '-' : '') + base;
+}
+// Shorthand: mm value → imperial fraction string
+function mmToFrac(mm){ return toFracInches(mm / IN_TO_MM); }
+
+
+
+// All "cm-class" field IDs (never OTA optics fields)
+const CM_FIELD_IDS = [
+  'bWidth','bLength','wallHeight','mountHeight','mountNS','mountEW',
+  'roofTravel','roofHeight','eaveHeight','ridgeHeight',
+  'wedgeLowHeight','wedgeHighHeight',
+  'gemAxis','decHoriz',
+  'scope1NS','scope1EW','scope1MountH',
+  'scope2NS','scope2EW','scope2MountH','scope2GemAxis','scope2DecHoriz',
+  'scope3NS','scope3EW','scope3MountH','scope3GemAxis','scope3DecHoriz',
+  'scope4NS','scope4EW','scope4MountH','scope4GemAxis','scope4DecHoriz',
+  'minScopeGap'
+];
+// "mm-class" non-OTA fields
+const MM_FIELD_IDS = ['customRoofSpan'];
+// wallDist fields are dynamically created — handled separately
+
+function setUnitSystem(imperial){
+  const wasImperial = useImperial;
+  if(imperial === wasImperial) return;
+  useImperial = imperial;
+
+  const fromMult = wasImperial ? IN_TO_MM : CM_TO_MM;
+  const toMult   = useImperial ? IN_TO_MM : CM_TO_MM;
+  const fromMm   = wasImperial ? IN_TO_MM : 1;
+  const toMm     = useImperial ? IN_TO_MM : 1;
+
+  // Convert all cm-class fields
+  CM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const mm = parseFloat(el.value) * fromMult;
+    if(useImperial){
+      // Store as decimal inches in the field (fractions shown only in readouts)
+      el.value = (mm / IN_TO_MM).toFixed(4);
+    } else {
+      el.value = (mm / CM_TO_MM).toFixed(1);
+    }
+  });
+
+  // Convert mm-class fields
+  MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const mm = parseFloat(el.value) * fromMm;
+    el.value = useImperial ? (mm / IN_TO_MM).toFixed(4) : mm.toFixed(0);
+  });
+
+  // Convert dynamic wallDist fields
+  for(let i = 0; i < 6; i++){
+    const el = document.getElementById(`wallDist${i}`);
+    if(!el) continue;
+    const mm = parseFloat(el.value) * fromMm;
+    el.value = useImperial ? (mm / IN_TO_MM).toFixed(4) : mm.toFixed(0);
+  }
+
+  // Update all unit labels in the UI
+  refreshUnitLabels();
+  updateFracHints();
+
+  // Update toggle button states
+  document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
+  document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
+
+  compute();
+}
+
+function refreshUnitLabels(){
+  const lbl = unitLabel();
+  const lblMm = unitLabelMm();
+  // All cm-class unit spans
+  CM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const span = el.parentElement.querySelector('.unit');
+    if(span) span.textContent = lbl;
+  });
+  // mm-class spans
+  MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const span = el.parentElement.querySelector('.unit');
+    if(span) span.textContent = lblMm;
+  });
+  // Dynamic wallDist spans
+  for(let i = 0; i < 6; i++){
+    const el = document.getElementById(`wallDist${i}`);
+    if(!el) continue;
+    const span = el.parentElement.querySelector('.unit') || el.nextElementSibling;
+    if(span) span.textContent = lblMm;
+  }
+}
+
+// Override numCm for wallDist fields which are mm-class
+function numWallDist(i){ return numMmField(`wallDist${i}`); }
+
 function THREE_clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 const HALF_PI = Math.PI/2;
 
@@ -991,7 +1160,7 @@ function getBuildingConfig(){
   return {
     width, length, customWalls, walls, rollWallIndex,
     roofTravelWalls: walls ? walls.map((w,i) => i === rollWallIndex) : null,
-    customRoofSpan: num('customRoofSpan'),
+    customRoofSpan: numMmField('customRoofSpan'),
     wallHeight: numCm('wallHeight'), roofTravel: numCm('roofTravel'), roofHeight: numCm('roofHeight'),
     roofShape, eaveHeight: numCm('eaveHeight'), ridgeHeight: numCm('ridgeHeight'),
     wedgeLowHeight: numCm('wedgeLowHeight'), wedgeHighHeight: numCm('wedgeHighHeight'),
@@ -1146,7 +1315,7 @@ function buildWallRows(){
       <div><label>Wall ${i+1}</label></div>
       <div class="field">
         <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit">°</span>
-        <input type="number" id="wallDist${i}" value="${DEFAULT_WALLS[i].dist}" style="width:80px;"><span class="unit">mm</span>
+        <input type="number" id="wallDist${i}" value="${DEFAULT_WALLS[i].dist}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
       </div>`;
     container.appendChild(row);
     row.querySelectorAll('input').forEach(el => el.addEventListener('input', compute));
@@ -1180,7 +1349,7 @@ function getWallList(building){
   const count = document.getElementById('useExtraWalls').checked ? 6 : 4;
   const walls = [];
   for(let i = 0; i < count; i++){
-    walls.push({ angle: num('wallAngle'+i), dist: num('wallDist'+i) });
+    walls.push({ angle: num('wallAngle'+i), dist: numMmField('wallDist'+i) });
   }
   return walls;
 }
@@ -1746,6 +1915,7 @@ const _origCompute = compute;
 function compute(){
   _origCompute();
   if(FP.canvas) FP.draw();
+  updateFracHints();
 }
 
 // Also redraw when NS/EW fields change (two-way sync)
@@ -2740,11 +2910,21 @@ function compute(){
     : (Math.abs(mx) > halfW || Math.abs(my) > halfL);
   document.getElementById('geomWarning').style.display = geomBad ? 'block' : 'none';
 
-  document.getElementById('outFootprint').textContent = `${building.width}×${building.length} mm`;
-  document.getElementById('outWallHeight').textContent = building.wallHeight + ' mm';
-  document.getElementById('outRoofTravel').textContent = building.roofTravel + ' mm';
+  // Building/roof summary chips — displayed in the user's chosen unit
+  if(useImperial){
+    document.getElementById('outFootprint').textContent   = `${mmToFrac(building.width)} × ${mmToFrac(building.length)}`;
+    document.getElementById('outWallHeight').textContent  = mmToFrac(building.wallHeight);
+    document.getElementById('outRoofTravel').textContent  = mmToFrac(building.roofTravel);
+    const myI = mmToFrac(Math.abs(my)) + (my >= 0 ? ' N' : ' S');
+    const mxI = mmToFrac(Math.abs(mx)) + (mx >= 0 ? ' E' : ' W');
+    document.getElementById('outMountOffset').textContent = `${myI}, ${mxI}`;
+  } else {
+    document.getElementById('outFootprint').textContent   = `${building.width/10}×${building.length/10} cm`;
+    document.getElementById('outWallHeight').textContent  = `${building.wallHeight/10} cm`;
+    document.getElementById('outRoofTravel').textContent  = `${building.roofTravel/10} cm`;
+    document.getElementById('outMountOffset').textContent = `${my/10>=0?'+':''}${my/10} cm N/S, ${mx/10>=0?'+':''}${mx/10} cm E/W`;
+  }
   document.getElementById('outRollDir').textContent = { N:'North', S:'South', E:'East', W:'West' }[building.rollDir];
-  document.getElementById('outMountOffset').textContent = `${my>=0?'+':''}${my}mm N/S, ${mx>=0?'+':''}${mx}mm E/W`;
 
   const lat = num('lat');
   let ha, dec;
