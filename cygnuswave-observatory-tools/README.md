@@ -1,8 +1,8 @@
-# Cygnus Wave Observatory Tools
+# CygnusWave Observatory Tools
 
 **Free, open-source geometry calculators for astrophotographers building dome and roll-off-roof observatories.**
 
-Built by [Cygnus Wave](https://cygnuswave.io) · Licensed under the [Mozilla Public License 2.0](LICENSE)
+Built by [CygnusWave](https://cygnuswave.io) · Licensed under the [Mozilla Public License 2.0](LICENSE)
 
 ---
 
@@ -74,7 +74,7 @@ Everything runs locally in your browser. Nothing you enter is sent anywhere.
 observatory-tools/
 ├── dome-calculator.html        # Dome & Mount Geometry Calculator
 ├── ror-calculator.html         # Roll-Off-Roof Calculator (v2.00.000)
-├── index.html                  # Cygnus Wave site homepage
+├── index.html                  # CygnusWave site homepage
 ├── about.html
 ├── help.html
 ├── dome-manual.html            # Dome calculator user manual
@@ -86,8 +86,8 @@ observatory-tools/
 ├── faq.html
 ├── contact.html
 ├── 404.html
-├── favicon.svg                 # Cygnus Wave logo favicon
-├── cygnuswave-logo.svg         # Full Cygnus Wave logo
+├── favicon.svg                 # CygnusWave logo favicon
+├── cygnuswave-logo.svg         # Full CygnusWave logo
 ├── LICENSE                     # Mozilla Public License 2.0
 └── README.md                   # This file
 ```

@@ -196,7 +196,7 @@
 
 
     <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:700;
-      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CYGNUS WAVE</span>
+      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CYGNUSWAVE</span>
   </a>
   <div style="display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
     <a href="index.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Home</a>
@@ -592,10 +592,7 @@
         </div>
       <hr style="border:none;border-top:1px solid var(--line);margin:20px 0;">
       <div style="display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start;">
-        <div style="flex:0 0 300px;">
-          <div class="eyebrow" style="margin-bottom:6px;">Plan View</div>
-          <svg viewBox="0 0 300 300" id="swingPlanView" style="width:100%; max-width:300px; background:#05070a; border-radius:6px; display:block;"></svg>
-        </div>
+
         <div style="flex:1 1 240px; min-width:200px;">
           <div class="eyebrow" style="margin-bottom:6px;">Wall / Floor / Ceiling Clearance</div>
           <div id="swingClearanceReadout" style="padding:10px 12px; border-radius:5px; border:1px solid var(--line); background:var(--readout-bg); font-size:12.5px; line-height:1.7; margin-bottom:14px;"></div>
@@ -1357,6 +1354,7 @@ function renderScopeCollisions(swing){
 // from a shared pivot, because each is on its own independent mount.
 function renderSwingPlanView(building, swing){
   const svg = document.getElementById('swingPlanView');
+  if(!svg) return;
   while(svg.firstChild) svg.removeChild(svg.firstChild);
   const ns = 'http://www.w3.org/2000/svg';
   const cx = 150, cy = 150;
@@ -1828,7 +1826,8 @@ document.getElementById('dec').addEventListener('input', function(){ document.ge
 function clampAltToHorizon(){
   const az = num('targetAz');
   const building = getBuildingConfig();
-  const limit = combinedObstructionAt(az, _ps.mx, _ps.my, _ps.mountH, building).altDeg;
+  const ps = getPointingScope();
+  const limit = combinedObstructionAt(az, ps.mx, ps.my, ps.mountH, building).altDeg;
   document.getElementById('altSlider').min = limit;
   if(num('targetAlt') < limit){
     document.getElementById('targetAlt').value = limit.toFixed(2);
@@ -1854,7 +1853,8 @@ function jog(dx, dy){
     if(az < 0) az += 360;
     let alt = num('targetAlt') + dy * jogStep;
     const building = getBuildingConfig();
-    const limit = combinedObstructionAt(az, _ps.mx, _ps.my, _ps.mountH, building).altDeg;
+    const ps = getPointingScope();
+    const limit = combinedObstructionAt(az, ps.mx, ps.my, ps.mountH, building).altDeg;
     alt = Math.max(limit, Math.min(90, alt));
     document.getElementById('targetAlt').value = alt.toFixed(2);
     document.getElementById('altSlider').value = alt;
@@ -2244,6 +2244,16 @@ function initThree(){
 
     sph._tube = tube;
     sph._pivot = pivot;
+
+    // Pointing ray — only shown for the selected scope in multi-scope mode
+    const ray = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.006, 0.006, 1, 8),
+      new THREE.MeshBasicMaterial({ color: 0x7fd88f, transparent: true, opacity: 0.7 })
+    );
+    ray.visible = false;
+    scene.add(ray);
+    sph._ray = ray;
+
     return sph;
   });
 
@@ -2304,44 +2314,62 @@ function initThree(){
 // Wireframe sphere per enabled telescope, centered on the mount pivot at
 // its actual swing radius — green if it clears every wall/floor/ceiling
 // direction, red if it doesn't, regardless of current pointing.
-function updateSwingSpheres(swing, sceneScale){
+function updateSwingSpheres(swing, sceneScale, otaDir, selectedScopeN){
   if(!three) return;
+  const dirV = otaDir
+    ? new THREE.Vector3(otaDir[0], otaDir[2], -otaDir[1]).normalize()
+    : new THREE.Vector3(0, 1, 0);
+  const multiScope = swing.results.length > 1;
+
   three.swingSpheres.forEach((sph, i) => {
     const r = swing.results[i];
-    const tube = sph._tube, pivot = sph._pivot;
+    const tube = sph._tube, pivot = sph._pivot, ray = sph._ray;
     if(!r){
       sph.visible = false;
       if(tube)  tube.visible = false;
       if(pivot) pivot.visible = false;
+      if(ray)   ray.visible = false;
       return;
     }
     const pos = new THREE.Vector3(r.my * sceneScale, r.mountH * sceneScale, r.mx * sceneScale);
     const col = r.clears ? 0x7fd88f : 0xe0685c;
+    const scopeN = i + 1;
+    const isSelected = scopeN === selectedScopeN;
 
-    // Swing sphere
     sph.visible = true;
     sph.position.copy(pos);
     sph.scale.setScalar(Math.max(r.swingRadius * sceneScale, 0.001));
     sph.material.color.set(col);
 
-    // OTA tube — fixed height inside the sphere, proportional to sphere size
-    // but clamped so it stays readable at both small and large scales.
     if(tube){
       const tubeLen = Math.max(Math.min(r.swingRadius * sceneScale * 0.55, 0.45), 0.12);
       tube.visible = true;
       tube.geometry.dispose();
-      tube.geometry = new THREE.CylinderGeometry(
-        tubeLen * 0.10, tubeLen * 0.13, tubeLen, 12
-      );
-      tube.position.copy(pos).add(new THREE.Vector3(0, tubeLen * 0.5, 0));
-      tube.quaternion.identity();
-      tube.material.color.set(0xc8623f);
+      tube.geometry = new THREE.CylinderGeometry(tubeLen * 0.10, tubeLen * 0.13, tubeLen, 12);
+      const tubeDir = isSelected ? dirV : new THREE.Vector3(0, 1, 0);
+      tube.position.copy(pos).addScaledVector(tubeDir, tubeLen * 0.5);
+      tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tubeDir);
+      tube.material.color.set(isSelected ? 0xc8623f : 0x8b7355);
     }
 
-    // Pivot dot at mount center
     if(pivot){
       pivot.visible = true;
       pivot.position.copy(pos);
+    }
+
+    // Pointing ray — only for the selected scope, shows current aim direction
+    if(ray){
+      if(multiScope && isSelected){
+        const rayLen = r.swingRadius * sceneScale * 1.8;
+        ray.visible = true;
+        ray.geometry.dispose();
+        ray.geometry = new THREE.CylinderGeometry(0.006, 0.006, rayLen, 8);
+        ray.position.copy(pos).addScaledVector(dirV, rayLen * 0.5);
+        ray.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirV);
+        ray.material.color.set(r.clears ? 0x7fd88f : 0xe0685c);
+      } else {
+        ray.visible = false;
+      }
     }
   });
 }
@@ -2787,7 +2815,7 @@ function compute(){
 
   const swing = computeSwingClearance(building);
   renderSwingClearance(swing);
-  updateSwingSpheres(swing, sceneScale);
+  updateSwingSpheres(swing, sceneScale, otaOrient.direction, pointingScope);
 
   renderScopeCollisions(swing);
   renderSwingPlanView(building, swing);

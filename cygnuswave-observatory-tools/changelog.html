@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Changelog — Cygnus Wave Observatory Tools</title>
+<title>Changelog — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -117,7 +117,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
 <path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
 </g>
 </svg>
-<span style="color:var(--text);">CYGNUS WAVE</span></a>
+<span style="color:var(--text);">CYGNUSWAVE</span></a>
   <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html">Home</a>
@@ -174,9 +174,38 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </ul></div>
 
 <h2>Roll-Off-Roof Calculator</h2>
-<p>Versioned as <code>v1.00.00</code>, incrementing <code>.00.01</code> per change.</p>
+<p>Versioned as <code>v2.00.000</code>, incrementing <code>.00.001</code> per change.</p>
 
-<div class="card"><div class="eyebrow">v1.00.10 — Current</div>
+<div class="card"><div class="eyebrow">v2.00.008 — Current</div>
+<p>Two bug fixes: (1) Peaked gable / wedge roof threw a <code>ReferenceError: _ps is not defined</code> — <code>clampAltToHorizon()</code> and <code>jog()</code> were using <code>_ps</code> as a free variable that only existed inside <code>computeSkyCoverage()</code>; both now call <code>getPointingScope()</code> directly. (2) In multi-telescope mode, the selected telescope's OTA tube now tracks the live pointing direction — previously all tubes pointed straight up regardless of HA/Dec. Non-selected scope tubes remain in a neutral upright pose, tinted muted brown to distinguish them from the active amber tube.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.007</div>
+<p>Fixed column alignment: removed a stale <code>&lt;div style="max-width:860px"&gt;</code> wrapper left over from an earlier rebuild that was capping the layout at 860px and offsetting the padding. All three columns now sit directly inside <code>.wrap</code> and align flush with the header.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.006</div>
+<p>Three-column layout aligned to header: <code>two-col-layout</code> max-width and horizontal padding matched to <code>.wrap</code> (1440px, 24px), so the left edge of the setup column and the right edge of the 3D preview column sit flush with the header edges.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.005</div>
+<p>All three columns set to equal <code>1fr 1fr 1fr</code> width.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.004</div>
+<p>3D Preview moved into a proper third column inside the two-col-layout grid (had been injected outside the layout by a prior rebuild script). Layout is now correctly: collapsible setup left | Telescope Pointing middle | 3D Preview right.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.003</div>
+<p>3D Preview split into a dedicated third column — setup sections left (collapsible), Telescope Pointing middle (persistent/sticky), 3D Preview right (persistent/sticky). Grid: <code>1fr 1fr 1fr</code>.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.002</div>
+<p>Full page reorganisation into two columns: left (6 collapsible setup sections) and right (Telescope Pointing + 3D Preview, always visible). Sky coverage outline now traces the actual building wall polygon shape rather than an ellipse — a 4-wall rectangle shows as a rectangle, a 6-wall polygon shows its true footprint.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.001</div>
+<p>Collapsible single-column layout: all setup panels converted to native <code>&lt;details&gt;</code> elements. Building &amp; Roof open by default; Optical Axis, Telescopes, Pier Layout &amp; Swing Clearance, Sky Coverage, and Local Horizon collapsed. Sky coverage fires automatically on section expand.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.000</div>
+<p>Major version bump reflecting the full independent multi-mount rewrite. Interactive pier-layout floor plan (click to place, drag to reposition, syncs with NS/EW fields). Each telescope on its own independent mount with its own absolute position, mount height, and mount type. Telescope selector dropdown — any mount can drive the live pointing preview and sky coverage sweep. Swing clearance checks each telescope independently at its own position. Scope-to-scope check uses pivot-to-pivot distance vs sum of swing radii. Plan-view removed (redundant with floor plan). Site nav bar and CygnusWave logo added above tool header.</p></div>
+
+<h3 style="color:var(--text-dim); font-size:13px; margin:20px 0 10px;">v1.x Legacy (single shared-mount model)</h3>
+
+<div class="card"><div class="eyebrow">v1.00.10</div>
 <p>Panel 1 and Panel 2 now use centimetres. All read sites updated to convert cm→mm internally; underlying physics math unchanged.</p></div>
 
 <div class="card"><div class="eyebrow">v1.00.09</div>
@@ -210,7 +239,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Rectangular building, flat/peaked roof, roof-travel distance, local terrain horizon (.hrz import), full-sky coverage, GEM/AltAz mounts, full pointing constraints, 3D preview, dark/light mode, Save/Load, Reset, SRI hash, horizon-file export.</p></div>
 
 <footer>
-  <p>&copy; 2026 Cygnus Wave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
+  <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
   See the <a href="disclaimer.html">Disclaimer</a> and <a href="privacy.html">Privacy Policy</a>.</p>
 </footer>
 
