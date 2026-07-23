@@ -1,0 +1,3041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Roll-Off-Roof Observatory — Sky Coverage & Horizon Planner</title>
+<style>
+  :root{
+    --bg: #0a0d12;
+    --panel: #12161d;
+    --panel-2: #171c25;
+    --line: #262d38;
+    --text: #e7e2d6;
+    --text-dim: #8b93a3;
+    --amber: #c8623f;
+    --amber-dim: #7a3d29;
+    --green: #7fa373;
+    --readout-bg: #0d0b09;
+  }
+  html[data-theme="light"]{
+    --bg: #f4f2ec;
+    --panel: #ffffff;
+    --panel-2: #eeebe1;
+    --line: #d9d4c6;
+    --text: #23201b;
+    --text-dim: #6b6558;
+    --amber: #b5501f;
+    --amber-dim: #e0b48f;
+    --green: #3f7a35;
+    --readout-bg: #faf8f2;
+  }
+  html[data-theme="light"] .status-banner.status-ok{ background:rgba(63,122,53,0.10); border-color:#a8cf9e; color:#2f5c28; }
+  html[data-theme="light"] .status-banner.status-warn{ background:rgba(181,80,31,0.10); border-color:#e0b48f; color:#8a3c15; }
+  html[data-theme="light"] .status-banner.status-bad{ background:rgba(196,60,50,0.10); border-color:#e3a49e; color:#9c2e24; }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .wrap{ max-width: 1440px; margin: 0 auto; padding: 32px 24px 64px; }
+  h1{ font-size: 20px; margin: 0 0 4px; font-weight: 700; letter-spacing: 0.01em; }
+  h2{ font-size: 14px; margin: 0 0 14px; color: var(--amber); text-transform: uppercase; letter-spacing: 0.06em; }
+  .eyebrow{ font-size: 11px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .sub{ font-size: 13px; color: var(--text-dim); max-width: 720px; line-height:1.5; }
+  .card{ background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 18px 20px; margin-bottom: 18px; }
+  .step-num{ display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:50%;
+    background: var(--amber-dim); color: var(--text); font-size:11px; margin-right:8px; }
+  .step-note{ font-size: 12px; color: var(--text-dim); margin: 0 0 12px; line-height:1.5; }
+  .row{ display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-bottom: 9px; }
+  label{ font-size: 12.5px; }
+  .hint{ display:block; font-size: 11px; color: var(--text-dim); margin-top:2px; }
+  .field{ display:flex; align-items:center; gap:6px; }
+  input[type=number], input[type=text], select{ background: var(--readout-bg); border: 1px solid var(--line); color: var(--text);
+    padding: 6px 8px; border-radius: 4px; font-size: 13px; width: 90px; font-family: "Courier New", monospace; }
+  select{ width: auto; font-family: inherit; }
+  .unit{ font-size: 12px; color: var(--text-dim); width: 26px; }
+  .toggle-row{ display:flex; align-items:center; gap:8px; margin: 10px 0 14px; padding: 7px 10px;
+    background: rgba(255,255,255,0.02); border: 1px solid var(--line); border-radius: 5px; }
+  html[data-theme="light"] .toggle-row{ background: rgba(0,0,0,0.025); }
+  .toggle-row label{ color: var(--text-dim); font-size: 12.5px; }
+  .toggle-row input{ accent-color: var(--amber); }
+  .mount-type-toggle{ display:flex; gap:8px; margin-bottom:16px; }
+  .mount-type-toggle button{ flex:1; background: var(--panel-2); border:1px solid var(--line); color: var(--text-dim);
+    padding: 8px; border-radius: 4px; font-size: 12.5px; cursor:pointer; font-family: inherit; }
+  .mount-type-toggle button.active{ background: var(--amber-dim); color:#f0e6df; border-color: var(--amber); }
+  html[data-theme="light"] .mount-type-toggle button.active{ background: var(--amber); color:#fff6ee; }
+  .preset-btn{ background: var(--panel-2); border:1px solid var(--line); color: var(--text-dim);
+    padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor:pointer; font-family: inherit; }
+  .preset-btn:hover{ border-color: var(--amber); color: var(--text); }
+  .jog-wrap{ display:flex; align-items:center; gap:22px; margin-top:16px; flex-wrap:wrap; }
+  .jog-pad{ display:grid; grid-template-columns: 42px 42px 42px; grid-template-rows: 42px 42px 42px; gap:4px; }
+  .jog-btn{ background: var(--panel-2); border:1px solid var(--line); color: var(--amber);
+    border-radius: 4px; font-size: 16px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    user-select:none; touch-action:none; }
+  .jog-btn:hover{ border-color: var(--amber); background: var(--amber-dim); color:#f0e6df; }
+  html[data-theme="light"] .jog-btn:hover{ background: var(--amber); color:#fff6ee; }
+  .jog-btn:active{ background: var(--amber); color:#1a0f0a; }
+  .jog-center{ display:flex; align-items:center; justify-content:center; font-family:"Courier New",monospace;
+    font-size:10px; color:var(--text-dim); border-radius:4px; background:var(--readout-bg); border:1px solid var(--line); }
+  .jog-steps{ display:flex; flex-direction:column; gap:6px; }
+  .jog-steps .step-label{ font-size:11px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:2px; }
+  .jog-step-row{ display:flex; gap:6px; }
+  .jog-step-btn{ background: var(--panel-2); border:1px solid var(--line); color: var(--text-dim);
+    padding: 6px 10px; border-radius: 4px; font-size: 12px; cursor:pointer; font-family: "Courier New", monospace; }
+  .jog-step-btn.active{ background: var(--amber-dim); color:#f0e6df; border-color: var(--amber); }
+  html[data-theme="light"] .jog-step-btn.active{ background: var(--amber); color:#fff6ee; }
+
+  .status-banner{ display:flex; align-items:center; gap:8px; padding:10px 16px; border-radius:6px;
+    font-size:13px; font-weight:600; margin-bottom:14px; border:1px solid transparent; }
+  .status-banner.status-ok{ background:rgba(127,216,143,0.12); border-color:#3d5c42; color:#9fe0ac; }
+  .status-banner.status-warn{ background:rgba(217,160,102,0.12); border-color:#6b4f30; color:#e0b785; }
+  .status-banner.status-bad{ background:rgba(224,104,92,0.12); border-color:#6b3833; color:#e89890; }
+
+  .header-readout{ display:flex; align-items:flex-start; gap:24px; flex-wrap: wrap; }
+  .panel-bar{ background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 16px 20px; margin-bottom: 20px; }
+  .header-stats{ flex: 1 1 360px; min-width: 280px; }
+  .stat-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .stat-chip{ background: var(--readout-bg); border: 1px solid var(--line); border-radius: 5px; padding: 7px 10px; }
+  .stat-lbl{ display:block; font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 2px; }
+  .stat-val{ font-family: "Courier New", monospace; font-size: 14px; }
+
+  .layout{ display: grid; grid-template-columns: 1fr 1.3fr 0.9fr; gap: 18px; }
+  @media (max-width: 1100px){ .layout{ grid-template-columns: 1fr 1fr; } .horizon{ grid-column: 1 / -1; } }
+  @media (max-width: 720px){ .layout{ grid-template-columns: 1fr; } .horizon{ grid-column: auto; } }
+
+  /* ── Collapsible sections ── */
+  .section-card{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    margin-bottom:14px; overflow:hidden;
+  }
+  .section-card[open] > summary .section-title::after{ content:' ▾'; }
+  .section-card:not([open]) > summary .section-title::after{ content:' ▸'; }
+  .section-header{
+    display:flex; align-items:center; gap:10px;
+    padding:14px 18px; cursor:pointer; list-style:none;
+    user-select:none; -webkit-user-select:none;
+    background:var(--panel-2); border-bottom:1px solid transparent;
+  }
+  .section-card[open] > summary.section-header{
+    border-bottom-color:var(--line);
+  }
+  .section-header::-webkit-details-marker{ display:none; }
+  .section-title{
+    font-size:15px; font-weight:700; color:var(--text);
+    letter-spacing:0.01em; flex:1;
+  }
+  .section-header:hover .section-title{ color:var(--amber); }
+  .section-body{
+    padding:20px 22px 22px;
+  }
+  @media(max-width:600px){
+    .section-body{ padding:14px 14px 18px; }
+    .section-header{ padding:12px 14px; }
+  }
+  /* Remove the old multi-column layout */
+  .frac-hint{ font-family:'Courier New', monospace; opacity:0.75; }
+  .layout, .left, .pointing, .horizon{ display:block; }
+
+
+  .two-col-layout{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; padding-bottom:60px; align-items:start; }
+  .col-setup{ min-width:0; }
+  .col-persistent{ position:sticky; top:16px; min-width:0; }
+  .col-preview{ position:sticky; top:16px; min-width:0; }
+  .section-card{ background:var(--panel); border:1px solid var(--line); border-radius:8px; margin-bottom:12px; overflow:hidden; }
+  .section-card[open] > summary .section-title::after{ content:' ▾'; }
+  .section-card:not([open]) > summary .section-title::after{ content:' ▸'; }
+  .section-header{ display:flex; align-items:center; padding:13px 18px; cursor:pointer; list-style:none; user-select:none; -webkit-user-select:none; background:var(--panel-2); border-bottom:1px solid transparent; }
+  .section-card[open] > summary.section-header{ border-bottom-color:var(--line); }
+  .section-header::-webkit-details-marker{ display:none; }
+  .section-title{ font-size:14px; font-weight:700; color:var(--text); flex:1; }
+  .section-header:hover .section-title{ color:var(--amber); }
+  .section-body{ padding:18px 20px 20px; }
+  .section-card.persistent .section-header.persistent-header{ cursor:default; pointer-events:none; }
+  .section-card.persistent .section-title::after{ content:'' !important; }
+  @media(max-width:1200px){ .two-col-layout{ grid-template-columns:360px 1fr; } .col-preview{ grid-column:1/-1; position:static; } }
+  @media(max-width:800px){ .two-col-layout{ grid-template-columns:1fr; padding:0 16px 48px; } .col-persistent,.col-preview{ position:static; } }
+  @media(max-width:480px){ .two-col-layout{ padding:0 10px 36px; } .section-body{ padding:14px 14px 16px; } .section-header{ padding:11px 14px; } }
+
+</style>
+<style>
+#cw-sitenav a:hover { color:#c8623f !important; }
+</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+</head>
+<body>
+<div id="cw-sitenav" style="
+  display:flex; align-items:center; gap:0;
+  background:#0d111a; border-bottom:1px solid #1e2530;
+  padding:0; font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  position:relative; z-index:200;">
+  <a href="index.html" style="display:flex; align-items:center; gap:9px;
+    padding:9px 16px; text-decoration:none; border-right:1px solid #1e2530; flex-shrink:0;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
+<rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
+<g transform="translate(170,140) scale(1.7) rotate(-45)">
+<g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+<line x1="0" y1="-52" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="0" y2="30"/>
+<line x1="0" y1="30" x2="0" y2="54"/>
+<line x1="-42" y1="-12" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="36" y2="-8"/>
+</g>
+<g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
+<line x1="36" y1="-8" x2="50" y2="-20"/>
+<line x1="-42" y1="-12" x2="-54" y2="-2"/>
+</g>
+<circle cx="0" cy="-52" r="7" fill="#FFFFFF"/>
+<circle cx="0" cy="5" r="9" fill="#FFFFFF"/>
+<circle cx="0" cy="30" r="4" fill="#FFFFFF" opacity="0.85"/>
+<circle cx="0" cy="54" r="7" fill="#FFFFFF"/>
+<circle cx="-42" cy="-12" r="5.5" fill="#FFFFFF"/>
+<circle cx="36" cy="-8" r="5" fill="#FFFFFF"/>
+<circle cx="50" cy="-20" r="3" fill="#FFFFFF" opacity="0.75"/>
+<circle cx="-54" cy="-2" r="3" fill="#FFFFFF" opacity="0.75"/>
+<path d="M20 10 Q32 20 20 30" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
+<path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+</g>
+</svg>
+
+
+    <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:700;
+      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CygnusWave Observatory Calculator</span>
+  </a>
+  <div style="display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+    <a href="index.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Home</a>
+    <a href="dome-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Dome Calculator</a>
+    <a href="ror-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Roll-Off-Roof Calculator</a>
+    <a href="help.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Help</a>
+    <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
+    </div>
+
+</div>
+<div class="wrap">
+  <header>
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
+      <div>
+        <div class="eyebrow">Observatory Calibration Worksheet</div>
+        <h1>Roll-Off-Roof Observatory → Sky Coverage &amp; Horizon Planner</h1>
+      </div>
+      <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+        <div class="mount-type-toggle" style="margin:0;">
+          <button id="btnUnitMetric" class="active" onclick="setUnitSystem(false)" title="Metric units (cm / mm)">Metric</button>
+          <button id="btnUnitImperial" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always in mm">Imperial</button>
+        </div>
+        <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
+        <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
+        <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
+        <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
+        <input type="file" id="loadSetupFile" accept="application/json" style="display:none;">
+      </div>
+    </div>
+  </header>
+
+  <div id="statusBanner" class="status-banner status-ok">
+    <span id="statusIcon">✓</span> <span id="statusText">Valid pointing — clear of the walls, roof, and local horizon.</span>
+  </div>
+
+  <div class="header-readout panel-bar">
+    <div class="header-stats">
+      <div class="eyebrow" style="margin-bottom:8px;">Building &amp; Roof Summary</div>
+      <div class="stat-row">
+        <div class="stat-chip"><span class="stat-lbl">Footprint</span><span class="stat-val" id="outFootprint">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Wall Height</span><span class="stat-val" id="outWallHeight">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Roof Travel</span><span class="stat-val" id="outRoofTravel">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Roll-off Direction</span><span class="stat-val" id="outRollDir">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Mount Offset</span><span class="stat-val" id="outMountOffset">—</span></div>
+      </div>
+      <button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button>
+    </div>
+
+    <div class="header-stats">
+      <div class="eyebrow" style="margin-bottom:8px;">Live Pointing</div>
+      <div class="stat-row">
+        <div class="stat-chip"><span class="stat-lbl">Telescope points at</span><span class="stat-val" id="outTargetAltAz">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Obstruction Limit Here</span><span class="stat-val" id="outObstructionLimit">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Clearance Margin</span><span class="stat-val" id="outMargin">—</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Blocked By</span><span class="stat-val" id="outBlockedBy">—</span></div>
+      </div>
+      <div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
+        ⚠ Mount position falls outside the building footprint — check your offset measurements.
+      </div>
+      <div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
+        ⚠ Pointing was pulled up to clear the walls/roof/horizon at this azimuth.
+      </div>
+      <div id="decWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
+        ⚠ Declination was raised to the lowest value ever observable from this latitude (lat − 90°) — anything below that never clears the horizon, at any hour angle.
+      </div>
+    </div>
+  </div>
+
+<div class="two-col-layout">
+  <div class="col-setup">
+  <details class="section-card" id="sec-building" open>
+    <summary class="section-header"><span class="section-title">Building &amp; Roof</span></summary>
+    <div class="section-body">
+<h2><span class="step-num">1</span>Building &amp; Mount Position</h2>
+        <p class="step-note">Measured from the building's true geometric center on the floor (not magnetic north). Positive North offset means the mount is closer to the North wall.</p>
+        <div class="row">
+          <div><label>Building width (East/West)</label></div>
+          <div class="field"><input type="number" id="bWidth" value="400"><span class="unit">cm</span><span class="frac-hint" id="hint_bWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="row">
+          <div><label>Building length (North/South)</label></div>
+          <div class="field"><input type="number" id="bLength" value="400"><span class="unit">cm</span><span class="frac-hint" id="hint_bLength" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="row">
+          <div><label>Wall height (floor to top of wall)</label></div>
+          <div class="field"><input type="number" id="wallHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="row">
+          <div><label>Mount RA/Dec intersection height above floor</label></div>
+          <div class="field"><input type="number" id="mountHeight" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_mountHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="row">
+          <div><label>Mount North/South offset from center</label><span class="hint">positive = North of center</span></div>
+          <div class="field"><input type="number" id="mountNS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_mountNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="row">
+          <div><label>Mount East/West offset from center</label><span class="hint">positive = East of center</span></div>
+          <div class="field"><input type="number" id="mountEW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_mountEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
+<h2>Building Shape</h2>
+        <p class="step-note">Most buildings are a simple rectangle — the width/length above cover that. Non-rectangular buildings (angled corners, an extension, an irregular footprint) can be described directly as up to 6 walls, each its own distance and angle from center.</p>
+        <div class="toggle-row">
+          <input type="checkbox" id="useCustomWalls">
+          <label for="useCustomWalls">Use a custom wall shape instead of the simple rectangle</label>
+        </div>
+        <div id="customWallFields" style="display:none;">
+          <p class="step-note">Angle is measured from North (0°), clockwise — same convention as azimuth. Distance is the perpendicular distance from the building's center out to that wall.</p>
+          <div id="wallRows"></div>
+          <div class="toggle-row">
+            <input type="checkbox" id="useExtraWalls">
+            <label for="useExtraWalls">Add 2 more walls (up to 6 total)</label>
+          </div>
+          <div class="row" style="margin-top:12px;">
+            <div><label>Which wall does the roof roll off through?</label></div>
+            <div class="field"><select id="rollWallIndex">
+              <option value="0">Wall 1</option><option value="1">Wall 2</option>
+              <option value="2">Wall 3</option><option value="3" selected>Wall 4</option>
+              <option value="4">Wall 5</option><option value="5">Wall 6</option>
+            </select></div>
+          </div>
+          <div class="row">
+            <div><label>Roof span</label><span class="hint">width of the roof structure, for the peaked-roof taper</span></div>
+            <div class="field"><input type="number" id="customRoofSpan" value="4000"><span class="unit">mm</span><span class="frac-hint" id="hint_customRoofSpan" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+        </div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:18px 0;">
+<h2><span class="step-num">2</span>Roll-Off Roof</h2>
+        <p class="step-note">The roof rolls off past one wall and parks there — that parked structure is its own obstruction, not just an open gap.</p>
+        <div class="row">
+          <div><label>Roll-off direction</label></div>
+          <div class="field"><select id="rollDir">
+            <option value="N">North</option>
+            <option value="S">South</option>
+            <option value="E">East</option>
+            <option value="W" selected>West</option>
+          </select></div>
+        </div>
+        <div class="row">
+          <div><label>Roof travel distance</label><span class="hint">how far the roof slides past that wall</span></div>
+          <div class="field"><input type="number" id="roofTravel" value="420"><span class="unit">cm</span><span class="frac-hint" id="hint_roofTravel" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+        <div class="mount-type-toggle">
+          <button id="btnRoofFlat" class="active">Flat roof</button>
+          <button id="btnRoofPeak">Peaked (gable)</button>
+          <button id="btnRoofWedge">Wedge (mono-slope)</button>
+        </div>
+        <div id="roofFlatFields">
+          <div class="row">
+            <div><label>Parked roof height</label><span class="hint">usually close to wall height; taller if on a raised track</span></div>
+            <div class="field"><input type="number" id="roofHeight" value="250"><span class="unit">cm</span><span class="frac-hint" id="hint_roofHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+        </div>
+        <div id="roofPeakFields" style="display:none;">
+          <div class="row">
+            <div><label>Eave height</label><span class="hint">roof height at the sides, where it meets the walls</span></div>
+            <div class="field"><input type="number" id="eaveHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_eaveHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Ridge height</label><span class="hint">peak height, running the length of the roll-off travel</span></div>
+            <div class="field"><input type="number" id="ridgeHeight" value="310"><span class="unit">cm</span><span class="frac-hint" id="hint_ridgeHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <p class="step-note" style="margin-top:8px;">The ridge is assumed to run parallel to the roll-off direction — obstruction is higher looking toward the middle of the roof's width and lower looking toward its edges, tapering linearly between ridge and eave.</p>
+        </div>
+        <div id="roofWedgeFields" style="display:none;">
+          <div class="row">
+            <div><label>Low side height</label></div>
+            <div class="field"><input type="number" id="wedgeLowHeight" value="240"><span class="unit">cm</span><span class="frac-hint" id="hint_wedgeLowHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>High side height</label></div>
+            <div class="field"><input type="number" id="wedgeHighHeight" value="310"><span class="unit">cm</span><span class="frac-hint" id="hint_wedgeHighHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <div class="toggle-row">
+            <input type="checkbox" id="wedgeFlip">
+            <label for="wedgeFlip">Flip slope direction (swap which side is high/low)</label>
+          </div>
+          <p class="step-note" style="margin-top:4px;">A single slope from low to high across the roof's width, rather than a symmetric peak — the more common real-world shape for a roll-off roof, since it's simpler to build on rails than a full gable.</p>
+        </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-optical">
+    <summary class="section-header"><span class="section-title">Optical Axis &amp; Mount</span></summary>
+    <div class="section-body">
+<h2><span class="step-num">3</span>Optical Axis Offset</h2>
+        <p class="step-note">Mount type changes the OTA's swing in the 3D preview and how pier side affects it. Doesn't change the wall/roof obstruction math itself — that's driven purely by true Alt/Az.</p>
+        <div class="mount-type-toggle">
+          <button id="btnGEM" class="active">Equatorial (GEM)</button>
+          <button id="btnAltAz">Alt/Az or Fork</button>
+        </div>
+        <div id="gemFields">
+          <div class="row">
+            <div><label>GEM Axis Length</label><span class="hint">RA axis to OTA aperture center</span></div>
+            <div class="field"><input type="number" id="gemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_gemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+        </div>
+        <div id="altAzFields" style="display:none;">
+          <div class="row">
+            <div><label>Dec Horizontal Offset</label></div>
+            <div class="field"><input type="number" id="decHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_decHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div><label>OTA tube length</label></div>
+          <div class="field"><input type="number" id="otaLength" value="600"><span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <div><label>OTA clear aperture</label></div>
+          <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
+        </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-telescopes">
+    <summary class="section-header"><span class="section-title">Telescopes</span></summary>
+    <div class="section-body">
+<h2>Telescopes</h2>
+        <p class="step-note">Each telescope is on its own independent mount. The position entered in Step 1 drives the <strong>live pointing preview</strong> only. For swing clearance, each telescope uses its own position defined here — including Telescope 1. See the Swing Clearance panel below.</p>
+
+        <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:14px 16px; margin-bottom:14px;">
+          <div class="eyebrow" style="margin-bottom:10px;">Telescope 1</div>
+          <div class="row">
+            <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
+            <div class="field"><input type="number" id="scope1NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>East/West position from building center</label><span class="hint">positive = East of center</span></div>
+            <div class="field"><input type="number" id="scope1EW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Mount height above floor</label></div>
+            <div class="field"><input type="number" id="scope1MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope1MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+          </div>
+          <p class="step-note" style="margin:8px 0 0; color:var(--text-dim);">Mount type and OTA dimensions come from Step 3 above. The Step 1 N/S, E/W, and height fields separately drive the live pointing preview and 3D scene.</p>
+        </div>
+
+        <div id="scope2Row" class="toggle-row" style="display:block; padding-bottom:0;">
+          <div class="toggle-row" style="margin:0 0 10px;">
+            <input type="checkbox" id="scope2Enabled">
+            <label for="scope2Enabled">Telescope 2</label>
+          </div>
+          <div id="scope2Fields" style="display:none; padding-left:4px;">
+            <div class="row">
+              <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
+              <div class="field"><input type="number" id="scope2NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>East/West position from building center</label><span class="hint">positive = East of center</span></div>
+              <div class="field"><input type="number" id="scope2EW" value="100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>Mount height above floor</label></div>
+              <div class="field"><input type="number" id="scope2MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="mount-type-toggle" style="margin-bottom:8px;">
+              <button id="scope2BtnGEM" class="active" onclick="setScope2MountType('GEM')">GEM</button>
+              <button id="scope2BtnAltAz" onclick="setScope2MountType('AltAz')">Alt/Az</button>
+            </div>
+            <div id="scope2GEMFields">
+              <div class="row">
+                <div><label>GEM Axis Length</label></div>
+                <div class="field"><input type="number" id="scope2GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div id="scope2AltAzFields" style="display:none;">
+              <div class="row">
+                <div><label>Dec Horizontal Offset</label></div>
+                <div class="field"><input type="number" id="scope2DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope2DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div class="row">
+              <div><label>Tube length</label></div>
+              <div class="field"><input type="number" id="scope2Length" value="600"><span class="unit">mm</span></div>
+            </div>
+            <div class="row">
+              <div><label>Aperture</label></div>
+              <div class="field"><input type="number" id="scope2Aperture" value="200"><span class="unit">mm</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="scope3Row" class="toggle-row" style="display:block; padding-bottom:0; margin-top:8px;">
+          <div class="toggle-row" style="margin:0 0 10px;">
+            <input type="checkbox" id="scope3Enabled">
+            <label for="scope3Enabled">Telescope 3</label>
+          </div>
+          <div id="scope3Fields" style="display:none; padding-left:4px;">
+            <div class="row">
+              <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
+              <div class="field"><input type="number" id="scope3NS" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>East/West position from building center</label></div>
+              <div class="field"><input type="number" id="scope3EW" value="-100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>Mount height above floor</label></div>
+              <div class="field"><input type="number" id="scope3MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="mount-type-toggle" style="margin-bottom:8px;">
+              <button id="scope3BtnGEM" class="active" onclick="setScope3MountType('GEM')">GEM</button>
+              <button id="scope3BtnAltAz" onclick="setScope3MountType('AltAz')">Alt/Az</button>
+            </div>
+            <div id="scope3GEMFields">
+              <div class="row">
+                <div><label>GEM Axis Length</label></div>
+                <div class="field"><input type="number" id="scope3GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div id="scope3AltAzFields" style="display:none;">
+              <div class="row">
+                <div><label>Dec Horizontal Offset</label></div>
+                <div class="field"><input type="number" id="scope3DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope3DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div class="row">
+              <div><label>Tube length</label></div>
+              <div class="field"><input type="number" id="scope3Length" value="600"><span class="unit">mm</span></div>
+            </div>
+            <div class="row">
+              <div><label>Aperture</label></div>
+              <div class="field"><input type="number" id="scope3Aperture" value="200"><span class="unit">mm</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="scope4Row" class="toggle-row" style="display:block; padding-bottom:0; margin-top:8px;">
+          <div class="toggle-row" style="margin:0 0 10px;">
+            <input type="checkbox" id="scope4Enabled">
+            <label for="scope4Enabled">Telescope 4</label>
+          </div>
+          <div id="scope4Fields" style="display:none; padding-left:4px;">
+            <div class="row">
+              <div><label>North/South position from building center</label><span class="hint">positive = North of center</span></div>
+              <div class="field"><input type="number" id="scope4NS" value="100"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4NS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>East/West position from building center</label></div>
+              <div class="field"><input type="number" id="scope4EW" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4EW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="row">
+              <div><label>Mount height above floor</label></div>
+              <div class="field"><input type="number" id="scope4MountH" value="120"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4MountH" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+            </div>
+            <div class="mount-type-toggle" style="margin-bottom:8px;">
+              <button id="scope4BtnGEM" class="active" onclick="setScope4MountType('GEM')">GEM</button>
+              <button id="scope4BtnAltAz" onclick="setScope4MountType('AltAz')">Alt/Az</button>
+            </div>
+            <div id="scope4GEMFields">
+              <div class="row">
+                <div><label>GEM Axis Length</label></div>
+                <div class="field"><input type="number" id="scope4GemAxis" value="28"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4GemAxis" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div id="scope4AltAzFields" style="display:none;">
+              <div class="row">
+                <div><label>Dec Horizontal Offset</label></div>
+                <div class="field"><input type="number" id="scope4DecHoriz" value="0"><span class="unit">cm</span><span class="frac-hint" id="hint_scope4DecHoriz" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+              </div>
+            </div>
+            <div class="row">
+              <div><label>Tube length</label></div>
+              <div class="field"><input type="number" id="scope4Length" value="600"><span class="unit">mm</span></div>
+            </div>
+            <div class="row">
+              <div><label>Aperture</label></div>
+              <div class="field"><input type="number" id="scope4Aperture" value="200"><span class="unit">mm</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <div><label>Minimum gap between swing circles</label><span class="hint">walkway clearance between any two telescope's swing radii</span></div>
+          <div class="field"><input type="number" id="minScopeGap" value="50"><span class="unit">cm</span><span class="frac-hint" id="hint_minScopeGap" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
+        </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-pier">
+    <summary class="section-header"><span class="section-title">Pier Layout &amp; Swing Clearance</span></summary>
+    <div class="section-body">
+<h2 style="margin-bottom:4px;">Pier Layout — Floor Plan</h2>
+        <p class="step-note">Click anywhere inside the building to place a telescope pier. Drag to reposition. Enable additional telescopes first — each enabled pier appears on the plan. The number fields below stay in sync and can be used for fine-tuning after placement.</p>
+        <div style="display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap; margin-top:12px;">
+          <div style="flex:0 0 auto; position:relative;">
+            <canvas id="floorPlanCanvas" width="340" height="340"
+              style="border-radius:6px; cursor:crosshair; display:block; touch-action:none;"></canvas>
+            <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:11px; color:var(--text-dim); font-family:'Courier New',monospace;">
+              <span id="fpWLabel">← W</span>
+              <span id="fpScaleLabel"></span>
+              <span id="fpELabel">E →</span>
+            </div>
+          </div>
+          <div style="flex:1; min-width:160px; font-size:12.5px; color:var(--text-dim); line-height:1.8;">
+            <div class="eyebrow" style="margin-bottom:8px;">Legend</div>
+            <div id="fpLegend" style="display:flex; flex-direction:column; gap:6px;"></div>
+            <p class="step-note" style="margin-top:12px;">Click inside the building outline to place. Drag to fine-tune position. Use the number fields in the Telescopes card below for precise entry.</p>
+          </div>
+        </div>
+      <hr style="border:none;border-top:1px solid var(--line);margin:20px 0;">
+      <div style="display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start;">
+
+        <div style="flex:1 1 240px; min-width:200px;">
+          <div class="eyebrow" style="margin-bottom:6px;">Wall / Floor / Ceiling Clearance</div>
+          <div id="swingClearanceReadout" style="padding:10px 12px; border-radius:5px; border:1px solid var(--line); background:var(--readout-bg); font-size:12.5px; line-height:1.7; margin-bottom:14px;"></div>
+          <div class="eyebrow" style="margin-bottom:6px;">Telescope-to-Telescope Clearance</div>
+          <div id="scopeCollisionReadout" style="padding:10px 12px; border-radius:5px; border:1px solid var(--line); background:var(--readout-bg); font-size:12.5px; line-height:1.7;"></div>
+        </div>
+      </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-sky">
+    <summary class="section-header"><span class="section-title">Sky Coverage</span></summary>
+    <div class="section-body">
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin-bottom:0;">Sky Coverage</h2>
+    </div>
+    <p class="step-note" style="margin-top:6px;">Sweeps a grid across the whole sky and checks whether each point clears the walls, the parked roof, and your local horizon — not a dome shutter, since a roll-off roof either fully opens or fully closes.</p>
+    <div id="skyCoverageBody">
+      <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:10px;">
+        <div style="flex:0 0 240px;">
+          <div class="eyebrow" style="margin-bottom:6px;">Sky Coverage</div>
+          <svg viewBox="0 0 200 200" id="skyPlot" style="width:100%; max-width:240px; background:#05070a; border-radius:6px; display:block;"></svg>
+        </div>
+        <div style="flex:1 1 200px; min-width:200px;">
+          <div class="eyebrow" style="margin-bottom:6px;">Reading this</div>
+          <p class="step-note" style="margin:0;">Center = zenith, edge = horizon, up = North, right = East. The outer boundary traces your building's actual wall shape — a 4-wall rectangle shows as a rectangle, a 6-wall polygon shows its true footprint. Updates live as you change your setup.<br><br>
+          <span style="color:#7fd88f;">●</span> Green — clear of walls, roof, and horizon<br>
+          <span style="color:#e0685c;">●</span> Red — blocked by a wall or the parked roof<br>
+          <span style="color:#b5713f;">●</span> Brown — below your local (terrain) horizon<br></p>
+          <button class="preset-btn" id="btnExportHorizon" type="button" style="margin-top:8px;">Export as Horizon File (.hrz)</button>
+          <p class="hint" id="exportStatus" style="margin-top:6px;"></p>
+        </div>
+      </div>
+    </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-horizon">
+    <summary class="section-header"><span class="section-title">Local Horizon</span></summary>
+    <div class="section-body">
+<h2>Local Horizon</h2>
+        <p class="step-note">Terrain beyond the building — trees, other structures. Layered on top of the wall/roof obstruction; whichever blocks more at a given azimuth wins.</p>
+        <div class="mount-type-toggle">
+          <button id="btnHorizonFlat" class="active">Flat minimum</button>
+          <button id="btnHorizonCustom">Custom profile</button>
+        </div>
+        <div id="horizonFlatFields">
+          <div class="row" style="margin-top:12px;">
+            <div><label>Minimum observation altitude</label></div>
+            <div class="field"><input type="number" id="horizonMinAlt" value="10" step="1"><span class="unit">°</span></div>
+          </div>
+        </div>
+        <div id="horizonCustomFields" style="display:none;">
+          <p class="step-note" style="margin-top:10px;">Load a horizon .hrz file — the same azimuth/altitude format Stellarium's custom horizon files use (comma or space separated, "#" comment lines ignored; .csv/.txt also accepted) — or paste/edit the points directly below.</p>
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom:10px;">
+            <button class="preset-btn" id="btnLoadHorizonCsv" type="button">Load Horizon File…</button>
+            <input type="file" id="horizonCsvFile" accept=".hrz,.csv,.txt" style="display:none;">
+            <span class="hint" id="horizonCsvStatus" style="margin-top:0;"></span>
+          </div>
+          <textarea id="horizonCustomData" rows="5" style="width:100%; background:var(--readout-bg); border:1px solid var(--line); border-radius:4px; color:var(--text); font-family:'Courier New',monospace; font-size:12px; padding:8px; resize:vertical;" placeholder="0,15&#10;30,22&#10;60,18&#10;90,12&#10;...">0 10
+90 10
+180 10
+270 10
+360 10</textarea>
+        </div>
+    </div>
+  </details>
+  </div>
+  <div class="col-persistent">
+  <div class="section-card persistent" id="sec-pointing">
+    <div class="section-header persistent-header"><span class="section-title">Telescope Pointing</span></div>
+    <div class="section-body">
+<h2><span class="step-num">4</span>Telescope Pointing</h2>
+        <p class="step-note">Drives the live obstruction calculation, 3D preview, and sky coverage sweep. Select which telescope you are pointing.</p>
+
+        <div class="row" style="margin-bottom:12px;">
+          <div><label>Pointing telescope</label><span class="hint">all pointing checks use this telescope's position, mount type, and optics</span></div>
+          <div class="field">
+            <select id="pointingScope" style="background:var(--panel-2); color:var(--text); border:1px solid var(--line); border-radius:4px; padding:6px 8px; font-size:13px; width:100%;">
+              <option value="1">Telescope 1</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div><label>Site latitude</label></div>
+          <div class="field"><input type="number" id="lat" value="40.2" step="0.1"><span class="unit">°</span></div>
+        </div>
+
+        <div class="mount-type-toggle">
+          <button id="btnHADec" class="active">Hour Angle + Dec</button>
+          <button id="btnAltAzMode">Point at Alt/Az</button>
+        </div>
+
+        <div id="haDecFields">
+          <div class="row">
+            <div><label>Hour Angle</label></div>
+            <div class="field"><input type="number" id="ha" value="0" step="0.1"><span class="unit">h</span></div>
+          </div>
+          <input type="range" id="haSlider" min="-6" max="6" step="0.05" value="0" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <div class="row">
+            <div><label>Declination</label></div>
+            <div class="field"><input type="number" id="dec" value="45" step="1"><span class="unit">°</span></div>
+          </div>
+          <input type="range" id="decSlider" min="-90" max="90" step="1" value="45" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="preset-btn" data-ha="0" data-dec="60">Meridian, high</button>
+            <button class="preset-btn" data-ha="-3" data-dec="20">East, low</button>
+            <button class="preset-btn" data-ha="3" data-dec="20">West, low</button>
+          </div>
+        </div>
+
+        <div id="altAzModeFields" style="display:none;">
+          <div class="row">
+            <div><label>Altitude</label></div>
+            <div class="field"><input type="number" id="targetAlt" value="45" step="1"><span class="unit">°</span></div>
+          </div>
+          <input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <div class="row">
+            <div><label>Azimuth</label></div>
+            <div class="field"><input type="number" id="targetAz" value="180" step="1"><span class="unit">°</span></div>
+          </div>
+          <input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="preset-btn" data-alt="70" data-az="180">Due South, high</button>
+            <button class="preset-btn" data-alt="15" data-az="0">Due North, low</button>
+            <button class="preset-btn" data-alt="15" data-az="270">Due West, low</button>
+          </div>
+        </div>
+
+        <div class="jog-wrap">
+          <div class="jog-pad">
+            <div></div><button class="jog-btn" id="jogUp">▲</button><div></div>
+            <button class="jog-btn" id="jogLeft">◀</button><div class="jog-center">JOG</div><button class="jog-btn" id="jogRight">▶</button>
+            <div></div><button class="jog-btn" id="jogDown">▼</button><div></div>
+          </div>
+          <div class="jog-steps">
+            <span class="step-label">Step size</span>
+            <div class="jog-step-row">
+              <button class="jog-step-btn" data-step="0.1">0.1°</button>
+              <button class="jog-step-btn active" data-step="1">1°</button>
+              <button class="jog-step-btn" data-step="5">5°</button>
+              <button class="jog-step-btn" data-step="15">15°</button>
+            </div>
+            <span class="hint" style="margin-top:2px;">Hold to keep jogging. Nudges whichever pointing mode is active above.</span>
+          </div>
+        </div>
+
+        <div class="row" id="pierRow" style="margin-top:14px;">
+          <div><label>Pier side</label></div>
+          <div class="field"><select id="pierSide"><option value="East">East</option><option value="West">West</option></select></div>
+        </div>
+        <div class="toggle-row" id="pierAutoRow">
+          <input type="checkbox" id="pierAutoFlip">
+          <label for="pierAutoFlip">Auto-flip at the meridian (HA=0) — East while approaching, West once past</label>
+        </div>
+    </div>
+  </div>
+    </div>
+  <div class="col-preview">
+<div class="section-card persistent" id="sec-preview">
+    <div class="section-header persistent-header"><span class="section-title">3D Preview</span></div>
+    <div class="section-body">
+<h2 style="margin-bottom:10px;">3D Preview</h2>
+        <div style="display:flex; gap:16px; margin-bottom:10px; flex-wrap:wrap; align-items:center;">
+          <div style="display:flex; gap:16px; flex-wrap:nowrap;">
+            <div class="toggle-row" style="margin-bottom:0;">
+              <input type="checkbox" id="showHorizon3D" checked>
+              <label for="showHorizon3D">Show local horizon</label>
+            </div>
+            <div class="toggle-row" style="margin-bottom:0;">
+              <input type="checkbox" id="showMeridian3D" checked>
+              <label for="showMeridian3D">Show celestial equator</label>
+            </div>
+          </div>
+          <div style="display:flex; gap:12px; margin-left:auto; font-size:11px; color:var(--text-dim);">
+            <span><span style="color:#7fd88f;">●</span> Clears</span>
+            <span><span style="color:#e0685c;">●</span> Blocked</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start;">
+          <div style="flex:1 1 340px; min-width:280px;">
+            <div id="threeContainer" style="width:100%; height:460px; border-radius:4px; overflow:hidden; background:#05070a; cursor:grab;"></div>
+            <button class="preset-btn" id="btnToggleLegend" type="button" style="margin-top:10px;">Show Wire frame legend</button>
+          </div>
+          <div style="flex:0 1 260px; min-width:220px;">
+            <p class="step-note" style="margin-top:0; color:var(--amber);">Drag to orbit, scroll to zoom.</p>
+            <ul id="threeLegendList" style="display:none; margin:10px 0 0; padding-left:18px; font-size:12.5px; color:var(--text-dim); line-height:1.6;">
+              <li><strong style="color:var(--text);">Walls</strong> — solid up to wall height, the building's actual footprint</li>
+              <li><strong style="color:var(--text);">Parked roof box</strong> — the rolled-off roof's obstruction, past whichever wall it slides beyond</li>
+              <li><strong style="color:var(--text);">N / E / S / W</strong> — cardinal directions at the walls</li>
+              <li><strong style="color:var(--text);">Small bar</strong> — OTA</li>
+              <li><strong style="color:var(--text);">Amber line</strong> — optical axis</li>
+              <li><strong style="color:var(--text);">Rust-colored skyline</strong> — your local (terrain) horizon limit</li>
+              <li><strong style="color:var(--text);">Blue arc</strong> — the celestial equator (Dec=0); genuinely tilts with latitude, crossing the horizon due East and due West</li>
+              <li><strong style="color:var(--text);">Bright dot</strong> — the elevated celestial pole, at altitude = your latitude — where a polar-aligned GEM's RA axis points</li>
+            </ul>
+            <p class="step-note" id="obstructionNote" style="margin-top:8px;"></p>
+          </div>
+        </div>
+    </div>
+  </div>
+  </div>
+</div>>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
+
+// ── Unit system ──────────────────────────────────────────────────────────────
+// All internal math runs in mm. Fields are entered in the user's chosen unit.
+// OTA fields (tube length, aperture) are always mm regardless of unit mode.
+// Switching units converts all field values in place.
+let useImperial = false; // false = metric (cm/mm), true = imperial (in)
+
+// 1 inch = 25.4 mm. cm fields: 1 cm = 10 mm. Imperial shows inches.
+const IN_TO_MM = 25.4;
+const CM_TO_MM = 10;
+
+// Read a "cm-class" field → mm (internal). In metric: value × 10. In imperial: value × 25.4.
+function numCm(id){ return num(id) * (useImperial ? IN_TO_MM : CM_TO_MM); }
+// Read a "mm-class" field (customRoofSpan, wallDist) → mm. In imperial: value × 25.4.
+function numMmField(id){ return num(id) * (useImperial ? IN_TO_MM : 1); }
+
+function unitLabel(){ return useImperial ? 'in' : 'cm'; }
+function unitLabelMm(){ return useImperial ? 'in' : 'mm'; }
+
+// Update all fraction hint spans — called whenever a field changes or unit mode switches.
+// In metric mode: hints hidden. In imperial mode: shows e.g. 13'1 1/2" beside the field.
+function updateFracHints(){
+  const show = useImperial;
+  // cm-class fields: value is in inches, mult = IN_TO_MM → back to mm → toFracInches
+  CM_FIELD_IDS.forEach(id => {
+    const hint = document.getElementById('hint_' + id);
+    if(!hint) return;
+    if(!show){ hint.style.display = 'none'; return; }
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inches = parseFloat(el.value);
+    hint.textContent = isNaN(inches) ? '' : toFracInches(inches);
+    hint.style.display = inches === 0 ? 'none' : 'inline';
+  });
+  // mm-class fields: value is in inches too when imperial
+  [...MM_FIELD_IDS, ...[0,1,2,3,4,5].map(i => `wallDist${i}`)].forEach(id => {
+    const hint = document.getElementById('hint_' + id);
+    if(!hint) return;
+    if(!show){ hint.style.display = 'none'; return; }
+    const el = document.getElementById(id);
+    if(!el) return;
+    const inches = parseFloat(el.value);
+    hint.textContent = isNaN(inches) ? '' : toFracInches(inches);
+    hint.style.display = inches === 0 ? 'none' : 'inline';
+  });
+}
+
+// Convert decimal inches to feet + fractional-inch string (sixteenths).
+// e.g. 157.48 → 13'1 1/2"   94.49 → 7'10 1/2"   13.5 → 1'1 1/2"
+function toFracInches(totalInches){
+  const neg = totalInches < 0;
+  const abs = Math.abs(totalInches);
+  const feet  = Math.floor(abs / 12);
+  const rem   = abs - feet * 12;
+  let whole   = Math.floor(rem);
+  let sixteenths = Math.round((rem - whole) * 16);
+  if(sixteenths === 16){ whole++; sixteenths = 0; }
+  if(whole === 12){ return (neg ? '-' : '') + (feet+1) + "'0\""; }
+  let fracStr = '';
+  if(sixteenths > 0){
+    let n = sixteenths, d = 16;
+    const g = [8,4,2,1].find(x => n%x===0 && d%x===0);
+    n /= g; d /= g;
+    fracStr = ` ${n}/${d}`;
+  }
+  const base = feet > 0 ? `${feet}'${whole}${fracStr}"` : `${whole}${fracStr}"`;
+  return (neg ? '-' : '') + base;
+}
+// Shorthand: mm value → imperial fraction string
+function mmToFrac(mm){ return toFracInches(mm / IN_TO_MM); }
+
+
+
+// All "cm-class" field IDs (never OTA optics fields)
+const CM_FIELD_IDS = [
+  'bWidth','bLength','wallHeight','mountHeight','mountNS','mountEW',
+  'roofTravel','roofHeight','eaveHeight','ridgeHeight',
+  'wedgeLowHeight','wedgeHighHeight',
+  'gemAxis','decHoriz',
+  'scope1NS','scope1EW','scope1MountH',
+  'scope2NS','scope2EW','scope2MountH','scope2GemAxis','scope2DecHoriz',
+  'scope3NS','scope3EW','scope3MountH','scope3GemAxis','scope3DecHoriz',
+  'scope4NS','scope4EW','scope4MountH','scope4GemAxis','scope4DecHoriz',
+  'minScopeGap'
+];
+// "mm-class" non-OTA fields
+const MM_FIELD_IDS = ['customRoofSpan'];
+// wallDist fields are dynamically created — handled separately
+
+function setUnitSystem(imperial){
+  const wasImperial = useImperial;
+  if(imperial === wasImperial) return;
+  useImperial = imperial;
+
+  const fromMult = wasImperial ? IN_TO_MM : CM_TO_MM;
+  const toMult   = useImperial ? IN_TO_MM : CM_TO_MM;
+  const fromMm   = wasImperial ? IN_TO_MM : 1;
+  const toMm     = useImperial ? IN_TO_MM : 1;
+
+  // Convert all cm-class fields
+  CM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const mm = parseFloat(el.value) * fromMult;
+    if(useImperial){
+      // Store as decimal inches in the field (fractions shown only in readouts)
+      el.value = (mm / IN_TO_MM).toFixed(4);
+    } else {
+      el.value = (mm / CM_TO_MM).toFixed(1);
+    }
+  });
+
+  // Convert mm-class fields
+  MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const mm = parseFloat(el.value) * fromMm;
+    el.value = useImperial ? (mm / IN_TO_MM).toFixed(4) : mm.toFixed(0);
+  });
+
+  // Convert dynamic wallDist fields
+  for(let i = 0; i < 6; i++){
+    const el = document.getElementById(`wallDist${i}`);
+    if(!el) continue;
+    const mm = parseFloat(el.value) * fromMm;
+    el.value = useImperial ? (mm / IN_TO_MM).toFixed(4) : mm.toFixed(0);
+  }
+
+  // Update all unit labels in the UI
+  refreshUnitLabels();
+  updateFracHints();
+
+  // Update toggle button states
+  document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
+  document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
+
+  compute();
+}
+
+function refreshUnitLabels(){
+  const lbl = unitLabel();
+  const lblMm = unitLabelMm();
+  // All cm-class unit spans
+  CM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const span = el.parentElement.querySelector('.unit');
+    if(span) span.textContent = lbl;
+  });
+  // mm-class spans
+  MM_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const span = el.parentElement.querySelector('.unit');
+    if(span) span.textContent = lblMm;
+  });
+  // Dynamic wallDist spans
+  for(let i = 0; i < 6; i++){
+    const el = document.getElementById(`wallDist${i}`);
+    if(!el) continue;
+    const span = el.parentElement.querySelector('.unit') || el.nextElementSibling;
+    if(span) span.textContent = lblMm;
+  }
+}
+
+// Override numCm for wallDist fields which are mm-class
+function numWallDist(i){ return numMmField(`wallDist${i}`); }
+
+function THREE_clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+const HALF_PI = Math.PI/2;
+
+// ================= Pointing math (pure spherical astronomy, mount-independent) =================
+function altAzToHaDec(altDeg, azDeg, latDeg){
+  const alt = altDeg * Math.PI/180, az = azDeg * Math.PI/180, lat = latDeg * Math.PI/180;
+  const sinDec = Math.sin(alt)*Math.sin(lat) + Math.cos(alt)*Math.cos(lat)*Math.cos(az);
+  const dec = Math.asin(THREE_clamp(sinDec, -1, 1));
+  let cosHa = (Math.sin(alt) - sinDec*Math.sin(lat)) / (Math.cos(dec)*Math.cos(lat) || 1e-9);
+  let ha = Math.acos(THREE_clamp(cosHa, -1, 1));
+  if(Math.sin(az) > 0) ha = -ha;
+  return { haHours: ha * 180/Math.PI / 15, decDeg: dec * 180/Math.PI };
+}
+function haDecToAltAz(haHours, decDeg, latDeg){
+  const ha = haHours * 15 * Math.PI/180, dec = decDeg * Math.PI/180, lat = latDeg * Math.PI/180;
+  const sinAlt = Math.sin(dec)*Math.sin(lat) + Math.cos(dec)*Math.cos(lat)*Math.cos(ha);
+  const alt = Math.asin(THREE_clamp(sinAlt, -1, 1));
+  let cosAz = (Math.sin(dec) - sinAlt*Math.sin(lat)) / (Math.cos(alt)*Math.cos(lat) || 1e-9);
+  let az = Math.acos(THREE_clamp(cosAz, -1, 1));
+  if(Math.sin(ha) > 0) az = 2*Math.PI - az;
+  return { altDeg: alt * 180/Math.PI, azDeg: az * 180/Math.PI };
+}
+
+// ================= Mount matrix math (for OTA orientation in the 3D view only) =================
+function mat4Identity(){ return [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]; }
+function mat4Translation(x,y,z){ const m = mat4Identity(); m[3]=x; m[7]=y; m[11]=z; return m; }
+function mat4RotX(r){ const c=Math.cos(r), s=Math.sin(r); const m=mat4Identity(); m[5]=c; m[6]=-s; m[9]=s; m[10]=c; return m; }
+function mat4RotY(r){ const c=Math.cos(r), s=Math.sin(r); const m=mat4Identity(); m[0]=c; m[2]=s; m[8]=-s; m[10]=c; return m; }
+function mat4RotZ(r){ const c=Math.cos(r), s=Math.sin(r); const m=mat4Identity(); m[0]=c; m[1]=-s; m[4]=s; m[5]=c; return m; }
+function mat4Mul(a,b){
+  const r = new Array(16).fill(0);
+  for(let i=0;i<4;i++) for(let j=0;j<4;j++){
+    let sum=0;
+    for(let k=0;k<4;k++) sum += a[i*4+k]*b[k*4+j];
+    r[i*4+j]=sum;
+  }
+  return r;
+}
+function mat4MulVec4(m,v){
+  return [
+    m[0]*v[0]+m[1]*v[1]+m[2]*v[2]+m[3]*v[3],
+    m[4]*v[0]+m[5]*v[1]+m[6]*v[2]+m[7]*v[3],
+    m[8]*v[0]+m[9]*v[1]+m[10]*v[2]+m[11]*v[3],
+    m[12]*v[0]+m[13]*v[1]+m[14]*v[2]+m[15]*v[3]
+  ];
+}
+// Same construction as the dome tool's computeAperture, minus the dome-specific
+// GEM axis / dec-offset translation at the end — here we only need the OTA's
+// true pointing direction and pivot position for the 3D view, not a dome
+// intersection target.
+function computeOtaOrientation(mountType, latDeg, haHours, decDeg, pierSide, off){
+  const latRad = latDeg * Math.PI / 180;
+  const latFactor = latRad >= 0 ? 1 : -1;
+  const haRad = haHours * 15 * Math.PI / 180;
+  const decRad = decDeg * Math.PI / 180;
+  const latitudeAdjustment = mat4RotY(-Math.abs(latRad));
+
+  let M;
+  if(mountType === 'GEM'){
+    const pierFactor = (pierSide === 'East' ? 1 : -1) * latFactor;
+    const raRotationAdjustment = mat4RotX(pierFactor * HALF_PI - haRad * latFactor);
+    const decRotationAdjustment = mat4RotZ(pierFactor * (HALF_PI - decRad * latFactor));
+    const gemAdjustment = mat4Translation(0, 0, off.gem);
+    M = mat4Mul(mat4Mul(mat4Mul(latitudeAdjustment, raRotationAdjustment), decRotationAdjustment), gemAdjustment);
+  } else {
+    const raRotationAdjustment = mat4RotX(-haRad * latFactor);
+    const raOffsetAdjustment = mat4Translation(0, -off.decHoriz, 0);
+    const decRotationAdjustment = mat4RotY(-(HALF_PI - decRad * latFactor));
+    M = mat4Mul(mat4Mul(mat4Mul(latitudeAdjustment, raRotationAdjustment), raOffsetAdjustment), decRotationAdjustment);
+  }
+  const origin4 = mat4MulVec4(M, [0,0,0,1]);
+  const p4 = mat4MulVec4(M, [1,0,0,1]);
+  const dir = [p4[0]-origin4[0], p4[1]-origin4[1], p4[2]-origin4[2]];
+  const dlen = Math.hypot(dir[0], dir[1], dir[2]) || 1;
+  return { origin: [origin4[0], origin4[1], origin4[2]], direction: [dir[0]/dlen, dir[1]/dlen, dir[2]/dlen] };
+}
+
+// ================= Wall / roof obstruction (the core new geometry) =================
+// Roof height at a given point across its width, perpendicular to the roll
+// direction. Flat roofs are a constant height. Peaked roofs taper linearly
+// from the ridge (center) down to the eave (edges) — the ridge is assumed
+// to run parallel to the direction of travel. Wedge (mono-slope) roofs
+// ramp linearly from a low side to a high side across the FULL width,
+// rather than symmetrically from a center peak.
+function roofHeightAt(perpCoordMm, building){
+  if(building.roofShape === 'flat') return building.roofHeight;
+  const halfSpan = (building.rollDir === 'N' || building.rollDir === 'S') ? building.width/2 : building.length/2;
+  if(building.roofShape === 'wedge'){
+    const t = THREE_clamp((perpCoordMm/Math.max(halfSpan,1) + 1) / 2, 0, 1); // -halfSpan..+halfSpan -> 0..1
+    const lo = building.wedgeFlip ? building.wedgeHighHeight : building.wedgeLowHeight;
+    const hi = building.wedgeFlip ? building.wedgeLowHeight : building.wedgeHighHeight;
+    return lo + (hi - lo) * t;
+  }
+  const t = Math.min(1, Math.abs(perpCoordMm) / Math.max(halfSpan, 1));
+  return building.ridgeHeight + (building.eaveHeight - building.ridgeHeight) * t;
+}
+
+// Ray-box intersection from an interior point (mx, my), heading toward azimuth
+// azDeg (0=N, 90=E, 180=S, 270=W). One boundary — whichever wall the roof
+// rolls off past — is pushed outward by the roof's travel distance, modeling
+// the parked roof as an obstruction of its own rather than an open gap.
+function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
+  if(building.customWalls){
+    // Push the roll-off wall's boundary outward by the roof's travel
+    // distance before intersecting — otherwise the "roof zone" is detected
+    // correctly but at the wrong (un-extended) distance.
+    const extendedWalls = building.walls.map((w, i) =>
+      (i === building.rollWallIndex) ? { angle: w.angle, dist: w.dist + building.roofTravel } : w
+    );
+    const { dist, wallIndex } = polygonRayDist(azDeg, mx, my, extendedWalls);
+    const isRoofWall = (wallIndex === building.rollWallIndex);
+    let structureHeight;
+    if(isRoofWall){
+      const az = azDeg * Math.PI/180;
+      const dx = Math.sin(az), dy = Math.cos(az);
+      const crossX = mx + dist*dx, crossY = my + dist*dy;
+      const wa = building.walls[wallIndex].angle * Math.PI/180;
+      const perpCoord = crossX*Math.cos(wa) - crossY*Math.sin(wa);
+      structureHeight = roofHeightAtCustom(perpCoord, building);
+    } else {
+      structureHeight = building.wallHeight;
+    }
+    const heightAboveMount = structureHeight - mountHeightMm;
+    const altRad = Math.atan2(heightAboveMount, dist);
+    return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist,
+      blockedBy: isRoofWall ? 'Parked roof' : ('Wall ' + (wallIndex+1)) };
+  }
+
+  const az = azDeg * Math.PI/180;
+  const dx = Math.sin(az), dy = Math.cos(az); // East, North components
+  const halfW = building.width/2, halfL = building.length/2;
+  let xMin=-halfW, xMax=halfW, yMin=-halfL, yMax=halfL;
+  if(building.rollDir === 'N') yMax += building.roofTravel;
+  if(building.rollDir === 'S') yMin -= building.roofTravel;
+  if(building.rollDir === 'E') xMax += building.roofTravel;
+  if(building.rollDir === 'W') xMin -= building.roofTravel;
+
+  let tx = Infinity, sideX = null;
+  if(dx > 1e-9){ tx = (xMax - mx)/dx; sideX = 'E'; }
+  else if(dx < -1e-9){ tx = (xMin - mx)/dx; sideX = 'W'; }
+  let ty = Infinity, sideY = null;
+  if(dy > 1e-9){ ty = (yMax - my)/dy; sideY = 'N'; }
+  else if(dy < -1e-9){ ty = (yMin - my)/dy; sideY = 'S'; }
+
+  let dist, side;
+  if(tx < ty){ dist = tx; side = sideX; } else { dist = ty; side = sideY; }
+  dist = Math.max(dist, 1);
+
+  let structureHeight;
+  if(side === building.rollDir){
+    // Crossing point's coordinate along the axis perpendicular to travel,
+    // to look up where across the roof's width this sightline passes.
+    const perpCoord = (building.rollDir === 'N' || building.rollDir === 'S') ? (mx + dist*dx) : (my + dist*dy);
+    structureHeight = roofHeightAt(perpCoord, building);
+  } else {
+    structureHeight = building.wallHeight;
+  }
+  const heightAboveMount = structureHeight - mountHeightMm;
+  const altRad = Math.atan2(heightAboveMount, dist);
+  return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist, blockedBy: (side === building.rollDir) ? 'Parked roof' : (side + ' wall') };
+}
+// Peaked/wedge-roof taper for custom wall shapes: same interpolation as the
+// simple rectangle case, but spanned by a user-entered roof width rather
+// than one derived from building width/length, since an arbitrary wall's
+// own extent isn't otherwise well-defined.
+function roofHeightAtCustom(perpCoordMm, building){
+  if(building.roofShape === 'flat') return building.roofHeight;
+  const halfSpan = Math.max(building.customRoofSpan/2, 1);
+  if(building.roofShape === 'wedge'){
+    const t = THREE_clamp((perpCoordMm/halfSpan + 1) / 2, 0, 1);
+    const lo = building.wedgeFlip ? building.wedgeHighHeight : building.wedgeLowHeight;
+    const hi = building.wedgeFlip ? building.wedgeLowHeight : building.wedgeHighHeight;
+    return lo + (hi - lo) * t;
+  }
+  const t = Math.min(1, Math.abs(perpCoordMm) / halfSpan);
+  return building.ridgeHeight + (building.eaveHeight - building.ridgeHeight) * t;
+}
+
+function getBuildingConfig(){
+  const btnPeak = document.getElementById('btnRoofPeak'), btnWedge = document.getElementById('btnRoofWedge');
+  const roofShape = btnPeak.classList.contains('active') ? 'peak' : (btnWedge.classList.contains('active') ? 'wedge' : 'flat');
+  const customWalls = document.getElementById('useCustomWalls').checked;
+  const width = numCm('bWidth'), length = numCm('bLength');
+  const walls = customWalls ? getWallList({width, length}) : null;
+  const rollWallIndex = customWalls ? parseInt(document.getElementById('rollWallIndex').value) : -1;
+  return {
+    width, length, customWalls, walls, rollWallIndex,
+    roofTravelWalls: walls ? walls.map((w,i) => i === rollWallIndex) : null,
+    customRoofSpan: numMmField('customRoofSpan'),
+    wallHeight: numCm('wallHeight'), roofTravel: numCm('roofTravel'), roofHeight: numCm('roofHeight'),
+    roofShape, eaveHeight: numCm('eaveHeight'), ridgeHeight: numCm('ridgeHeight'),
+    wedgeLowHeight: numCm('wedgeLowHeight'), wedgeHighHeight: numCm('wedgeHighHeight'),
+    wedgeFlip: document.getElementById('wedgeFlip').checked,
+    rollDir: document.getElementById('rollDir').value
+  };
+}
+
+function horizonAltAt(azDeg){
+  if(horizonMode === 'flat') return num('horizonMinAlt');
+  const pts = parseHorizonProfile(document.getElementById('horizonCustomData').value);
+  if(pts.length === 0) return 0;
+  if(pts.length === 1) return pts[0].alt;
+  let az = azDeg % 360; if(az < 0) az += 360;
+  for(let i = 0; i < pts.length; i++){
+    const a = pts[i], b = pts[(i+1) % pts.length];
+    const bAz = i === pts.length-1 ? b.az + 360 : b.az;
+    if(az >= a.az && az <= bAz){
+      const t = (bAz === a.az) ? 0 : (az - a.az) / (bAz - a.az);
+      return a.alt + t * (b.alt - a.alt);
+    }
+  }
+  return pts[0].alt;
+}
+function parseHorizonProfile(text){
+  const pts = [];
+  text.split('\n').forEach(line => {
+    const m = line.trim().match(/^(-?[\d.]+)[\s,]+(-?[\d.]+)/);
+    if(m){
+      let az = parseFloat(m[1]) % 360; if(az < 0) az += 360;
+      pts.push({ az, alt: parseFloat(m[2]) });
+    }
+  });
+  pts.sort((a,b) => a.az - b.az);
+  return pts;
+}
+
+// Combined obstruction: whichever of (wall/roof, terrain horizon) blocks more.
+function combinedObstructionAt(azDeg, mx, my, mountHeightMm, building){
+  const wr = wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building);
+  const terrainAlt = horizonAltAt(azDeg);
+  if(terrainAlt > wr.altDeg) return { altDeg: terrainAlt, blockedBy: 'Local horizon' };
+  return { altDeg: wr.altDeg, blockedBy: wr.blockedBy };
+}
+
+// ================= App state =================
+let mountType = 'GEM', pointingMode = 'HADec', horizonMode = 'flat', entryMode = 'measure';
+let pointingScope = 1; // which telescope drives the live pointing preview
+
+// Keep the dropdown in sync with which telescopes are enabled.
+// Called whenever a scope is enabled/disabled or on page load.
+function updatePointingDropdown(){
+  const sel = document.getElementById('pointingScope');
+  const prev = pointingScope;
+  sel.innerHTML = '<option value="1">Telescope 1</option>';
+  [2,3,4].forEach(n => {
+    if(document.getElementById(`scope${n}Enabled`)?.checked){
+      const opt = document.createElement('option');
+      opt.value = n; opt.textContent = 'Telescope ' + n;
+      sel.appendChild(opt);
+    }
+  });
+  // Restore previous selection if still available, otherwise fall back to T1
+  if([...sel.options].some(o => parseInt(o.value) === prev)){
+    sel.value = prev;
+  } else {
+    sel.value = 1;
+    pointingScope = 1;
+  }
+}
+
+// Returns the geometry for the currently selected pointing telescope —
+// position, mount height, mount type, and axis offset — so compute()
+// and computeSkyCoverage() can use whichever scope is selected.
+function getPointingScope(){
+  const n = pointingScope;
+  if(n === 1){
+    return {
+      mx: numCm('scope1EW'), my: numCm('scope1NS'),
+      mountH: numCm('scope1MountH'),
+      mtype: mountType,
+      axis: mountType === 'GEM' ? numCm('gemAxis') : numCm('decHoriz'),
+      otaLen: num('otaLength'), otaAp: num('otaAperture')
+    };
+  }
+  const mtype = scopeMountTypes[n];
+  return {
+    mx: numCm(`scope${n}EW`), my: numCm(`scope${n}NS`),
+    mountH: numCm(`scope${n}MountH`),
+    mtype,
+    axis: mtype === 'GEM' ? numCm(`scope${n}GemAxis`) : numCm(`scope${n}DecHoriz`),
+    otaLen: num(`scope${n}Length`), otaAp: num(`scope${n}Aperture`)
+  };
+}
+
+document.getElementById('pointingScope').addEventListener('change', function(){
+  pointingScope = parseInt(this.value);
+  compute();
+});
+
+
+let jogStep = 1;
+let flipAnimating = false;
+
+document.getElementById('btnGEM').addEventListener('click', () => setMountType('GEM'));
+document.getElementById('btnAltAz').addEventListener('click', () => setMountType('AltAz'));
+function setMountType(t){
+  mountType = t;
+  document.getElementById('btnGEM').classList.toggle('active', t==='GEM');
+  document.getElementById('btnAltAz').classList.toggle('active', t==='AltAz');
+  document.getElementById('gemFields').style.display = t==='GEM' ? 'block' : 'none';
+  document.getElementById('altAzFields').style.display = t==='AltAz' ? 'block' : 'none';
+  document.getElementById('pierRow').style.display = t==='GEM' ? 'grid' : 'none';
+  document.getElementById('pierAutoRow').style.display = t==='GEM' ? 'flex' : 'none';
+  compute();
+}
+
+document.getElementById('btnHADec').addEventListener('click', () => setPointingMode('HADec'));
+document.getElementById('btnAltAzMode').addEventListener('click', () => setPointingMode('AltAz'));
+function setPointingMode(m){
+  pointingMode = m;
+  document.getElementById('btnHADec').classList.toggle('active', m==='HADec');
+  document.getElementById('btnAltAzMode').classList.toggle('active', m==='AltAz');
+  document.getElementById('haDecFields').style.display = m==='HADec' ? 'block' : 'none';
+  document.getElementById('altAzModeFields').style.display = m==='AltAz' ? 'block' : 'none';
+  if(m === 'AltAz') clampAltToHorizon();
+  clampDecToVisible();
+  compute();
+}
+
+let horizonModeInternal = 'flat';
+document.getElementById('btnHorizonFlat').addEventListener('click', () => setHorizonMode('flat'));
+document.getElementById('btnHorizonCustom').addEventListener('click', () => setHorizonMode('custom'));
+document.getElementById('btnRoofFlat').addEventListener('click', () => setRoofShape('flat'));
+document.getElementById('btnRoofPeak').addEventListener('click', () => setRoofShape('peak'));
+document.getElementById('btnRoofWedge').addEventListener('click', () => setRoofShape('wedge'));
+// ================= Custom wall shape (up to 6 walls) =================
+const DEFAULT_WALLS = [
+  { angle: 0, dist: 2000 }, { angle: 90, dist: 2000 },
+  { angle: 180, dist: 2000 }, { angle: 270, dist: 2000 },
+  { angle: 45, dist: 2600 }, { angle: 315, dist: 2600 }
+];
+function buildWallRows(){
+  const container = document.getElementById('wallRows');
+  container.innerHTML = '';
+  for(let i = 0; i < 6; i++){
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.id = 'wallRow' + i;
+    row.style.marginTop = i===0 ? '10px' : '0';
+    row.innerHTML = `
+      <div><label>Wall ${i+1}</label></div>
+      <div class="field">
+        <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit">°</span>
+        <input type="number" id="wallDist${i}" value="${DEFAULT_WALLS[i].dist}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
+      </div>`;
+    container.appendChild(row);
+    row.querySelectorAll('input').forEach(el => el.addEventListener('input', compute));
+  }
+  updateExtraWallVisibility();
+}
+function updateExtraWallVisibility(){
+  const showExtra = document.getElementById('useExtraWalls').checked;
+  document.getElementById('wallRow4').style.display = showExtra ? 'grid' : 'none';
+  document.getElementById('wallRow5').style.display = showExtra ? 'grid' : 'none';
+  const rollSelect = document.getElementById('rollWallIndex');
+  [...rollSelect.options].forEach((opt, i) => { opt.disabled = (i >= 4) && !showExtra; });
+  if(!showExtra && parseInt(rollSelect.value) >= 4) rollSelect.value = '3';
+}
+document.getElementById('useExtraWalls').addEventListener('change', () => { updateExtraWallVisibility(); compute(); });
+document.getElementById('useCustomWalls').addEventListener('change', function(){
+  document.getElementById('customWallFields').style.display = this.checked ? 'block' : 'none';
+  compute();
+});
+buildWallRows();
+
+// Returns the active wall list (2-6 walls) as {angle, dist} in mm, using
+// either the simple width/length rectangle or the custom editor.
+function getWallList(building){
+  if(!document.getElementById('useCustomWalls').checked){
+    return [
+      { angle: 0, dist: building.length/2 }, { angle: 90, dist: building.width/2 },
+      { angle: 180, dist: building.length/2 }, { angle: 270, dist: building.width/2 }
+    ];
+  }
+  const count = document.getElementById('useExtraWalls').checked ? 6 : 4;
+  const walls = [];
+  for(let i = 0; i < count; i++){
+    walls.push({ angle: num('wallAngle'+i), dist: numMmField('wallDist'+i) });
+  }
+  return walls;
+}
+// General ray-vs-convex-polygon distance from an interior point, as the
+// intersection of half-planes {p : p·n_i <= dist_i}. Generalizes the
+// axis-aligned rectangle case (which is just 4 such half-planes at
+// 0/90/180/270) to any convex shape with up to 6 walls.
+function polygonRayDist(azDeg, mx, my, walls){
+  const az = azDeg * Math.PI/180;
+  const dx = Math.sin(az), dy = Math.cos(az);
+  let bestT = Infinity, bestIdx = -1;
+  walls.forEach((w, i) => {
+    const wa = w.angle * Math.PI/180;
+    const nx = Math.sin(wa), ny = Math.cos(wa);
+    const denom = dx*nx + dy*ny;
+    if(denom <= 1e-9) return;
+    const t = (w.dist - (mx*nx + my*ny)) / denom;
+    if(t > 0 && t < bestT){ bestT = t; bestIdx = i; }
+  });
+  return { dist: Math.max(bestT, 1), wallIndex: bestIdx };
+}
+function pointInsidePolygon(mx, my, walls){
+  return walls.every(w => {
+    const wa = w.angle * Math.PI/180;
+    return mx*Math.sin(wa) + my*Math.cos(wa) <= w.dist + 1e-6;
+  });
+}
+// Vertices of the polygon formed by the walls' half-plane boundaries,
+// found by intersecting each pair of angularly-adjacent walls.
+function polygonVertices(walls){
+  const ws = walls.map((w,i) => ({...w, i})).sort((a,b) => (a.angle%360) - (b.angle%360));
+  const n = ws.length;
+  const verts = [];
+  for(let k = 0; k < n; k++){
+    const a = ws[k], b = ws[(k+1)%n];
+    const aa = a.angle*Math.PI/180, ba = b.angle*Math.PI/180;
+    const det = Math.sin(aa)*Math.cos(ba) - Math.sin(ba)*Math.cos(aa);
+    if(Math.abs(det) < 1e-9) continue;
+    const x = (a.dist*Math.cos(ba) - b.dist*Math.cos(aa)) / det;
+    const y = (Math.sin(aa)*b.dist - Math.sin(ba)*a.dist) / det;
+    verts.push({ x, y });
+  }
+  return verts;
+}
+
+// ================= Telescopes & swing clearance =================
+[2,3,4].forEach(n => {
+  document.getElementById(`scope${n}Enabled`).addEventListener('change', function(){
+    document.getElementById(`scope${n}Fields`).style.display = this.checked ? 'block' : 'none';
+    updatePointingDropdown();
+    compute();
+  });
+});
+
+// Per-scope mount type toggles
+const scopeMountTypes = { 2:'GEM', 3:'GEM', 4:'GEM' };
+function setScopeMountType(n, t){
+  scopeMountTypes[n] = t;
+  document.getElementById(`scope${n}BtnGEM`).classList.toggle('active', t==='GEM');
+  document.getElementById(`scope${n}BtnAltAz`).classList.toggle('active', t==='AltAz');
+  document.getElementById(`scope${n}GEMFields`).style.display = t==='GEM' ? 'block' : 'none';
+  document.getElementById(`scope${n}AltAzFields`).style.display = t==='AltAz' ? 'block' : 'none';
+  compute();
+}
+function setScope2MountType(t){ setScopeMountType(2,t); }
+function setScope3MountType(t){ setScopeMountType(3,t); }
+function setScope4MountType(t){ setScopeMountType(4,t); }
+
+// Each telescope is on its own independent mount. Swing radius is the
+// worst-case distance from that mount's own pivot to the OTA's farthest
+// point — independent of every other mount in the building.
+function getScopeList(){
+  const scopes = [];
+  const t1Axis = mountType === 'GEM' ? numCm('gemAxis') : numCm('decHoriz');
+  scopes.push({
+    name: 'Telescope 1',
+    mx: numCm('scope1EW'),
+    my: numCm('scope1NS'),
+    mountH: numCm('scope1MountH'),
+    swingRadius: t1Axis + num('otaLength') + num('otaAperture') / 2
+  });
+  [2,3,4].forEach(n => {
+    if(!document.getElementById(`scope${n}Enabled`).checked) return;
+    const mtype = scopeMountTypes[n];
+    const axis = mtype === 'GEM' ? numCm(`scope${n}GemAxis`) : numCm(`scope${n}DecHoriz`);
+    scopes.push({
+      name: 'Telescope ' + n,
+      mx: numCm(`scope${n}EW`),
+      my: numCm(`scope${n}NS`),
+      mountH: numCm(`scope${n}MountH`),
+      swingRadius: axis + num(`scope${n}Length`) + num(`scope${n}Aperture`) / 2
+    });
+  });
+  return scopes;
+}
+
+function minWallClearance(mx, my, building){
+  const walls = building.customWalls ? building.walls : [
+    { angle: 0, dist: building.length/2 }, { angle: 90, dist: building.width/2 },
+    { angle: 180, dist: building.length/2 }, { angle: 270, dist: building.width/2 }
+  ];
+  return Math.min(...walls.map(w => {
+    const wa = w.angle * Math.PI/180;
+    return w.dist - (mx*Math.sin(wa) + my*Math.cos(wa));
+  }));
+}
+
+function computeSwingClearance(building){
+  const scopes = getScopeList();
+  const minGap = numCm('minScopeGap');
+  const results = scopes.map(s => {
+    const wallClear = minWallClearance(s.mx, s.my, building);
+    const floorClear = s.mountH;
+    const ceilClear = building.wallHeight - s.mountH;
+    const limiting = Math.min(wallClear, floorClear, ceilClear);
+    return { ...s, wallClear, floorClear, ceilClear, limiting, clears: s.swingRadius <= limiting };
+  });
+  // Scope-to-scope: check if any pair's swing circles overlap (plus required gap)
+  const pairs = [];
+  for(let i = 0; i < scopes.length; i++){
+    for(let j = i+1; j < scopes.length; j++){
+      const a = results[i], b = results[j];
+      const centreDist = Math.hypot(b.mx - a.mx, b.my - a.my);
+      const combinedRadii = a.swingRadius + b.swingRadius;
+      const gap = centreDist - combinedRadii;
+      pairs.push({ a: a.name, b: b.name, centreDist, combinedRadii, gap,
+        minGap, clears: gap >= minGap });
+    }
+  }
+  const allClear = results.every(r => r.clears) && pairs.every(p => p.clears);
+  return { results, pairs, allClear };
+}
+
+function renderSwingClearance(swing){
+  const el = document.getElementById('swingClearanceReadout');
+  el.innerHTML = swing.results.map(r => {
+    const ok = r.clears;
+    return `<div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:4px;">
+      <span>${ok?'✓':'✗'} ${r.name} — swing radius ${r.swingRadius.toFixed(0)}mm</span>
+      <span style="color:${ok?'#7fd88f':'#e0685c'};">${ok ? 'clears' : 'DOES NOT CLEAR'}</span>
+    </div>
+    <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px; padding-left:16px;">
+      wall ${r.wallClear.toFixed(0)}mm · floor ${r.floorClear.toFixed(0)}mm · ceiling ${r.ceilClear.toFixed(0)}mm · limiting ${r.limiting.toFixed(0)}mm
+    </div>`;
+  }).join('');
+}
+
+function renderScopeCollisions(swing){
+  const el = document.getElementById('scopeCollisionReadout');
+  if(swing.pairs.length === 0){
+    el.innerHTML = '<span style="color:var(--text-dim);">Only one telescope enabled — nothing to check against.</span>';
+    return;
+  }
+  el.innerHTML = swing.pairs.map(p => {
+    const ok = p.clears;
+    const gapStr = p.gap >= 0
+      ? `${p.gap.toFixed(0)}mm gap`
+      : `OVERLAP by ${Math.abs(p.gap).toFixed(0)}mm`;
+    const label = ok
+      ? `clears — ${gapStr} (min ${p.minGap.toFixed(0)}mm required)`
+      : `${gapStr} — needs ${p.minGap.toFixed(0)}mm minimum`;
+    return `<div style="display:flex; justify-content:space-between; gap:10px; margin-bottom:4px;">
+      <span>${ok?'✓':'✗'} ${p.a} ↔ ${p.b}</span>
+      <span style="color:${ok?'#7fd88f':'#e0685c'};">${label}</span>
+    </div>`;
+  }).join('');
+}
+
+// Plan view: building footprint to scale, each telescope at its own
+// independent position with its own swing circle — no longer offset
+// from a shared pivot, because each is on its own independent mount.
+function renderSwingPlanView(building, swing){
+  const svg = document.getElementById('swingPlanView');
+  if(!svg) return;
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const ns = 'http://www.w3.org/2000/svg';
+  const cx = 150, cy = 150;
+
+  let polyPts, buildingExtent;
+  if(building.customWalls){
+    polyPts = polygonVertices(building.walls);
+    buildingExtent = Math.max(...polyPts.map(p => Math.hypot(p.x, p.y)), 1);
+  } else {
+    const hw = building.width/2, hl = building.length/2;
+    polyPts = [{x:hw,y:hl},{x:hw,y:-hl},{x:-hw,y:-hl},{x:-hw,y:hl}];
+    buildingExtent = Math.hypot(hw, hl);
+  }
+  const maxReach = Math.max(...swing.results.map(r => Math.hypot(Math.abs(r.mx)+r.swingRadius, Math.abs(r.my)+r.swingRadius)), 1);
+  const worldExtent = Math.max(buildingExtent, maxReach) * 1.15;
+  const scale = 128 / worldExtent;
+
+  function toSvg(wx, wy){ return { x: cx + wx*scale, y: cy - wy*scale }; }
+
+  // Building outline
+  const poly = document.createElementNS(ns, 'polygon');
+  poly.setAttribute('points', polyPts.map(p => { const s=toSvg(p.x,p.y); return `${s.x.toFixed(1)},${s.y.toFixed(1)}`; }).join(' '));
+  poly.setAttribute('fill','none'); poly.setAttribute('stroke','#aab2c0'); poly.setAttribute('stroke-width','2');
+  svg.appendChild(poly);
+
+  // N label
+  const nLabel = document.createElementNS(ns,'text');
+  nLabel.setAttribute('x',cx); nLabel.setAttribute('y',12);
+  nLabel.setAttribute('text-anchor','middle'); nLabel.setAttribute('font-size','11');
+  nLabel.setAttribute('fill','#8b93a3'); nLabel.setAttribute('font-family','Courier New');
+  nLabel.textContent='N'; svg.appendChild(nLabel);
+
+  // Draw largest circles first
+  [...swing.results].sort((a,b) => b.swingRadius - a.swingRadius).forEach(r => {
+    const center = toSvg(r.mx, r.my);
+    const circ = document.createElementNS(ns,'circle');
+    circ.setAttribute('cx', center.x.toFixed(1)); circ.setAttribute('cy', center.y.toFixed(1));
+    circ.setAttribute('r', Math.max(r.swingRadius*scale, 1).toFixed(1));
+    circ.setAttribute('fill', r.clears ? 'rgba(127,216,143,0.08)' : 'rgba(224,104,92,0.14)');
+    circ.setAttribute('stroke', r.clears ? '#7fd88f' : '#e0685c');
+    circ.setAttribute('stroke-width','1.5');
+    svg.appendChild(circ);
+
+    // Label above the circle
+    const label = document.createElementNS(ns,'text');
+    label.setAttribute('x', center.x.toFixed(1));
+    label.setAttribute('y', (center.y - r.swingRadius*scale - 4).toFixed(1));
+    label.setAttribute('text-anchor','middle'); label.setAttribute('font-size','9');
+    label.setAttribute('fill', r.clears ? '#7fd88f' : '#e0685c');
+    label.setAttribute('font-family','Courier New');
+    label.textContent = r.name.replace('Telescope ','T');
+    svg.appendChild(label);
+
+    // Mount pivot dot for each telescope at its own position
+    const dot = document.createElementNS(ns,'circle');
+    dot.setAttribute('cx', center.x.toFixed(1)); dot.setAttribute('cy', center.y.toFixed(1));
+    dot.setAttribute('r','3'); dot.setAttribute('fill','#e7e2d6');
+    svg.appendChild(dot);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTERACTIVE FLOOR PLAN
+// ═══════════════════════════════════════════════════════════
+const FP = {
+  canvas: null, ctx: null,
+  // Pier colour palette — matches swing-sphere colours but distinct per scope
+  COLOURS: ['#c8623f','#7fd88f','#6ab0e0','#d4a84b'],
+  NAMES: ['T1','T2','T3','T4'],
+  dragging: null,  // { scopeN, startX, startY }
+  scale: 1,        // mm per canvas pixel
+  origin: { x:170, y:170 }, // canvas px for building center
+
+  init(){
+    this.canvas = document.getElementById('floorPlanCanvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.canvas.addEventListener('mousedown',  e => this.onDown(e));
+    this.canvas.addEventListener('mousemove',  e => this.onMove(e));
+    this.canvas.addEventListener('mouseup',    e => this.onUp(e));
+    this.canvas.addEventListener('mouseleave', e => this.onUp(e));
+    this.canvas.addEventListener('touchstart', e => this.onDown(e), {passive:false});
+    this.canvas.addEventListener('touchmove',  e => this.onMove(e), {passive:false});
+    this.canvas.addEventListener('touchend',   e => this.onUp(e));
+  },
+
+  // Convert canvas pixel → building mm (N=+Y, E=+X)
+  pxToMm(px, py){
+    return {
+      ewMm: (px - this.origin.x) * this.scale,
+      nsMm: -(py - this.origin.y) * this.scale
+    };
+  },
+
+  // Convert building mm → canvas pixel
+  mmToPx(ewMm, nsMm){
+    return {
+      x: this.origin.x + ewMm / this.scale,
+      y: this.origin.y - nsMm / this.scale
+    };
+  },
+
+  // Which scope is the user clicking on? Returns scopeN (1–4) or null.
+  hitTest(px, py){
+    for(const n of [1,2,3,4]){
+      if(n > 1 && !document.getElementById(`scope${n}Enabled`)?.checked) continue;
+      const ewCm = parseFloat(document.getElementById(`scope${n}EW`)?.value || 0);
+      const nsCm = parseFloat(document.getElementById(`scope${n}NS`)?.value || 0);
+      const pt = this.mmToPx(ewCm*10, nsCm*10);
+      const dist = Math.hypot(px - pt.x, py - pt.y);
+      if(dist < 14) return n;
+    }
+    return null;
+  },
+
+  // Is a point inside the building footprint?
+  insideBuilding(ewMm, nsMm){
+    const building = getBuildingConfig();
+    if(building.customWalls){
+      return pointInsidePolygon(ewMm, nsMm, building.walls);
+    }
+    return Math.abs(ewMm) <= building.width/2 && Math.abs(nsMm) <= building.length/2;
+  },
+
+  getEventPos(e){
+    const r = this.canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return { x: src.clientX - r.left, y: src.clientY - r.top };
+  },
+
+  onDown(e){
+    e.preventDefault();
+    const { x, y } = this.getEventPos(e);
+    const hit = this.hitTest(x, y);
+    if(hit){
+      this.dragging = hit;
+      this.canvas.style.cursor = 'grabbing';
+    } else {
+      // Click to place: find the first empty enabled slot
+      const { ewMm, nsMm } = this.pxToMm(x, y);
+      if(!this.insideBuilding(ewMm, nsMm)) return;
+      // Place on the scope the user last clicked near — or the first unlocked one
+      // Priority: T1 always available; T2/3/4 only if enabled
+      for(const n of [2,3,4,1]){
+        const en = n === 1 ? true : document.getElementById(`scope${n}Enabled`)?.checked;
+        if(!en) continue;
+        // Check if this scope is far from the click (not already placed near here)
+        const ewCm = parseFloat(document.getElementById(`scope${n}EW`)?.value || 0);
+        const nsCm = parseFloat(document.getElementById(`scope${n}NS`)?.value || 0);
+        const pt = this.mmToPx(ewCm*10, nsCm*10);
+        if(Math.hypot(x - pt.x, y - pt.y) > 40){
+          this.setPierPosition(n, ewMm, nsMm);
+          this.dragging = n;
+          this.canvas.style.cursor = 'grabbing';
+          break;
+        }
+      }
+    }
+  },
+
+  onMove(e){
+    e.preventDefault();
+    const { x, y } = this.getEventPos(e);
+    if(this.dragging !== null){
+      const { ewMm, nsMm } = this.pxToMm(x, y);
+      const clamped = this.clampToBuilding(ewMm, nsMm);
+      this.setPierPosition(this.dragging, clamped.ewMm, clamped.nsMm);
+    } else {
+      const hit = this.hitTest(x, y);
+      this.canvas.style.cursor = hit ? 'grab' : 'crosshair';
+    }
+  },
+
+  onUp(e){
+    this.dragging = null;
+    this.canvas.style.cursor = 'crosshair';
+  },
+
+  clampToBuilding(ewMm, nsMm){
+    const building = getBuildingConfig();
+    const hw = building.width/2, hl = building.length/2;
+    if(!building.customWalls){
+      return {
+        ewMm: Math.max(-hw + 20, Math.min(hw - 20, ewMm)),
+        nsMm: Math.max(-hl + 20, Math.min(hl - 20, nsMm))
+      };
+    }
+    return { ewMm, nsMm }; // custom walls: allow free placement, walls handle it
+  },
+
+  setPierPosition(n, ewMm, nsMm){
+    const ewCm = (ewMm/10).toFixed(1);
+    const nsCm = (nsMm/10).toFixed(1);
+    const ewEl = document.getElementById(`scope${n}EW`);
+    const nsEl = document.getElementById(`scope${n}NS`);
+    if(ewEl) { ewEl.value = ewCm; ewEl.dispatchEvent(new Event('input')); }
+    if(nsEl) { nsEl.value = nsCm; nsEl.dispatchEvent(new Event('input')); }
+    compute();
+    this.draw();
+  },
+
+  draw(){
+    const canvas = this.canvas, ctx = this.ctx;
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    const building = getBuildingConfig();
+    // Scale: fit the building with 24px margin all around
+    const margin = 28;
+    const scaleW = (W - margin*2) / building.width;
+    const scaleH = (H - margin*2) / building.length;
+    this.scale = 1 / Math.min(scaleW, scaleH); // mm per pixel
+    this.origin = { x: W/2, y: H/2 };
+
+    // ── Background ──
+    ctx.fillStyle = '#05070a';
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Grid lines (every 100cm / 1000mm) ──
+    const gridMm = 1000;
+    const gridPx = gridMm / this.scale;
+    ctx.strokeStyle = '#1a2030';
+    ctx.lineWidth = 1;
+    // vertical (EW)
+    for(let ew = -Math.ceil(building.width/2/gridMm)*gridMm; ew <= building.width/2; ew += gridMm){
+      const px = this.origin.x + ew/this.scale;
+      ctx.beginPath(); ctx.moveTo(px, 0); ctx.lineTo(px, H); ctx.stroke();
+    }
+    // horizontal (NS)
+    for(let ns = -Math.ceil(building.length/2/gridMm)*gridMm; ns <= building.length/2; ns += gridMm){
+      const py = this.origin.y - ns/this.scale;
+      ctx.beginPath(); ctx.moveTo(0, py); ctx.lineTo(W, py); ctx.stroke();
+    }
+
+    // ── Center crosshair ──
+    ctx.strokeStyle = '#2a3545';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.moveTo(this.origin.x, 0); ctx.lineTo(this.origin.x, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0, this.origin.y); ctx.lineTo(W, this.origin.y); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ── Grid tick labels ──
+    ctx.font = '9px Courier New, monospace';
+    ctx.fillStyle = '#3a4555';
+    ctx.textAlign = 'center';
+    for(let ew = -Math.ceil(building.width/2/gridMm)*gridMm; ew <= building.width/2; ew += gridMm){
+      if(ew === 0) continue;
+      const px = this.origin.x + ew/this.scale;
+      ctx.fillText((ew/10>0?'+':'')+(ew/10).toFixed(0)+'cm', px, H-4);
+    }
+    ctx.textAlign = 'right';
+    for(let ns = -Math.ceil(building.length/2/gridMm)*gridMm; ns <= building.length/2; ns += gridMm){
+      if(ns === 0) continue;
+      const py = this.origin.y - ns/this.scale;
+      ctx.fillText((ns/10>0?'+':'')+(ns/10).toFixed(0), this.origin.x - 4, py + 3);
+    }
+
+    // ── Building outline ──
+    ctx.beginPath();
+    if(building.customWalls){
+      const pts = polygonVertices(building.walls);
+      pts.forEach((p,i) => {
+        const px = this.mmToPx(p.x, p.y);
+        i === 0 ? ctx.moveTo(px.x, px.y) : ctx.lineTo(px.x, px.y);
+      });
+      ctx.closePath();
+    } else {
+      const hw = building.width/2, hl = building.length/2;
+      const tl = this.mmToPx(-hw, hl), br = this.mmToPx(hw, -hl);
+      ctx.rect(tl.x, tl.y, br.x-tl.x, br.y-tl.y);
+    }
+    ctx.fillStyle = 'rgba(20,30,45,0.6)';
+    ctx.fill();
+    ctx.strokeStyle = '#5a7090';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // ── Cardinal labels ──
+    ctx.font = 'bold 10px Courier New, monospace';
+    ctx.fillStyle = '#4a5568';
+    ctx.textAlign = 'center';
+    ctx.fillText('N', this.origin.x, margin - 6);
+    ctx.fillText('S', this.origin.x, H - margin + 14);
+    ctx.textAlign = 'left';
+    ctx.fillText('E', W - margin + 4, this.origin.y + 4);
+    ctx.textAlign = 'right';
+    ctx.fillText('W', margin - 4, this.origin.y + 4);
+
+    // ── Pier markers ──
+    for(const n of [1,2,3,4]){
+      if(n > 1 && !document.getElementById(`scope${n}Enabled`)?.checked) continue;
+      const ewCm = parseFloat(document.getElementById(`scope${n}EW`)?.value || 0);
+      const nsCm = parseFloat(document.getElementById(`scope${n}NS`)?.value || 0);
+      const pt = this.mmToPx(ewCm*10, nsCm*10);
+      const col = this.COLOURS[n-1];
+      const isActive = this.dragging === n;
+
+      // Swing radius circle (faint)
+      const axis = n===1
+        ? (typeof mountType!=='undefined' && mountType==='GEM' ? numCm('gemAxis') : numCm('decHoriz'))
+        : (scopeMountTypes[n]==='GEM' ? numCm(`scope${n}GemAxis`) : numCm(`scope${n}DecHoriz`));
+      const otaLen = n===1 ? num('otaLength') : num(`scope${n}Length`);
+      const otaAp  = n===1 ? num('otaAperture') : num(`scope${n}Aperture`);
+      const swingR = (axis + otaLen + otaAp/2) / this.scale;
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, swingR, 0, Math.PI*2);
+      ctx.strokeStyle = col + '55';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3,5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Pier base shadow
+      ctx.beginPath();
+      ctx.arc(pt.x + 1.5, pt.y + 1.5, 10, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fill();
+
+      // Pier disc
+      ctx.beginPath();
+      ctx.arc(pt.x, pt.y, isActive ? 12 : 10, 0, Math.PI*2);
+      ctx.fillStyle = col;
+      ctx.fill();
+      ctx.strokeStyle = '#e7e2d6';
+      ctx.lineWidth = isActive ? 2 : 1;
+      ctx.stroke();
+
+      // Label
+      ctx.font = `bold ${isActive?11:10}px Courier New, monospace`;
+      ctx.fillStyle = '#e7e2d6';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.NAMES[n-1], pt.x, pt.y + 4);
+
+      // Coordinate tooltip when dragging
+      if(isActive){
+        const label = `${ewCm>0?'+':''}${parseFloat(ewCm).toFixed(1)}cm E, ${nsCm>0?'+':''}${parseFloat(nsCm).toFixed(1)}cm N`;
+        ctx.font = '10px Courier New, monospace';
+        ctx.fillStyle = '#e7e2d6';
+        ctx.textAlign = 'center';
+        const tx = Math.min(W-60, Math.max(40, pt.x));
+        const ty = pt.y < 30 ? pt.y + 26 : pt.y - 18;
+        ctx.fillStyle = 'rgba(10,13,18,0.85)';
+        ctx.fillRect(tx-38, ty-12, 76, 16);
+        ctx.fillStyle = col;
+        ctx.fillText(label, tx, ty);
+      }
+    }
+
+    // ── Scale bar ──
+    const barMm = Math.pow(10, Math.floor(Math.log10(building.width/3)));
+    const barPx = barMm / this.scale;
+    const bx = W - margin - barPx, by = margin - 10;
+    ctx.strokeStyle = '#5a7090'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx+barPx, by); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx, by-3); ctx.lineTo(bx, by+3); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(bx+barPx, by-3); ctx.lineTo(bx+barPx, by+3); ctx.stroke();
+    ctx.font = '9px Courier New, monospace';
+    ctx.fillStyle = '#5a7090'; ctx.textAlign = 'center';
+    ctx.fillText(`${barMm/10}cm`, bx+barPx/2, by-5);
+
+    // Update legend
+    this.updateLegend();
+    // Update scale label
+    document.getElementById('fpScaleLabel').textContent = `1 grid = ${gridMm/10}cm`;
+  },
+
+  updateLegend(){
+    const el = document.getElementById('fpLegend');
+    if(!el) return;
+    let html = '';
+    for(const n of [1,2,3,4]){
+      if(n > 1 && !document.getElementById(`scope${n}Enabled`)?.checked) continue;
+      const ewCm = parseFloat(document.getElementById(`scope${n}EW`)?.value || 0);
+      const nsCm = parseFloat(document.getElementById(`scope${n}NS`)?.value || 0);
+      html += `<div style="display:flex; align-items:center; gap:8px;">
+        <span style="width:12px;height:12px;border-radius:50%;background:${this.COLOURS[n-1]};flex-shrink:0;"></span>
+        <span style="color:var(--text);">T${n}</span>
+        <span style="color:var(--text-dim); font-family:'Courier New',monospace; font-size:11px;">
+          ${ewCm>=0?'+':''}${parseFloat(ewCm).toFixed(1)}cm E &nbsp; ${nsCm>=0?'+':''}${parseFloat(nsCm).toFixed(1)}cm N
+        </span>
+      </div>`;
+    }
+    el.innerHTML = html;
+  }
+};
+
+// Redraw the floor plan whenever compute() runs or inputs change
+const _origCompute = compute;
+function compute(){
+  _origCompute();
+  if(FP.canvas) FP.draw();
+  updateFracHints();
+}
+
+// Also redraw when NS/EW fields change (two-way sync)
+['scope1NS','scope1EW','scope2NS','scope2EW','scope3NS','scope3EW','scope4NS','scope4EW'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', () => { if(FP.canvas) FP.draw(); });
+});
+
+function setRoofShape(shape){
+  document.getElementById('btnRoofFlat').classList.toggle('active', shape==='flat');
+  document.getElementById('btnRoofPeak').classList.toggle('active', shape==='peak');
+  document.getElementById('btnRoofWedge').classList.toggle('active', shape==='wedge');
+  document.getElementById('roofFlatFields').style.display = shape==='flat' ? 'block' : 'none';
+  document.getElementById('roofPeakFields').style.display = shape==='peak' ? 'block' : 'none';
+  document.getElementById('roofWedgeFields').style.display = shape==='wedge' ? 'block' : 'none';
+  clampAltToHorizon();
+  compute();
+}
+
+function setHorizonMode(m){
+  horizonMode = m;
+  document.getElementById('btnHorizonFlat').classList.toggle('active', m==='flat');
+  document.getElementById('btnHorizonCustom').classList.toggle('active', m==='custom');
+  document.getElementById('horizonFlatFields').style.display = m==='flat' ? 'block' : 'none';
+  document.getElementById('horizonCustomFields').style.display = m==='custom' ? 'block' : 'none';
+  clampAltToHorizon();
+  compute();
+}
+
+document.getElementById('btnLoadHorizonCsv').addEventListener('click', () => document.getElementById('horizonCsvFile').click());
+document.getElementById('horizonCsvFile').addEventListener('change', function(){
+  const file = this.files && this.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    document.getElementById('horizonCustomData').value = e.target.result;
+    const count = parseHorizonProfile(e.target.result).length;
+    document.getElementById('horizonCsvStatus').textContent = count > 0
+      ? `Loaded "${file.name}" — ${count} point${count===1?'':'s'}`
+      : `"${file.name}" didn't contain any recognizable azimuth/altitude pairs`;
+    clampAltToHorizon();
+    compute();
+  };
+  reader.onerror = function(){
+    document.getElementById('horizonCsvStatus').textContent = `Couldn't read "${file.name}"`;
+  };
+  reader.readAsText(file);
+  this.value = '';
+});
+document.getElementById('horizonCustomData').addEventListener('input', function(){
+  const count = parseHorizonProfile(this.value).length;
+  document.getElementById('horizonCsvStatus').textContent = `${count} point${count===1?'':'s'} parsed`;
+  clampAltToHorizon();
+  compute();
+});
+document.getElementById('horizonMinAlt').addEventListener('input', function(){
+  clampAltToHorizon();
+  compute();
+});
+
+document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
+document.getElementById('lat').addEventListener('input', clampDecToVisible);
+
+document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = this.value; compute(); });
+document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = this.value; });
+
+function clampDecToVisible(){
+  const minDec = num('lat') - 90;
+  document.getElementById('decSlider').min = Math.max(-90, minDec);
+  if(num('dec') < minDec){
+    document.getElementById('dec').value = minDec.toFixed(2);
+    document.getElementById('decSlider').value = Math.max(-90, minDec);
+  }
+}
+document.getElementById('decSlider').addEventListener('input', function(){ document.getElementById('dec').value = this.value; clampDecToVisible(); compute(); });
+document.getElementById('dec').addEventListener('input', function(){ document.getElementById('decSlider').value = this.value; clampDecToVisible(); });
+
+function clampAltToHorizon(){
+  const az = num('targetAz');
+  const building = getBuildingConfig();
+  const ps = getPointingScope();
+  const limit = combinedObstructionAt(az, ps.mx, ps.my, ps.mountH, building).altDeg;
+  document.getElementById('altSlider').min = limit;
+  if(num('targetAlt') < limit){
+    document.getElementById('targetAlt').value = limit.toFixed(2);
+    document.getElementById('altSlider').value = limit;
+  }
+}
+document.getElementById('altSlider').addEventListener('input', function(){ document.getElementById('targetAlt').value = this.value; clampAltToHorizon(); compute(); });
+document.getElementById('targetAlt').addEventListener('input', function(){ document.getElementById('altSlider').value = this.value; clampAltToHorizon(); });
+document.getElementById('azSlider').addEventListener('input', function(){ document.getElementById('targetAz').value = this.value; clampAltToHorizon(); compute(); });
+document.getElementById('targetAz').addEventListener('input', function(){ document.getElementById('azSlider').value = this.value; clampAltToHorizon(); });
+
+document.querySelectorAll('.jog-step-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.jog-step-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    jogStep = parseFloat(btn.dataset.step);
+  });
+});
+
+function jog(dx, dy){
+  if(pointingMode === 'AltAz'){
+    let az = (num('targetAz') + dx * jogStep) % 360;
+    if(az < 0) az += 360;
+    let alt = num('targetAlt') + dy * jogStep;
+    const building = getBuildingConfig();
+    const ps = getPointingScope();
+    const limit = combinedObstructionAt(az, ps.mx, ps.my, ps.mountH, building).altDeg;
+    alt = Math.max(limit, Math.min(90, alt));
+    document.getElementById('targetAlt').value = alt.toFixed(2);
+    document.getElementById('altSlider').value = alt;
+    document.getElementById('targetAz').value = az.toFixed(2);
+    document.getElementById('azSlider').value = az;
+  } else {
+    let ha = num('ha') + dx * (jogStep/15);
+    ha = Math.max(-12, Math.min(12, ha));
+    let dec = num('dec') + dy * jogStep;
+    dec = Math.max(num('lat') - 90, Math.min(90, dec));
+    document.getElementById('ha').value = ha.toFixed(3);
+    document.getElementById('haSlider').value = Math.max(-6, Math.min(6, ha));
+    document.getElementById('dec').value = dec.toFixed(2);
+    document.getElementById('decSlider').value = dec;
+  }
+  compute();
+}
+let jogInterval = null;
+function bindJog(id, dx, dy){
+  const btn = document.getElementById(id);
+  const start = (e) => { e.preventDefault(); jog(dx,dy); jogInterval = setInterval(() => jog(dx,dy), 130); };
+  const stop = () => { clearInterval(jogInterval); };
+  btn.addEventListener('mousedown', start);
+  btn.addEventListener('touchstart', start, {passive:false});
+  ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev => btn.addEventListener(ev, stop));
+}
+bindJog('jogUp', 0, 1);
+bindJog('jogDown', 0, -1);
+bindJog('jogLeft', -1, 0);
+bindJog('jogRight', 1, 0);
+
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if(btn.dataset.ha !== undefined){
+      document.getElementById('ha').value = btn.dataset.ha;
+      document.getElementById('haSlider').value = btn.dataset.ha;
+      document.getElementById('dec').value = btn.dataset.dec;
+      document.getElementById('decSlider').value = btn.dataset.dec;
+      clampDecToVisible();
+    } else if(btn.dataset.alt !== undefined){
+      document.getElementById('targetAlt').value = btn.dataset.alt;
+      document.getElementById('altSlider').value = btn.dataset.alt;
+      document.getElementById('targetAz').value = btn.dataset.az;
+      document.getElementById('azSlider').value = btn.dataset.az;
+      clampAltToHorizon();
+    }
+    compute();
+  });
+});
+
+function resolvePierSide(haHours){
+  if(document.getElementById('pierAutoFlip').checked){
+    return haHours < 0 ? 'East' : 'West';
+  }
+  return document.getElementById('pierSide').value;
+}
+function syncPierSideDisplay(resolved){
+  const sel = document.getElementById('pierSide');
+  sel.value = resolved;
+  sel.disabled = document.getElementById('pierAutoFlip').checked;
+}
+
+let skyCoverageExpanded = false;
+// Sky coverage now expands via the <details> section toggle
+document.getElementById('sec-sky').addEventListener('toggle', function(){
+  if(this.open){ skyCoverageExpanded = true; computeSkyCoverage(); }
+});
+
+let swingClearanceExpanded = false;
+// Swing clearance now expands via the <details> section toggle — no-op needed
+
+document.getElementById('btnToggleLegend').addEventListener('click', function(){
+  const list = document.getElementById('threeLegendList');
+  const showing = list.style.display !== 'none';
+  list.style.display = showing ? 'none' : 'block';
+  this.textContent = showing ? 'Show Wire frame legend' : 'Hide legend';
+});
+
+document.getElementById('btnThemeToggle').addEventListener('click', function(){
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  document.documentElement.setAttribute('data-theme', isLight ? 'dark' : 'light');
+  this.textContent = isLight ? '🌙 Dark' : '☀️ Light';
+});
+
+document.getElementById('btnCopySettings').addEventListener('click', function(){
+  const lines = [
+    'Roll-Off-Roof Observatory Summary',
+    'Footprint: ' + document.getElementById('outFootprint').textContent,
+    'Wall Height: ' + document.getElementById('outWallHeight').textContent,
+    'Roof Travel: ' + document.getElementById('outRoofTravel').textContent,
+    'Roll-off Direction: ' + document.getElementById('outRollDir').textContent,
+    'Mount Offset: ' + document.getElementById('outMountOffset').textContent
+  ];
+  const text = lines.join('\n');
+  const btn = this;
+  const flash = (label) => { const orig = btn.textContent; btn.textContent = label; setTimeout(() => { btn.textContent = orig; }, 1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(() => flash('Copied!')).catch(() => fallbackCopy(text, flash));
+  } else {
+    fallbackCopy(text, flash);
+  }
+});
+function fallbackCopy(text, flash){
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    flash('Copied!');
+  } catch(e){ flash('Copy failed'); }
+}
+
+document.getElementById('btnResetDefaults').addEventListener('click', function(){
+  if(confirm('Reset every field back to its default value? This discards anything you\'ve entered that isn\'t saved.')){
+    location.reload();
+  }
+});
+
+// ================= Save / load setup =================
+const SAVE_FIELD_IDS = [
+  'bWidth','bLength','wallHeight','mountHeight','mountNS','mountEW',
+  'rollDir','roofTravel','roofHeight','eaveHeight','ridgeHeight',
+  'gemAxis','decHoriz','otaLength','otaAperture',
+  'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D',
+  'lat','ha','dec','targetAlt','targetAz','pierSide',
+  'useCustomWalls','useExtraWalls','rollWallIndex','customRoofSpan',
+  'wedgeLowHeight','wedgeHighHeight','wedgeFlip',
+  'wallAngle0','wallDist0','wallAngle1','wallDist1','wallAngle2','wallDist2',
+  'wallAngle3','wallDist3','wallAngle4','wallDist4','wallAngle5','wallDist5',
+  'minScopeGap',
+  'scope1NS','scope1EW','scope1MountH',
+  'scope2Enabled','scope2NS','scope2EW','scope2MountH','scope2GemAxis','scope2DecHoriz','scope2Length','scope2Aperture',
+  'scope3Enabled','scope3NS','scope3EW','scope3MountH','scope3GemAxis','scope3DecHoriz','scope3Length','scope3Aperture',
+  'scope4Enabled','scope4NS','scope4EW','scope4MountH','scope4GemAxis','scope4DecHoriz','scope4Length','scope4Aperture'
+];
+function saveSetup(){
+  const data = {};
+  SAVE_FIELD_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    data[id] = el.type === 'checkbox' ? el.checked : el.value;
+  });
+  data._mountType = mountType;
+  data._pointingMode = pointingMode;
+  data._horizonMode = horizonMode;
+  data._roofShape = document.getElementById('btnRoofPeak').classList.contains('active') ? 'peak'
+    : (document.getElementById('btnRoofWedge').classList.contains('active') ? 'wedge' : 'flat');
+  data._scope2MountType = scopeMountTypes[2];
+  data._scope3MountType = scopeMountTypes[3];
+  data._scope4MountType = scopeMountTypes[4];
+  data._meta = { tool: 'ROR Observatory Workbench', savedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ror-observatory-setup.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function loadSetupFromFile(file){
+  const reader = new FileReader();
+  reader.onload = function(e){
+    let data;
+    try { data = JSON.parse(e.target.result); }
+    catch(err){ alert("Could not read that file — it doesn't look like a valid setup export."); return; }
+    SAVE_FIELD_IDS.forEach(id => {
+      if(!(id in data)) return;
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.type === 'checkbox') el.checked = !!data[id];
+      else el.value = data[id];
+      el.dispatchEvent(new Event('input'));
+      el.dispatchEvent(new Event('change'));
+    });
+    if(data._mountType) setMountType(data._mountType);
+    if(data._pointingMode) setPointingMode(data._pointingMode);
+    if(data._horizonMode) setHorizonMode(data._horizonMode);
+    if(data._roofShape) setRoofShape(data._roofShape);
+    if(data._scope2MountType) setScopeMountType(2, data._scope2MountType);
+    if(data._scope3MountType) setScopeMountType(3, data._scope3MountType);
+    if(data._scope4MountType) setScopeMountType(4, data._scope4MountType);
+    const syncPairs = [['ha','haSlider'], ['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
+    syncPairs.forEach(([numId, sliderId]) => {
+      const numEl = document.getElementById(numId), sliderEl = document.getElementById(sliderId);
+      if(numEl && sliderEl) sliderEl.value = numEl.value;
+    });
+    clampAltToHorizon();
+    clampDecToVisible();
+    compute();
+    computeSkyCoverage();
+  };
+  reader.readAsText(file);
+}
+document.getElementById('btnSaveSetup').addEventListener('click', saveSetup);
+document.getElementById('btnLoadSetup').addEventListener('click', () => document.getElementById('loadSetupFile').click());
+document.getElementById('loadSetupFile').addEventListener('change', function(){
+  if(this.files && this.files[0]) loadSetupFromFile(this.files[0]);
+  this.value = '';
+});
+
+// ================= Sky coverage sweep =================
+const SKY_ALT_STEPS = [5, 15, 30, 45, 60, 75, 85];
+const SKY_AZ_STEP = 12;
+function sweepSky(building, mx, my, mountH){
+  const points = [];
+  for(const alt of SKY_ALT_STEPS){
+    for(let az = 0; az < 360; az += SKY_AZ_STEP){
+      const terrainAlt = horizonAltAt(az);
+      if(alt < terrainAlt){ points.push({ alt, az, clear:false, belowHorizon:true }); continue; }
+      const wr = wallRoofObstructionAlt(az, mx, my, mountH, building);
+      points.push({ alt, az, clear: alt >= wr.altDeg, belowHorizon:false });
+    }
+  }
+  return points;
+}
+function renderSkyPlot(points, building){
+  const svg = document.getElementById('skyPlot');
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const ns = 'http://www.w3.org/2000/svg';
+  const cx=100, cy=100, R=88;
+
+  // ── Building horizon outline ──
+  // Trace the obstruction altitude at every azimuth around the compass.
+  // In the sky plot (zenith=center, horizon=edge), a direction az at altitude
+  // alt maps to radius t = (1 - alt/90)*R from center in direction az.
+  // For the building outline we want the wall/roof obstruction — NOT including
+  // terrain — so we can draw exactly the shape the building defines.
+  const _ps = getPointingScope();
+  const OUTLINE_STEP = 4; // degrees
+  const outlinePts = [];
+  for(let az = 0; az < 360; az += OUTLINE_STEP){
+    const wr = wallRoofObstructionAlt(az, _ps.mx, _ps.my, _ps.mountH, building);
+    const altDeg = Math.max(0, Math.min(89, wr.altDeg));
+    const t = (1 - altDeg/90) * R;
+    const azRad = az * Math.PI/180;
+    outlinePts.push({
+      x: (cx + t * Math.sin(azRad)).toFixed(1),
+      y: (cy - t * Math.cos(azRad)).toFixed(1)
+    });
+  }
+  // Draw the filled building footprint area (everything inside the horizon = observable sky)
+  const fillPath = document.createElementNS(ns,'polygon');
+  fillPath.setAttribute('points', outlinePts.map(p => `${p.x},${p.y}`).join(' '));
+  fillPath.setAttribute('fill','rgba(30,45,60,0.35)');
+  fillPath.setAttribute('stroke','#5a7090');
+  fillPath.setAttribute('stroke-width','1.5');
+  svg.appendChild(fillPath);
+
+  // ── Reference circle (full 0° horizon) ──
+  const refCircle = document.createElementNS(ns,'circle');
+  refCircle.setAttribute('cx',cx); refCircle.setAttribute('cy',cy); refCircle.setAttribute('r',R);
+  refCircle.setAttribute('fill','none'); refCircle.setAttribute('stroke','#262d38'); refCircle.setAttribute('stroke-width','1'); refCircle.setAttribute('stroke-dasharray','4,5');
+  svg.appendChild(refCircle);
+
+  // ── Altitude rings (30° and 60°) ──
+  for(const altRing of [30, 60]){
+    const rr = (1 - altRing/90)*R;
+    const ring = document.createElementNS(ns,'circle');
+    ring.setAttribute('cx',cx); ring.setAttribute('cy',cy); ring.setAttribute('r',rr.toFixed(1));
+    ring.setAttribute('fill','none'); ring.setAttribute('stroke','#1e2530'); ring.setAttribute('stroke-width','1');
+    svg.appendChild(ring);
+    const lbl = document.createElementNS(ns,'text');
+    lbl.setAttribute('x',(cx+4).toFixed(1)); lbl.setAttribute('y',(cy-rr+10).toFixed(1));
+    lbl.setAttribute('font-size','8'); lbl.setAttribute('fill','#3a4555'); lbl.setAttribute('font-family','Courier New');
+    lbl.textContent = altRing+'°';
+    svg.appendChild(lbl);
+  }
+
+  // ── Cardinal labels ──
+  const cardinals = [['N',0],['E',90],['S',180],['W',270]];
+  cardinals.forEach(([label, az])=>{
+    const azRad = az*Math.PI/180;
+    const lx = cx + (R+10)*Math.sin(azRad), ly = cy - (R+10)*Math.cos(azRad);
+    const t = document.createElementNS(ns,'text');
+    t.setAttribute('x',lx.toFixed(1)); t.setAttribute('y',(ly+4).toFixed(1));
+    t.setAttribute('text-anchor','middle'); t.setAttribute('font-size','10');
+    t.setAttribute('fill','#8b93a3'); t.setAttribute('font-family','Courier New');
+    t.textContent = label;
+    svg.appendChild(t);
+  });
+
+  // ── Sky coverage dots ──
+  for(const p of points){
+    const t = (1 - p.alt/90);
+    const azRad = p.az * Math.PI/180;
+    const x = cx + R*t*Math.sin(azRad), y = cy - R*t*Math.cos(azRad);
+    const dot = document.createElementNS(ns,'circle');
+    dot.setAttribute('cx', x.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); dot.setAttribute('r', 4.0);
+    dot.setAttribute('fill', p.belowHorizon ? '#b5713f' : (p.clear ? '#7fd88f' : '#e0685c'));
+    dot.setAttribute('opacity', p.belowHorizon ? '0.5' : '0.9');
+    svg.appendChild(dot);
+  }
+}
+let lastSkyPoints = [];
+function computeSkyCoverage(){
+  const building = getBuildingConfig();
+  const _ps = getPointingScope(); lastSkyPoints = sweepSky(building, _ps.mx, _ps.my, _ps.mountH);
+  renderSkyPlot(lastSkyPoints, building);
+}
+document.getElementById('btnExportHorizon').addEventListener('click', function(){
+  const building = getBuildingConfig();
+  const lines = ['# Horizon profile exported from ROR Observatory Planner', '# azimuth altitude'];
+  for(let az = 0; az < 360; az += 5){
+    const c = combinedObstructionAt(az, _ps.mx, _ps.my, _ps.mountH, building);
+    lines.push(`${az} ${c.altDeg.toFixed(1)}`);
+  }
+  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ror-horizon-profile.hrz';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  document.getElementById('exportStatus').textContent = 'Exported ror-horizon-profile.hrz (73 points, every 5°)';
+});
+
+// ================= 3D scene =================
+let three = null;
+function toThree(v, scale){ return new THREE.Vector3(v[0]*scale, v[2]*scale, -v[1]*scale); }
+function toThreeDir(v){ return new THREE.Vector3(v[0], v[2], -v[1]); }
+
+function initThree(){
+  const container = document.getElementById('threeContainer');
+  const w = container.clientWidth, h = container.clientHeight;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45, w/h, 0.05, 100);
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(w, h);
+  renderer.setPixelRatio(window.devicePixelRatio || 1);
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+  dirLight.position.set(2,3,2);
+  scene.add(dirLight);
+
+  const walls = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshStandardMaterial({ color: 0x2a3242, transparent:true, opacity:0.35, side: THREE.DoubleSide })
+  );
+  scene.add(walls);
+  const wallEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)), new THREE.LineBasicMaterial({ color:0xaab2c0 }));
+  scene.add(wallEdges);
+
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(1,1), new THREE.MeshBasicMaterial({ color:0x171c25, side:THREE.DoubleSide }));
+  floor.rotation.x = -Math.PI/2;
+  scene.add(floor);
+
+  const roofBox = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshStandardMaterial({ color: 0xb5713f, transparent:true, opacity:0.4, side: THREE.DoubleSide })
+  );
+  scene.add(roofBox);
+  const roofEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)), new THREE.LineBasicMaterial({ color:0xd9a066 }));
+  scene.add(roofEdges);
+
+  const ota = new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,0.34,16), new THREE.MeshStandardMaterial({ color:0xc8623f, roughness:0.5, metalness:0.2 }));
+  scene.add(ota);
+  const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,1,10), new THREE.MeshBasicMaterial({ color:0xd9a066 }));
+  scene.add(ray);
+  const mountMarker = new THREE.Mesh(new THREE.SphereGeometry(0.025,12,12), new THREE.MeshBasicMaterial({ color:0xe7e2d6 }));
+  scene.add(mountMarker);
+
+  const swingSpheres = [0,1,2,3].map(() => {
+    const sph = new THREE.Mesh(
+      new THREE.SphereGeometry(1, 20, 14),
+      new THREE.MeshBasicMaterial({ color: 0x7fd88f, wireframe: true, transparent: true, opacity: 0.35 })
+    );
+    sph.visible = false;
+    scene.add(sph);
+
+    // Small OTA cylinder at the sphere center — neutral "pointing up" pose
+    // since the sphere represents all possible orientations.
+    const tube = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.03, 0.038, 0.28, 12),
+      new THREE.MeshStandardMaterial({ color: 0xc8623f, roughness: 0.5, metalness: 0.2 })
+    );
+    tube.visible = false;
+    scene.add(tube);
+
+    // Pivot dot at the mount center
+    const pivot = new THREE.Mesh(
+      new THREE.SphereGeometry(0.022, 10, 10),
+      new THREE.MeshBasicMaterial({ color: 0xe7e2d6 })
+    );
+    pivot.visible = false;
+    scene.add(pivot);
+
+    sph._tube = tube;
+    sph._pivot = pivot;
+
+    // Pointing ray — only shown for the selected scope in multi-scope mode
+    const ray = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.006, 0.006, 1, 8),
+      new THREE.MeshBasicMaterial({ color: 0x7fd88f, transparent: true, opacity: 0.7 })
+    );
+    ray.visible = false;
+    scene.add(ray);
+    sph._ray = ray;
+
+    return sph;
+  });
+
+  function makeCardinalSprite(letter){
+    const canvas = document.createElement('canvas');
+    canvas.width=64; canvas.height=64;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle='rgba(0,0,0,0)'; ctx.fillRect(0,0,64,64);
+    ctx.font='bold 40px Courier New, monospace';
+    ctx.fillStyle = letter==='N' ? '#ffb27a' : '#c3cad4';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(letter,32,34);
+    const texture = new THREE.CanvasTexture(canvas);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map:texture, transparent:true, depthTest:false }));
+    sprite.scale.set(0.13,0.13,1);
+    return sprite;
+  }
+  const cardinalN=makeCardinalSprite('N'), cardinalE=makeCardinalSprite('E'), cardinalS=makeCardinalSprite('S'), cardinalW=makeCardinalSprite('W');
+  scene.add(cardinalN, cardinalE, cardinalS, cardinalW);
+
+  const meridianLine = new THREE.Mesh(new THREE.CylinderGeometry(0.01,0.01,1,10), new THREE.MeshBasicMaterial({ color:0x6ea8d8, transparent:true, opacity:0.7, side:THREE.DoubleSide }));
+  scene.add(meridianLine);
+  const poleMarker = new THREE.Mesh(new THREE.SphereGeometry(0.022,16,16), new THREE.MeshBasicMaterial({ color:0xcfe6ff }));
+  scene.add(poleMarker);
+
+  const skyHorizonLine = new THREE.LineLoop(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color:0xb5713f, transparent:true, opacity:0.85 }));
+  scene.add(skyHorizonLine);
+  const horizonBand = new THREE.Mesh(new THREE.BufferGeometry(), new THREE.MeshBasicMaterial({ color:0xb5713f, transparent:true, opacity:0.22, side:THREE.DoubleSide, depthWrite:false }));
+  scene.add(horizonBand);
+
+  let camAz=0.9, camPolar=1.15, camRadius=6.0;
+  function updateCamera(){
+    camPolar = Math.max(0.2, Math.min(Math.PI-0.2, camPolar));
+    camRadius = Math.max(1.8, Math.min(14, camRadius));
+    camera.position.set(camRadius*Math.sin(camPolar)*Math.cos(camAz), camRadius*Math.cos(camPolar), camRadius*Math.sin(camPolar)*Math.sin(camAz));
+    camera.lookAt(0,0,0);
+  }
+  updateCamera();
+  let dragging=false, lastX=0, lastY=0;
+  container.addEventListener('pointerdown', e => { dragging=true; lastX=e.clientX; lastY=e.clientY; container.style.cursor='grabbing'; });
+  window.addEventListener('pointerup', () => { dragging=false; container.style.cursor='grab'; });
+  window.addEventListener('pointermove', e => {
+    if(!dragging) return;
+    camAz += (e.clientX-lastX)*0.006;
+    camPolar -= (e.clientY-lastY)*0.006;
+    lastX=e.clientX; lastY=e.clientY;
+    updateCamera();
+  });
+  container.addEventListener('wheel', e => { e.preventDefault(); camRadius *= (1 + e.deltaY*0.001); updateCamera(); }, { passive:false });
+
+  function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
+  animate();
+
+  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, ota, ray, mountMarker, swingSpheres,
+    cardinalN, cardinalE, cardinalS, cardinalW, meridianLine, poleMarker, skyHorizonLine, horizonBand };
+}
+
+// Wireframe sphere per enabled telescope, centered on the mount pivot at
+// its actual swing radius — green if it clears every wall/floor/ceiling
+// direction, red if it doesn't, regardless of current pointing.
+function updateSwingSpheres(swing, sceneScale, otaDir, selectedScopeN){
+  if(!three) return;
+  const dirV = otaDir
+    ? new THREE.Vector3(otaDir[0], otaDir[2], -otaDir[1]).normalize()
+    : new THREE.Vector3(0, 1, 0);
+  const multiScope = swing.results.length > 1;
+
+  three.swingSpheres.forEach((sph, i) => {
+    const r = swing.results[i];
+    const tube = sph._tube, pivot = sph._pivot, ray = sph._ray;
+    if(!r){
+      sph.visible = false;
+      if(tube)  tube.visible = false;
+      if(pivot) pivot.visible = false;
+      if(ray)   ray.visible = false;
+      return;
+    }
+    const pos = new THREE.Vector3(r.my * sceneScale, r.mountH * sceneScale, r.mx * sceneScale);
+    const col = r.clears ? 0x7fd88f : 0xe0685c;
+    const scopeN = i + 1;
+    const isSelected = scopeN === selectedScopeN;
+
+    sph.visible = true;
+    sph.position.copy(pos);
+    sph.scale.setScalar(Math.max(r.swingRadius * sceneScale, 0.001));
+    sph.material.color.set(col);
+
+    if(tube){
+      const tubeLen = Math.max(Math.min(r.swingRadius * sceneScale * 0.55, 0.45), 0.12);
+      tube.visible = true;
+      tube.geometry.dispose();
+      tube.geometry = new THREE.CylinderGeometry(tubeLen * 0.10, tubeLen * 0.13, tubeLen, 12);
+      const tubeDir = isSelected ? dirV : new THREE.Vector3(0, 1, 0);
+      tube.position.copy(pos).addScaledVector(tubeDir, tubeLen * 0.5);
+      tube.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), tubeDir);
+      tube.material.color.set(isSelected ? 0xc8623f : 0x8b7355);
+    }
+
+    if(pivot){
+      pivot.visible = true;
+      pivot.position.copy(pos);
+    }
+
+    // Pointing ray — only for the selected scope, shows current aim direction
+    if(ray){
+      if(multiScope && isSelected){
+        const rayLen = r.swingRadius * sceneScale * 1.8;
+        ray.visible = true;
+        ray.geometry.dispose();
+        ray.geometry = new THREE.CylinderGeometry(0.006, 0.006, rayLen, 8);
+        ray.position.copy(pos).addScaledVector(dirV, rayLen * 0.5);
+        ray.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dirV);
+        ray.material.color.set(r.clears ? 0x7fd88f : 0xe0685c);
+      } else {
+        ray.visible = false;
+      }
+    }
+  });
+}
+
+function updateSkyHorizonWireframe(latDeg, sceneR){
+  const segments = 60;
+  const linePts = [];
+  const bandPositions = [];
+  const upper = [], lower = [];
+  for(let i=0;i<=segments;i++){
+    const az = (i % segments) * (360/segments);
+    const alt = Math.max(0.5, horizonAltAt(az));
+    const conv = altAzToHaDec(alt, az, latDeg);
+    const dir = computeOtaOrientationForHorizon(latDeg, conv.haHours, conv.decDeg);
+    upper.push(toThree([dir[0]*sceneR*1.002, dir[1]*sceneR*1.002, dir[2]*sceneR*1.002], 1));
+    const conv0 = altAzToHaDec(0.01, az, latDeg);
+    const dir0 = computeOtaOrientationForHorizon(latDeg, conv0.haHours, conv0.decDeg);
+    lower.push(toThree([dir0[0]*sceneR*1.002, dir0[1]*sceneR*1.002, dir0[2]*sceneR*1.002], 1));
+  }
+  for(let i=0;i<segments;i++) linePts.push(upper[i]);
+  for(let i=0;i<segments;i++){
+    const a=upper[i], b=upper[i+1] || upper[0], c=lower[i], d=lower[i+1] || lower[0];
+    bandPositions.push(a.x,a.y,a.z, c.x,c.y,c.z, b.x,b.y,b.z);
+    bandPositions.push(b.x,b.y,b.z, c.x,c.y,c.z, d.x,d.y,d.z);
+  }
+  three.skyHorizonLine.geometry.dispose();
+  three.skyHorizonLine.geometry = new THREE.BufferGeometry().setFromPoints(linePts);
+  three.horizonBand.geometry.dispose();
+  const bandGeo = new THREE.BufferGeometry();
+  bandGeo.setAttribute('position', new THREE.Float32BufferAttribute(bandPositions,3));
+  bandGeo.computeVertexNormals();
+  three.horizonBand.geometry = bandGeo;
+
+  const showHorizon = document.getElementById('showHorizon3D').checked;
+  three.skyHorizonLine.visible = showHorizon;
+  three.horizonBand.visible = showHorizon;
+}
+// Direction-only helper (dome-independent): true sky direction for a given HA/Dec/Lat,
+// via the same neutral GEM construction used elsewhere, since direction depends only
+// on true Alt/Az, not mount type or dome geometry.
+function computeOtaOrientationForHorizon(latDeg, haHours, decDeg){
+  return computeOtaOrientation('GEM', latDeg, haHours, decDeg, 'East', {gem:0, decHoriz:0}).direction;
+}
+
+function updateCelestialEquatorAndPole(latDeg, sceneR){
+  const equatorPts = [];
+  const segs = 72;
+  for(let i=0;i<segs;i++){
+    const haHours = (i/segs)*24 - 12;
+    const dir = computeOtaOrientationForHorizon(latDeg, haHours, 0);
+    equatorPts.push(toThree(dir, sceneR*1.02));
+  }
+  const above = equatorPts.map(p => p.y >= 0);
+  let visiblePts = null;
+  if(above.every(v=>v)){
+    visiblePts = equatorPts.concat([equatorPts[0]]);
+  } else if(above.some(v=>v)){
+    const startIdx = above.indexOf(false);
+    const ordered = equatorPts.slice(startIdx).concat(equatorPts.slice(0,startIdx));
+    const orderedAbove = above.slice(startIdx).concat(above.slice(0,startIdx));
+    let run = [];
+    for(let i=0;i<ordered.length;i++){
+      if(orderedAbove[i]) run.push(ordered[i]);
+      else if(run.length) break;
+    }
+    if(run.length >= 2) visiblePts = run;
+  }
+  const showMeridian = document.getElementById('showMeridian3D').checked;
+  if(visiblePts){
+    const curve = new THREE.CatmullRomCurve3(visiblePts, false);
+    three.meridianLine.geometry.dispose();
+    three.meridianLine.geometry = new THREE.TubeGeometry(curve, Math.max(visiblePts.length,8), 0.01, 8, false);
+    three.meridianLine.position.set(0,0,0);
+    three.meridianLine.quaternion.identity();
+    three.meridianLine.visible = showMeridian;
+  } else {
+    three.meridianLine.visible = false;
+  }
+
+  const poleAltRad = Math.min(Math.abs(latDeg), 89.9) * Math.PI/180;
+  const poleTheta = Math.PI/2 - poleAltRad;
+  const polePhi = latDeg >= 0 ? 0 : Math.PI;
+  const R = sceneR*1.02;
+  three.poleMarker.position.set(R*Math.sin(poleTheta)*Math.cos(polePhi), R*Math.cos(poleTheta), R*Math.sin(poleTheta)*Math.sin(polePhi));
+  three.poleMarker.visible = showMeridian;
+}
+
+function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sceneScale, clearAtCurrentPointing, scopeOtaLen, scopeOtaAp){
+  // Fall back to T1's fields if not provided (single-scope mode)
+  const _otaLen = (scopeOtaLen !== undefined ? scopeOtaLen : num('otaLength')) * sceneScale;
+  const _otaAp  = (scopeOtaAp  !== undefined ? scopeOtaAp  : num('otaAperture'));
+  if(!three) return;
+  // Convention (matching the cardinal sprites and celestial-equator math,
+  // both inherited from the dome tool's validated toThree mapping):
+  // North = +X, East = +Z. So the building's North/South extent (its
+  // "length") runs along X, and its East/West extent ("width") runs along Z.
+  const halfNS = building.length*sceneScale/2, halfEW = building.width*sceneScale/2;
+  const wallHmm = building.wallHeight*sceneScale;
+  const floorY = 0;
+
+  three.walls.geometry.dispose();
+  three.wallEdges.geometry.dispose();
+  three.floor.geometry.dispose();
+  if(building.customWalls){
+    const verts2D = polygonVertices(building.walls); // {x: East mm, y: North mm}
+    // North=+X, East=+Z, matching the rest of the scene.
+    const verts3D = verts2D.map(v => new THREE.Vector3(v.y*sceneScale, 0, v.x*sceneScale));
+    const wallGeo = buildPolygonWallGeometry(verts3D, wallHmm);
+    three.walls.geometry = wallGeo;
+    three.wallEdges.geometry = new THREE.EdgesGeometry(wallGeo);
+    three.walls.scale.set(1,1,1); three.walls.position.set(0,0,0);
+    three.wallEdges.scale.set(1,1,1); three.wallEdges.position.set(0,0,0);
+
+    const floorGeo = buildPolygonFloorGeometry(verts3D);
+    three.floor.geometry = floorGeo;
+    three.floor.scale.set(1,1,1); three.floor.rotation.set(0,0,0); three.floor.position.set(0,0,0);
+  } else {
+    three.walls.geometry = new THREE.BoxGeometry(1,1,1);
+    three.wallEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
+    three.walls.scale.set(halfNS*2, wallHmm, halfEW*2);
+    three.walls.position.set(0, floorY + wallHmm/2, 0);
+    three.wallEdges.scale.copy(three.walls.scale);
+    three.wallEdges.position.copy(three.walls.position);
+
+    three.floor.geometry = new THREE.PlaneGeometry(1,1);
+    three.floor.rotation.x = -Math.PI/2;
+    three.floor.scale.set(halfNS*2, halfEW*2, 1);
+    three.floor.position.set(0, floorY, 0);
+  }
+
+  const travel = building.roofTravel*sceneScale;
+  three.roofBox.geometry.dispose();
+  three.roofEdges.geometry.dispose();
+  three.roofBox.quaternion.identity();
+  three.roofEdges.quaternion.identity();
+
+  if(building.customWalls){
+    const wallIdx = building.rollWallIndex;
+    const wall = building.walls[wallIdx];
+    if(wall){
+      const wa = wall.angle * Math.PI/180;
+      const d = wall.dist * sceneScale;
+      const roofSpan = building.customRoofSpan * sceneScale;
+      // North=+X, East=+Z: outward normal and along-wall tangent for this wall's angle.
+      const normal = new THREE.Vector3(Math.cos(wa), 0, Math.sin(wa));
+      const tangent = new THREE.Vector3(-Math.sin(wa), 0, Math.cos(wa));
+      const roofPos = normal.clone().multiplyScalar(d + travel/2);
+      const basis = new THREE.Matrix4().makeBasis(tangent, new THREE.Vector3(0,1,0), normal);
+      const quat = new THREE.Quaternion().setFromRotationMatrix(basis);
+      if(building.roofShape === 'peak'){
+        const eaveH = building.eaveHeight*sceneScale, ridgeH = building.ridgeHeight*sceneScale;
+        const prismGeo = buildGablePrismGeometry(roofSpan, eaveH, ridgeH, travel, false);
+        three.roofBox.geometry = prismGeo;
+        three.roofEdges.geometry = new THREE.EdgesGeometry(prismGeo);
+        three.roofBox.scale.set(1,1,1); three.roofEdges.scale.set(1,1,1);
+        three.roofBox.position.copy(roofPos).setY(floorY + eaveH);
+        three.roofEdges.position.copy(three.roofBox.position);
+      } else if(building.roofShape === 'wedge'){
+        const loH = building.wedgeLowHeight*sceneScale, hiH = building.wedgeHighHeight*sceneScale;
+        const prismGeo = buildWedgePrismGeometry(roofSpan, loH, hiH, travel, false, building.wedgeFlip);
+        three.roofBox.geometry = prismGeo;
+        three.roofEdges.geometry = new THREE.EdgesGeometry(prismGeo);
+        three.roofBox.scale.set(1,1,1); three.roofEdges.scale.set(1,1,1);
+        three.roofBox.position.copy(roofPos).setY(floorY + loH);
+        three.roofEdges.position.copy(three.roofBox.position);
+      } else {
+        const roofH = building.roofHeight*sceneScale;
+        three.roofBox.geometry = new THREE.BoxGeometry(1,1,1);
+        three.roofEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
+        three.roofBox.scale.set(roofSpan, roofH, travel);
+        three.roofBox.position.copy(roofPos).setY(floorY + roofH/2);
+        three.roofEdges.scale.copy(three.roofBox.scale);
+        three.roofEdges.position.copy(three.roofBox.position);
+      }
+      three.roofBox.quaternion.copy(quat);
+      three.roofEdges.quaternion.copy(quat);
+    }
+    three.roofBox.visible = travel > 0.001 && !!wall;
+    three.roofEdges.visible = travel > 0.001 && !!wall;
+  } else {
+    let rx=0, rz=0, sx=halfNS*2, sz=halfEW*2;
+    if(building.rollDir==='N'){ sx = travel; rx = halfNS + travel/2; }
+    if(building.rollDir==='S'){ sx = travel; rx = -(halfNS + travel/2); }
+    if(building.rollDir==='E'){ sz = travel; rz = halfEW + travel/2; }
+    if(building.rollDir==='W'){ sz = travel; rz = -(halfEW + travel/2); }
+    const travelAxisIsX = (building.rollDir==='N' || building.rollDir==='S');
+
+    if(building.roofShape === 'peak'){
+      const eaveH = building.eaveHeight*sceneScale, ridgeH = building.ridgeHeight*sceneScale;
+      const perpSpan = travelAxisIsX ? sz : sx;
+      const alongLen = travelAxisIsX ? sx : sz;
+      const prismGeo = buildGablePrismGeometry(perpSpan, eaveH, ridgeH, alongLen, travelAxisIsX);
+      three.roofBox.geometry = prismGeo;
+      three.roofEdges.geometry = new THREE.EdgesGeometry(prismGeo);
+      three.roofBox.scale.set(1,1,1);
+      three.roofEdges.scale.set(1,1,1);
+      three.roofBox.position.set(rx, floorY + eaveH, rz);
+      three.roofEdges.position.set(rx, floorY + eaveH, rz);
+    } else if(building.roofShape === 'wedge'){
+      const loH = building.wedgeLowHeight*sceneScale, hiH = building.wedgeHighHeight*sceneScale;
+      const perpSpan = travelAxisIsX ? sz : sx;
+      const alongLen = travelAxisIsX ? sx : sz;
+      const prismGeo = buildWedgePrismGeometry(perpSpan, loH, hiH, alongLen, travelAxisIsX, building.wedgeFlip);
+      three.roofBox.geometry = prismGeo;
+      three.roofEdges.geometry = new THREE.EdgesGeometry(prismGeo);
+      three.roofBox.scale.set(1,1,1);
+      three.roofEdges.scale.set(1,1,1);
+      three.roofBox.position.set(rx, floorY + loH, rz);
+      three.roofEdges.position.set(rx, floorY + loH, rz);
+    } else {
+      const roofH = building.roofHeight*sceneScale;
+      three.roofBox.geometry = new THREE.BoxGeometry(1,1,1);
+      three.roofEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
+      three.roofBox.scale.set(sx, roofH, sz);
+      three.roofBox.position.set(rx, floorY + roofH/2, rz);
+      three.roofEdges.scale.copy(three.roofBox.scale);
+      three.roofEdges.position.copy(three.roofBox.position);
+    }
+    three.roofBox.visible = travel > 0.001;
+    three.roofEdges.visible = travel > 0.001;
+  }
+
+  const cardinalR = Math.max(halfNS, halfEW) * 1.15;
+  three.cardinalN.position.set(cardinalR, floorY+0.05, 0);
+  three.cardinalE.position.set(0, floorY+0.05, cardinalR);
+  three.cardinalS.position.set(-cardinalR, floorY+0.05, 0);
+  three.cardinalW.position.set(0, floorY+0.05, -cardinalR);
+  const spriteScale = Math.max(cardinalR*0.11, 0.05);
+  [three.cardinalN, three.cardinalE, three.cardinalS, three.cardinalW].forEach(s => s.scale.set(spriteScale, spriteScale, 1));
+
+  // Mount position: North offset (my) -> +X, East offset (mx) -> +Z.
+  const mountV = new THREE.Vector3(my*sceneScale, mountHeightMm*sceneScale, mx*sceneScale);
+  three.mountMarker.position.copy(mountV);
+  three.lastMountV = mountV.clone();
+
+  // When multiple independent telescopes are enabled, the swing sphere tubes
+  // represent each scope. Hide the main pointing OTA and its ray to avoid
+  // showing a phantom third tube in the middle of the building.
+  const multiScope = [2,3,4].some(n => {
+    const el = document.getElementById(`scope${n}Enabled`);
+    return el && el.checked;
+  });
+
+  three.ota.visible = !multiScope;
+  three.ray.visible = !multiScope;
+
+  if(!multiScope){
+    const dirV = new THREE.Vector3(otaDir[0], otaDir[2], -otaDir[1]).normalize();
+    three.ota.position.copy(mountV).addScaledVector(dirV, _otaLen/2);
+    three.ota.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dirV);
+    three.ota.scale.set(1,1,1);
+    three.ota.geometry.dispose();
+    three.ota.geometry = new THREE.CylinderGeometry(_otaAp*sceneScale/2, _otaAp*sceneScale/2*1.15, _otaLen, 16);
+
+    const rayLen = Math.max(halfNS, halfEW) * 2.4;
+    three.ray.position.copy(mountV).addScaledVector(dirV, rayLen/2);
+    three.ray.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dirV);
+    three.ray.geometry.dispose();
+    three.ray.geometry = new THREE.CylinderGeometry(0.008,0.008,rayLen,10);
+    three.ray.material.color.set(clearAtCurrentPointing ? 0x7fd88f : 0xe0685c);
+  }
+
+  const sceneR = Math.max(halfNS, halfEW) * 1.3;
+  updateSkyHorizonWireframe(num('lat'), sceneR);
+  updateCelestialEquatorAndPole(num('lat'), sceneR);
+}
+
+// Builds a gable (tent) prism: triangular cross-section (eave, eave, ridge),
+// extruded along the travel axis. travelAxisIsX selects whether the prism's
+// length runs along X (North/South roll-off) or Z (East/West roll-off),
+// with the perpendicular span along the other axis. Base sits at local y=0
+// (the eave line); ridge sits at y=(ridgeH-eaveH) — the caller offsets the
+// whole mesh up by eaveH to place the eave at its true height.
+// Vertical wall geometry from a closed loop of floor-level vertices: one
+// quad (two triangles) per edge, from floor (y=0) up to wallHeight.
+function buildPolygonWallGeometry(verts3D, wallHeight){
+  const positions = [];
+  const n = verts3D.length;
+  for(let i = 0; i < n; i++){
+    const a = verts3D[i], b = verts3D[(i+1)%n];
+    const a0 = [a.x,0,a.z], a1 = [a.x,wallHeight,a.z];
+    const b0 = [b.x,0,b.z], b1 = [b.x,wallHeight,b.z];
+    positions.push(...a0, ...b0, ...a1);
+    positions.push(...a1, ...b0, ...b1);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+// Floor as a triangle fan from the origin — valid since the polygon is
+// convex and centered near the origin by construction (half-planes through
+// a shared reference point).
+function buildPolygonFloorGeometry(verts3D){
+  const positions = [];
+  const n = verts3D.length;
+  for(let i = 0; i < n; i++){
+    const a = verts3D[i], b = verts3D[(i+1)%n];
+    positions.push(0,0,0, b.x,0,b.z, a.x,0,a.z);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+function buildGablePrismGeometry(perpSpan, eaveH, ridgeH, alongLen, travelAxisIsX){
+  const hs = perpSpan/2, halfLen = alongLen/2, apexY = ridgeH - eaveH;
+  function vAt(travelCoord, perpCoord, y){
+    return travelAxisIsX ? [travelCoord, y, perpCoord] : [perpCoord, y, travelCoord];
+  }
+  const v = [
+    vAt(-halfLen, -hs, 0), vAt(-halfLen, hs, 0), vAt(-halfLen, 0, apexY),
+    vAt( halfLen, -hs, 0), vAt( halfLen, hs, 0), vAt( halfLen, 0, apexY)
+  ];
+  const idx = [0,1,2, 3,5,4, 0,3,1, 1,3,4, 1,4,2, 2,4,5, 2,5,0, 0,5,3];
+  const positions = [];
+  idx.forEach(i => positions.push(...v[i]));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+// Wedge (mono-slope) prism: trapezoidal cross-section — a low vertical edge
+// on one side, a high vertical edge on the other, sloped roof between them.
+// Base sits at local y=0 (the LOW side's ground line); heights are relative
+// to that. lowH/highH are absolute (caller offsets the mesh by lowH to place
+// the low side at its true height, matching the gable prism's convention).
+function buildWedgePrismGeometry(perpSpan, lowH, highH, alongLen, travelAxisIsX, flip){
+  const hs = perpSpan/2, halfLen = alongLen/2;
+  const loSide = flip ? hs : -hs, hiSide = flip ? -hs : hs;
+  function vAt(travelCoord, perpCoord, y){
+    return travelAxisIsX ? [travelCoord, y, perpCoord] : [perpCoord, y, travelCoord];
+  }
+  // Mesh is offset by lowH externally (matching the gable prism's
+  // convention), so y=0 here is the low side's top, and -lowH is ground.
+  const lowTopY = 0;
+  const highTopY = highH - lowH;
+  const verts = [
+    vAt(-halfLen, loSide, lowTopY), vAt(-halfLen, hiSide, highTopY),   // start cap: low-top(0), high-top(1)
+    vAt(-halfLen, loSide, -lowH),   vAt(-halfLen, hiSide, -lowH),      // start cap: low-bottom(2), high-bottom(3)
+    vAt( halfLen, loSide, lowTopY), vAt( halfLen, hiSide, highTopY),   // end cap: low-top(4), high-top(5)
+    vAt( halfLen, loSide, -lowH),   vAt( halfLen, hiSide, -lowH)       // end cap: low-bottom(6), high-bottom(7)
+  ];
+  const idx = [
+    0,1,3, 0,3,2,       // start cap
+    5,4,6, 5,6,7,       // end cap (reversed winding)
+    0,4,5, 0,5,1,       // top slope side
+    2,3,7, 2,7,6,       // bottom side
+    0,2,6, 0,6,4,       // low-side vertical face
+    1,5,7, 1,7,3        // high-side vertical face
+  ];
+  const positions = [];
+  idx.forEach(i => positions.push(...verts[i]));
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+// ================= Main compute =================
+function compute(){
+  const building = getBuildingConfig();
+  const ps = getPointingScope();
+  const mx = ps.mx, my = ps.my;
+  const halfW = building.width/2, halfL = building.length/2;
+  const geomBad = building.customWalls
+    ? !pointInsidePolygon(mx, my, building.walls)
+    : (Math.abs(mx) > halfW || Math.abs(my) > halfL);
+  document.getElementById('geomWarning').style.display = geomBad ? 'block' : 'none';
+
+  // Building/roof summary chips — displayed in the user's chosen unit
+  if(useImperial){
+    document.getElementById('outFootprint').textContent   = `${mmToFrac(building.width)} × ${mmToFrac(building.length)}`;
+    document.getElementById('outWallHeight').textContent  = mmToFrac(building.wallHeight);
+    document.getElementById('outRoofTravel').textContent  = mmToFrac(building.roofTravel);
+    const myI = mmToFrac(Math.abs(my)) + (my >= 0 ? ' N' : ' S');
+    const mxI = mmToFrac(Math.abs(mx)) + (mx >= 0 ? ' E' : ' W');
+    document.getElementById('outMountOffset').textContent = `${myI}, ${mxI}`;
+  } else {
+    document.getElementById('outFootprint').textContent   = `${building.width/10}×${building.length/10} cm`;
+    document.getElementById('outWallHeight').textContent  = `${building.wallHeight/10} cm`;
+    document.getElementById('outRoofTravel').textContent  = `${building.roofTravel/10} cm`;
+    document.getElementById('outMountOffset').textContent = `${my/10>=0?'+':''}${my/10} cm N/S, ${mx/10>=0?'+':''}${mx/10} cm E/W`;
+  }
+  document.getElementById('outRollDir').textContent = { N:'North', S:'South', E:'East', W:'West' }[building.rollDir];
+
+  const lat = num('lat');
+  let ha, dec;
+  if(pointingMode === 'AltAz'){
+    const conv = altAzToHaDec(num('targetAlt'), num('targetAz'), lat);
+    ha = conv.haHours; dec = conv.decDeg;
+  } else {
+    ha = num('ha'); dec = num('dec');
+  }
+
+  const minObservableDec = lat - 90;
+  let decClamped = false;
+  if(dec < minObservableDec){
+    dec = minObservableDec;
+    decClamped = true;
+    document.getElementById('dec').value = dec.toFixed(2);
+    document.getElementById('decSlider').value = Math.max(-90, dec);
+    if(pointingMode === 'AltAz'){
+      const fixedSky = haDecToAltAz(ha, dec, lat);
+      document.getElementById('targetAlt').value = fixedSky.altDeg.toFixed(2);
+      document.getElementById('altSlider').value = Math.max(0, fixedSky.altDeg);
+      document.getElementById('targetAz').value = fixedSky.azDeg.toFixed(2);
+      document.getElementById('azSlider').value = fixedSky.azDeg;
+    }
+  }
+  document.getElementById('decWarning').style.display = decClamped ? 'block' : 'none';
+
+  let skyPos = haDecToAltAz(ha, dec, lat);
+  let horizonClamped = false;
+  const obstruction = combinedObstructionAt(skyPos.azDeg, mx, my, ps.mountH, building);
+  if(skyPos.altDeg < obstruction.altDeg){
+    const conv2 = altAzToHaDec(obstruction.altDeg, skyPos.azDeg, lat);
+    ha = conv2.haHours; dec = conv2.decDeg;
+    skyPos = haDecToAltAz(ha, dec, lat);
+    horizonClamped = true;
+    document.getElementById('ha').value = ha.toFixed(3);
+    document.getElementById('haSlider').value = Math.max(-6, Math.min(6, ha));
+    document.getElementById('dec').value = dec.toFixed(2);
+    document.getElementById('decSlider').value = Math.max(-90, Math.min(90, dec));
+    document.getElementById('targetAlt').value = skyPos.altDeg.toFixed(2);
+    document.getElementById('altSlider').value = Math.max(0, Math.min(90, skyPos.altDeg));
+    document.getElementById('targetAz').value = skyPos.azDeg.toFixed(2);
+    document.getElementById('azSlider').value = skyPos.azDeg;
+  }
+  document.getElementById('outTargetAltAz').textContent = `Alt ${skyPos.altDeg.toFixed(1)}°, Az ${skyPos.azDeg.toFixed(1)}°`;
+  document.getElementById('horizonWarning').style.display = horizonClamped ? 'block' : 'none';
+
+  const finalObstruction = combinedObstructionAt(skyPos.azDeg, mx, my, ps.mountH, building);
+  const margin = skyPos.altDeg - finalObstruction.altDeg;
+  document.getElementById('outObstructionLimit').textContent = finalObstruction.altDeg.toFixed(1) + '°';
+  document.getElementById('outMargin').textContent = (margin>=0?'+':'') + margin.toFixed(1) + '°';
+  document.getElementById('outBlockedBy').textContent = horizonClamped ? finalObstruction.blockedBy : '—';
+  const clear = !horizonClamped && margin >= 0;
+
+  const pierSide = resolvePierSide(ha);
+  syncPierSideDisplay(pierSide);
+
+  const off = { gem: ps.mtype==='GEM' ? ps.axis : 0, decHoriz: ps.mtype==='AltAz' ? ps.axis : 0 };
+  const otaOrient = computeOtaOrientation(ps.mtype, lat, ha, dec, pierSide, off);
+
+  document.getElementById('obstructionNote').textContent = clear
+    ? `Clear by ${margin.toFixed(1)}° at this pointing.`
+    : `⚠ Blocked by: ${finalObstruction.blockedBy || 'obstruction'} — needs at least ${finalObstruction.altDeg.toFixed(1)}° altitude here.`;
+
+  const sceneScale = 1.6 / Math.max(building.width, building.length, 1000);
+  if(!three) initThree();
+  updateThreeScene(mx, my, ps.mountH, building, otaOrient.origin, otaOrient.direction, sceneScale, clear, ps.otaLen, ps.otaAp);
+
+  const swing = computeSwingClearance(building);
+  renderSwingClearance(swing);
+  updateSwingSpheres(swing, sceneScale, otaOrient.direction, pointingScope);
+
+  renderScopeCollisions(swing);
+  renderSwingPlanView(building, swing);
+
+  updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing);
+  if(skyCoverageExpanded) computeSkyCoverage();
+}
+
+function updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing){
+  const banner = document.getElementById('statusBanner');
+  const icon = document.getElementById('statusIcon');
+  const text = document.getElementById('statusText');
+  banner.classList.remove('status-ok','status-warn','status-bad');
+  if(geomBad){
+    banner.classList.add('status-bad'); icon.textContent='✗';
+    text.textContent = 'Mount position falls outside the building footprint — check your offset measurements.';
+  } else if(swing && swing.results && swing.results.some(r => !r.clears)){
+    banner.classList.add('status-bad'); icon.textContent='✗';
+    const failed = swing.results.filter(r => !r.clears).map(r => r.name).join(', ');
+    text.textContent = `Swing clearance failed for ${failed} — could hit a wall, floor, or ceiling at some pointing.`;
+  } else if(swing && swing.pairs && swing.pairs.some(p => !p.clears)){
+    banner.classList.add('status-bad'); icon.textContent='✗';
+    const hit = swing.pairs.find(p => !p.clears);
+    text.textContent = `${hit.a} and ${hit.b} swing circles overlap — see the Swing Clearance panel.`;
+  } else if(!clear){
+    banner.classList.add('status-bad'); icon.textContent='✗';
+    text.textContent = 'Current pointing is blocked — see Live Pointing for details.';
+  } else if(horizonClamped || decClamped){
+    banner.classList.add('status-warn'); icon.textContent='⚠';
+    text.textContent = horizonClamped ? 'Pointing was adjusted to clear the walls/roof/horizon.' : 'Declination was adjusted to stay within what\u2019s observable at this latitude.';
+  } else {
+    banner.classList.add('status-ok'); icon.textContent='✓';
+    text.textContent = 'Valid pointing — clear of the walls, roof, and local horizon.';
+  }
+}
+
+updatePointingDropdown();
+FP.init();
+compute();
+</script>
+</div>
+</body>
+</html>
