@@ -199,7 +199,7 @@
 
 
     <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:700;
-      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CYGNUSWAVE</span>
+      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CygnusWave Observatory Calculator</span>
   </a>
   <div style="display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
     <a href="index.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Home</a>
@@ -218,8 +218,8 @@
       </div>
       <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
         <div class="mount-type-toggle" style="margin:0;">
-          <button id="btnUnitMetric" class="active" onclick="setUnitSystem(false)" title="Metric units (mm)">Metric</button>
-          <button id="btnUnitImperial" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
+          <button id="btnUnitMetric" onclick="setUnitSystem(false)" title="Metric units (mm)">Metric</button>
+          <button id="btnUnitImperial" class="active" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
         </div>
         <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
         <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
@@ -289,188 +289,17 @@
         <line id="offsetLine" x1="130" y1="130" x2="130" y2="130" stroke="#c8623f" stroke-width="2.5" stroke-dasharray="4 3"/>
         <circle id="mountDot" cx="130" cy="130" r="7" fill="#ff8952" stroke="#fff2df" stroke-width="1.5"/>
         <text id="mountLabel" x="130" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#ffb27a" font-family="Courier New">mount</text>
+        <!-- Dual saddle OTA markers — hidden unless dual saddle is active -->
+        <line id="lateralLine" x1="130" y1="130" x2="130" y2="130" stroke="#6ab0e0" stroke-width="1.5" stroke-dasharray="3 4" display="none"/>
+        <circle id="ota1Dot" cx="130" cy="130" r="6" fill="#c8623f" stroke="#fff2df" stroke-width="1.5" display="none"/>
+        <text id="ota1Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#c8623f" font-family="Courier New" display="none">OTA 1</text>
+        <circle id="ota2Dot" cx="130" cy="130" r="6" fill="#6ab0e0" stroke="#fff2df" stroke-width="1.5" display="none"/>
+        <text id="ota2Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#6ab0e0" font-family="Courier New" display="none">OTA 2</text>
       </svg>
     </div>
   </div>
 
-  <div class="two-col-layout">
-  <div class="col-setup">
-  <details class="section-card" id="sec-mount" open>
-    <summary class="section-header"><span class="section-title">Mount Position</span></summary>
-    <div class="section-body">
-<h2><span class="step-num">1</span><span id="step1Title">Mount Position</span></h2>
-        <div class="mount-type-toggle" style="margin-top:8px;">
-          <button id="btnModeMeasure" class="active">I'll measure my dome</button>
-          <button id="btnModeDirect">I already have my NINA values</button>
-        </div>
-        <p class="step-note" style="margin-top:10px;" id="modeNote">Walks through plumb-bob and tape-measure steps and converts them into NINA's signed values.</p>
-
-        <div id="step1Measure">
-          <div class="row" style="margin-top:6px;">
-            <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, not the rim</span></div>
-            <div class="field"><input type="number" id="hDome" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>Height of mount RA/Dec intersection above floor</label></div>
-            <div class="field"><input type="number" id="hMount" value="1185"><span class="unit">mm</span><span class="frac-hint" id="hint_hMount" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>North/South distance</label></div>
-            <div class="field">
-              <input type="number" id="nsDist" value="80"><span class="frac-hint" id="hint_nsDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:4px; white-space:nowrap; font-family:'Courier New',monospace;"></span>
-              <select id="nsDir"><option value="1">is North</option><option value="-1">is South</option></select>
-            </div>
-          </div>
-          <div class="row">
-            <div><label>East/West distance</label><span class="hint">mount mark relative to dome center mark</span></div>
-            <div class="field">
-              <input type="number" id="ewDist" value="0"><span class="frac-hint" id="hint_ewDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:4px; white-space:nowrap; font-family:'Courier New',monospace;"></span>
-              <select id="ewDir"><option value="1">is East</option><option value="-1">is West</option></select>
-            </div>
-          </div>
-        </div>
-
-        <div id="step1Direct" style="display:none;">
-          <div class="row" style="margin-top:6px;">
-            <div><label>Scope Position +N/-S</label></div>
-            <div class="field"><input type="number" id="directNS" value="80"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>Scope Position +E/-W</label></div>
-            <div class="field"><input type="number" id="directEW" value="0"><span class="unit">mm</span><span class="frac-hint" id="hint_directEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>Scope Position +Up/-Down</label></div>
-            <div class="field"><input type="number" id="directUD" value="272"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-        </div>
-    </div>
-  </details>
-  <details class="section-card" id="sec-dome">
-    <summary class="section-header"><span class="section-title">Dome &amp; Rotator</span></summary>
-    <div class="section-body">
-<h2><span class="step-num">2</span>Dome &amp; Rotator</h2>
-        <div class="row">
-          <div><label>Dome radius</label><span class="hint">measured center-to-rim, along the base</span></div>
-          <div class="field"><input type="number" id="radius" value="1040"><span class="unit">mm</span><span class="frac-hint" id="hint_radius" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-        <div class="toggle-row">
-          <input type="checkbox" id="haveDiameter">
-          <label for="haveDiameter">I only measured the diameter — halve it for me</label>
-        </div>
-        <div class="row" style="margin-top:12px;">
-          <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
-          <div class="field"><input type="number" id="shutterWidth" value="500"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-        <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
-          <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
-          <div class="field"><input type="number" id="rotatorRes" value="1" step="0.1"><span class="unit">°</span></div>
-        </div>
-        <div class="row" style="margin-top:12px; display:none;" id="rotatorDirectRow">
-          <div><label>Azimuth Tolerance</label></div>
-          <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
-        </div>
-        <div class="row" style="margin-top:12px;">
-          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts — only affects the 3D preview, not the NINA math</span></div>
-          <div class="field"><input type="number" id="wallHeight" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-    </div>
-  </details>
-  <details class="section-card" id="sec-optical">
-    <summary class="section-header"><span class="section-title">Optical Axis Offset</span></summary>
-    <div class="section-body">
-<h2><span class="step-num">3</span>Optical Axis Offset</h2>
-        <p class="step-note">Mount type changes what NINA needs here.</p>
-        <div class="mount-type-toggle">
-          <button id="btnGEM" class="active">Equatorial (GEM)</button>
-          <button id="btnAltAz">Alt/Az or Fork</button>
-        </div>
-
-        <div id="gemFields">
-          <div class="row" id="gemMeasureRow">
-            <div>
-              <label>GEM Axis Length (raw)</label>
-              <span class="hint">Slew RA to ±90° from the meridian and measure the lateral distance from the RA axis to the center of the OTA aperture.</span>
-            </div>
-            <div class="field"><input type="number" id="gemRaw" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemRaw" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="toggle-row" id="guidescopeToggleRow">
-            <input type="checkbox" id="hasGuidescope">
-            <label for="hasGuidescope">I'm using a guide scope — add its correction</label>
-          </div>
-          <div class="sub-fields" id="guidescopeFields" style="display:none;">
-            <div class="row">
-              <div><label>OTA-to-guidescope aperture distance</label></div>
-              <div class="field"><input type="number" id="guideDist" value="140"><span class="unit">mm</span><span class="frac-hint" id="hint_guideDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-            </div>
-          </div>
-          <div class="row" id="gemDirectRow" style="display:none;">
-            <div><label>GEM Axis Length</label></div>
-            <div class="field"><input type="number" id="gemDirect" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemDirect" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-        </div>
-
-        <div id="altAzFields" style="display:none;">
-          <div class="row">
-            <div>
-              <label>Dec Horizontal Offset</label>
-              <span class="hint">Fork/Alt-Az only: horizontal distance from the Dec (altitude) axis to the OTA center. Positive = to the right facing the sky.</span>
-            </div>
-            <div class="field"><input type="number" id="decHoriz" value="0"><span class="unit">mm</span></div>
-          </div>
-        </div>
-
-        <div class="toggle-row">
-          <input type="checkbox" id="hasDualSaddle">
-          <label for="hasDualSaddle">Dual saddle with side-by-side OTAs — set Lateral Axis Length</label>
-        </div>
-        <div class="sub-fields" id="lateralFields" style="display:none;">
-          <div class="row" id="lateralMeasureRow">
-            <div><label>Offset of imaging OTA center from mount axis</label></div>
-            <div class="field">
-              <input type="number" id="lateralDist" value="0">
-              <select id="lateralDir"><option value="1">right</option><option value="-1">left</option></select>
-            </div>
-          </div>
-          <div class="row" id="lateralDirectRow" style="display:none;">
-            <div><label>Lateral Axis Length</label></div>
-            <div class="field"><input type="number" id="lateralDirect" value="0"><span class="unit">mm</span></div>
-          </div>
-          <div class="row" style="margin-top:2px;">
-            <div>
-              <label>Which OTA does NINA track?</label>
-              <span class="hint">The centered one defines the dome azimuth — the other rides along, mirrored</span>
-            </div>
-            <div class="field">
-              <select id="centerScope"><option value="between">Between OTA 1 &amp; 2</option><option value="1" selected>OTA 1</option><option value="2">OTA 2</option></select>
-            </div>
-          </div>
-        </div>
-
-        <p class="step-note" style="margin-top:14px; border-top:1px solid var(--line); padding-top:14px;">Telescope dimensions — used for the 3D preview and aperture clearance check.</p>
-        <div class="row">
-          <div><label id="otaLengthLabel">OTA tube length</label></div>
-          <div class="field"><input type="number" id="otaLength" value="450"><span class="unit">mm</span></div>
-        </div>
-        <div class="row">
-          <div><label id="otaApertureLabel">OTA clear aperture</label></div>
-          <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
-        </div>
-
-        <div id="ota2Fields" style="display:none;">
-          <hr style="border:none; border-top:1px solid var(--line); margin:12px 0;">
-          <div class="row">
-            <div><label>OTA 2 tube length</label></div>
-            <div class="field"><input type="number" id="ota2Length" value="450"><span class="unit">mm</span></div>
-          </div>
-          <div class="row">
-            <div><label>OTA 2 clear aperture</label></div>
-            <div class="field"><input type="number" id="ota2Aperture" value="130"><span class="unit">mm</span></div>
-          </div>
-        </div>
-    </div>
-  </details>
-  <details class="section-card" id="sec-sky">
+  <details class="section-card" id="sec-sky" style="margin-bottom:18px;">
     <summary class="section-header"><span class="section-title">Sky Coverage</span></summary>
     <div class="section-body">
 <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
@@ -499,6 +328,214 @@
     </div>
     </div>
   </details>
+
+  <div class="two-col-layout">
+  <div class="col-setup">
+  <details class="section-card" id="sec-mount" open>
+    <summary class="section-header"><span class="section-title">Mount Position</span></summary>
+    <div class="section-body">
+<h2><span id="step1Title">Mount Position</span></h2>
+        <div class="mount-type-toggle" style="margin-top:8px;">
+          <button id="btnModeMeasure" class="active">I'll measure my dome</button>
+          <button id="btnModeDirect">I already have my NINA values</button>
+        </div>
+        <p class="step-note" style="margin-top:10px;" id="modeNote">Walks through plumb-bob and tape-measure steps and converts them into NINA's signed values.</p>
+
+        <div id="step1Measure">
+          <div class="row" style="margin-top:6px;">
+            <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, not the rim</span></div>
+            <div class="field"><input type="number" id="hDome" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Pier height</label><span class="hint">floor to top of pier flange</span></div>
+            <div class="field"><input type="number" id="pierHeight" value="35"><span class="unit">mm</span><span class="frac-hint" id="hint_pierHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Pier diameter</label><span class="hint">outer diameter of the pier tube</span></div>
+            <div class="field"><input type="number" id="pierDiameter" value="8"><span class="unit">mm</span><span class="frac-hint" id="hint_pierDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Mount head height</label><span class="hint">pier flange to RA/Dec pivot</span></div>
+            <div class="field"><input type="number" id="mountHeadHeight" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_mountHeadHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:10px 14px; margin-top:4px; margin-bottom:8px;">
+            <div style="font-size:12px; color:#c8623f; font-family:'Courier New',monospace;">
+              RA/Dec pivot height: <span id="calcHMount">1185 mm</span>
+            </div>
+            <div style="font-size:11px; color:#c8623f; margin-top:2px;">pier height + mount head height = height above floor</div>
+          </div>
+          <p class="step-note" style="margin-top:6px; margin-bottom:10px;">Measure the distance from each wall to directly below the mount's RA/Dec pivot point on the floor.</p>
+          <div class="row" style="margin-top:6px;">
+            <div><label>North wall → mount center</label></div>
+            <div class="field"><input type="number" id="distN" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distN" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>South wall → mount center</label></div>
+            <div class="field"><input type="number" id="distS" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>East wall → mount center</label></div>
+            <div class="field"><input type="number" id="distE" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distE" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>West wall → mount center</label></div>
+            <div class="field"><input type="number" id="distW" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:10px 14px; margin-top:4px;">
+            <div style="font-size:12px; color:var(--text-dim); font-family:'Courier New',monospace; margin-bottom:4px;">
+              N/S offset: <span id="calcNS">0 mm</span> · <span style="font-size:11px;">+ = North of dome center</span>
+            </div>
+            <div style="font-size:12px; color:var(--text-dim); font-family:'Courier New',monospace;">
+              E/W offset: <span id="calcEW">0 mm</span> · <span style="font-size:11px;">+ = East of dome center</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="step1Direct" style="display:none;">
+          <div class="row" style="margin-top:6px;">
+            <div><label>Scope Position +N/-S</label></div>
+            <div class="field"><input type="number" id="directNS" value="3"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Scope Position +E/-W</label></div>
+            <div class="field"><input type="number" id="directEW" value="0"><span class="unit">mm</span><span class="frac-hint" id="hint_directEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Scope Position +Up/-Down</label></div>
+            <div class="field"><input type="number" id="directUD" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+        </div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
+      <h2>Optical Axis Offset</h2>
+        <p class="step-note">Mount type changes what NINA needs here.</p>
+        <div class="mount-type-toggle">
+          <button id="btnGEM" class="active">Equatorial (GEM)</button>
+          <button id="btnAltAz">Alt/Az or Fork</button>
+        </div>
+
+        <div id="gemFields">
+          <div class="row" id="gemMeasureRow">
+            <div>
+              <label>GEM Axis Length (raw)</label>
+              <span class="hint">Slew RA to ±90° from the meridian and measure the lateral distance from the RA axis to the center of the OTA aperture.</span>
+            </div>
+            <div class="field"><input type="number" id="gemRaw" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_gemRaw" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+
+          <div class="row" id="gemDirectRow" style="display:none;">
+            <div><label>GEM Axis Length</label></div>
+            <div class="field"><input type="number" id="gemDirect" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_gemDirect" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+        </div>
+
+        <div id="altAzFields" style="display:none;">
+          <div class="row">
+            <div>
+              <label>Dec Horizontal Offset</label>
+              <span class="hint">Fork/Alt-Az only: horizontal distance from the Dec (altitude) axis to the OTA center. Positive = to the right facing the sky.</span>
+            </div>
+            <div class="field"><input type="number" id="decHoriz" value="0"><span class="unit">mm</span></div>
+          </div>
+        </div>
+    </div>
+  </details>
+  <details class="section-card" id="sec-dome">
+    <summary class="section-header"><span class="section-title">Dome &amp; Rotator</span></summary>
+    <div class="section-body">
+<h2>Dome &amp; Rotator</h2>
+        <div class="row">
+          <div><label>Dome radius</label><span class="hint">measured center-to-rim, along the base</span></div>
+          <div class="field"><input type="number" id="radius" value="41"><span class="unit">mm</span><span class="frac-hint" id="hint_radius" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" id="haveDiameter">
+          <label for="haveDiameter">I only measured the diameter — halve it for me</label>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
+          <div class="field"><input type="number" id="shutterWidth" value="20"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+        </div>
+        <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
+          <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
+          <div class="field"><input type="number" id="rotatorRes" value="1" step="0.1"><span class="unit">°</span></div>
+        </div>
+        <div class="row" style="margin-top:12px; display:none;" id="rotatorDirectRow">
+          <div><label>Azimuth Tolerance</label></div>
+          <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts — only affects the 3D preview, not the NINA math</span></div>
+          <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+        </div>
+    </div>
+  </details>
+  
+
+  <details class="section-card" id="sec-optical-system">
+    <summary class="section-header"><span class="section-title">Optical System</span></summary>
+    <div class="section-body">
+      <p class="step-note">Used for the 3D preview and shutter aperture clearance check. Always in mm.</p>
+      <div class="toggle-row" id="guidescopeToggleRow">
+        <input type="checkbox" id="hasGuidescope">
+        <label for="hasGuidescope">I'm using a guide scope — add its correction</label>
+      </div>
+      <div class="sub-fields" id="guidescopeFields" style="display:none;">
+        <div class="row">
+          <div><label>OTA-to-guidescope aperture distance</label></div>
+          <div class="field"><input type="number" id="guideDist" value="6"><span class="unit">mm</span><span class="frac-hint" id="hint_guideDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+        </div>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="toggle-row">
+        <input type="checkbox" id="hasDualSaddle">
+        <label for="hasDualSaddle">Dual saddle with side-by-side OTAs — set Lateral Axis Length</label>
+      </div>
+      <div class="sub-fields" id="lateralFields" style="display:none;">
+        <div class="row" id="lateralMeasureRow">
+          <div><label>Offset of imaging OTA center from mount axis</label></div>
+          <div class="field">
+            <input type="number" id="lateralDist" value="0">
+            <select id="lateralDir"><option value="1">right</option><option value="-1">left</option></select>
+          </div>
+        </div>
+        <div class="row" id="lateralDirectRow" style="display:none;">
+          <div><label>Lateral Axis Length</label></div>
+          <div class="field"><input type="number" id="lateralDirect" value="0"><span class="unit">mm</span></div>
+        </div>
+        <div class="row" style="margin-top:2px;">
+          <div>
+            <label>Which OTA does NINA track?</label>
+            <span class="hint">The centered one defines the dome azimuth — the other rides along, mirrored</span>
+          </div>
+          <div class="field">
+            <select id="centerScope"><option value="between">Between OTA 1 &amp; 2</option><option value="1" selected>OTA 1</option><option value="2">OTA 2</option></select>
+          </div>
+        </div>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="row">
+        <div><label id="otaLengthLabel">OTA tube length</label></div>
+        <div class="field"><input type="number" id="otaLength" value="450"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+        <div><label id="otaApertureLabel">OTA clear aperture</label></div>
+        <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
+      </div>
+      <div id="ota2Fields" style="display:none;">
+        <hr style="border:none; border-top:1px solid var(--line); margin:12px 0;">
+        <div class="row">
+          <div><label>OTA 2 tube length</label></div>
+          <div class="field"><input type="number" id="ota2Length" value="450"><span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <div><label>OTA 2 clear aperture</label></div>
+          <div class="field"><input type="number" id="ota2Aperture" value="130"><span class="unit">mm</span></div>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  
   <details class="section-card" id="sec-horizon">
     <summary class="section-header"><span class="section-title">Local Horizon</span></summary>
     <div class="section-body">
@@ -536,7 +573,7 @@
   <div class="section-card persistent" id="sec-pointing">
     <div class="section-header persistent-header"><span class="section-title">Telescope Pointing</span></div>
     <div class="section-body">
-<h2><span class="step-num">4</span>Telescope Pointing</h2>
+<h2>Telescope Pointing</h2>
         <p class="step-note">Drives the live azimuth calculation and the 3D preview, using the exact same math NINA runs internally.</p>
         <div class="row">
           <div><label>Site latitude</label></div>
@@ -673,12 +710,13 @@ function num(id){ const v = parseFloat(document.getElementById(id).value); retur
 // ── Unit system ──────────────────────────────────────────────────────────────
 // All internal math runs in mm. OTA fields (otaLength, otaAperture, ota2Length,
 // ota2Aperture) are always mm regardless of unit mode.
-let useImperial = false;
+let useImperial = true;
+let _convertingUnits = false;
 const IN_TO_MM = 25.4;
 
 // All non-OTA mm field IDs
 const DOME_MM_FIELD_IDS = [
-  'hDome','hMount','nsDist','ewDist','directNS','directEW','directUD',
+  'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW','directNS','directEW','directUD',
   'shutterWidth','wallHeight','gemRaw','guideDist','gemDirect','radius'
 ];
 
@@ -734,17 +772,33 @@ function setUnitSystem(imperial){
   if(imperial === useImperial) return;
   const factor = imperial ? (1/IN_TO_MM) : IN_TO_MM;
   useImperial = imperial;
+  _convertingUnits = true;  // suppress compute() during field updates
   DOME_MM_FIELD_IDS.forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
     const v = parseFloat(el.value);
     if(!isNaN(v)) el.value = (v * factor).toFixed(imperial ? 4 : 0);
   });
+  _convertingUnits = false;
   refreshDomeUnitLabels();
   document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
   document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
   updateFracHints();
   compute();
+}
+
+
+// Derive signed NS and EW offsets from four wall-to-mount measurements.
+// ns = (distN - distS) / 2  — positive = North of dome center
+// ew = (distE - distW) / 2  — positive = East of dome center
+// Both measurements must be in the same unit (mm internal).
+function getNsEwFromWalls(){
+  const dN = numMmDome('distN'), dS = numMmDome('distS');
+  const dE = numMmDome('distE'), dW = numMmDome('distW');
+  // If mount is closer to the north wall than the south wall, it is north of center.
+  // ns positive = north:  ns = (distS - distN) / 2
+  // ew positive = east:   ew = (distW - distE) / 2
+  return { ns: (dS - dN) / 2, ew: (dW - dE) / 2 };
 }
 
 // Override num() for dome mm fields to return mm regardless of mode
@@ -865,6 +919,7 @@ function fmt(v, unit){
 }
 
 function compute(){
+  if(_convertingUnits) return;
   let ns, ew, ud, gem, lateral;
 
   if(entryMode === 'direct'){
@@ -875,10 +930,10 @@ function compute(){
     lateral = computeSignedLateral();
   } else {
     const hDome = numMmDome('hDome');
-    const hMount = numMmDome('hMount');
+    const hMount = (numMmDome('pierHeight') + numMmDome('mountHeadHeight'));
     ud = hMount - hDome;
-    ns = numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value);
-    ew = numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value);
+    ({ ns, ew } = getNsEwFromWalls());
+    // ew derived above
     gem = 0;
     if(mountType === 'GEM'){
       gem = numMmDome('gemRaw');
@@ -920,8 +975,66 @@ function compute(){
   document.getElementById('offsetLine').setAttribute('x2', px);
   document.getElementById('offsetLine').setAttribute('y2', py);
 
+  // Dual saddle: show OTA 1 and OTA 2 positions offset laterally from mount
+  const dualActive = document.getElementById('hasDualSaddle').checked;
+  const setVis = (id, show) => document.getElementById(id)?.setAttribute('display', show ? '' : 'none');
+  if(dualActive){
+    // Lateral offset is along East/West axis (perpendicular to NS)
+    // rawLateral = half the saddle spacing; OTA1 is to the right (east), OTA2 to the left (west)
+    // Read from computeSignedLateral / lateralDist field
+    const rawLat = entryMode === 'direct'
+      ? num('lateralDirect')
+      : num('lateralDist');
+    const lateralPx = rawLat * scale;
+    // OTA 1 is always at +lateral (right / east), OTA 2 at -lateral (left / west)
+    const ox1 = Math.max(-100, Math.min(100, ew*scale + lateralPx));
+    const ox2 = Math.max(-100, Math.min(100, ew*scale - lateralPx));
+    const oy  = py; // same NS position as mount
+
+    setVis('lateralLine', true);
+    document.getElementById('lateralLine').setAttribute('x1', 130 + ox1);
+    document.getElementById('lateralLine').setAttribute('y1', oy);
+    document.getElementById('lateralLine').setAttribute('x2', 130 + ox2);
+    document.getElementById('lateralLine').setAttribute('y2', oy);
+
+    setVis('ota1Dot', true);
+    document.getElementById('ota1Dot').setAttribute('cx', 130 + ox1);
+    document.getElementById('ota1Dot').setAttribute('cy', oy);
+    setVis('ota1Label', true);
+    document.getElementById('ota1Label').setAttribute('x', 130 + ox1);
+    document.getElementById('ota1Label').setAttribute('y', oy - 10);
+
+    setVis('ota2Dot', true);
+    document.getElementById('ota2Dot').setAttribute('cx', 130 + ox2);
+    document.getElementById('ota2Dot').setAttribute('cy', oy);
+    setVis('ota2Label', true);
+    document.getElementById('ota2Label').setAttribute('x', 130 + ox2);
+    document.getElementById('ota2Label').setAttribute('y', oy - 10);
+
+    // Dim the mount dot — it's the pivot, not the aperture
+    document.getElementById('mountDot').setAttribute('opacity', '0.4');
+    document.getElementById('mountLabel').setAttribute('opacity', '0.4');
+  } else {
+    ['lateralLine','ota1Dot','ota1Label','ota2Dot','ota2Label'].forEach(id => setVis(id, false));
+    document.getElementById('mountDot').setAttribute('opacity', '1');
+    document.getElementById('mountLabel').setAttribute('opacity', '1');
+  }
+
   computeLiveDomeAim();
   if(typeof skyCoverageExpanded !== 'undefined' && skyCoverageExpanded) computeSkyCoverage();
+  // Update the derived offset readout
+  // Update pier height readout
+  if(document.getElementById('calcHMount')){
+    const hMountMm = numMmDome('pierHeight') + numMmDome('mountHeadHeight');
+    document.getElementById('calcHMount').textContent = useImperial ? mmToFrac(hMountMm) : Math.round(hMountMm) + ' mm';
+  }
+  if(document.getElementById('calcNS')){
+    const {ns: nsV, ew: ewV} = getNsEwFromWalls();
+    const fmtV = v => useImperial ? mmToFrac(Math.abs(v)) + (v>=0?' N':' S') : Math.round(v)+' mm '+(v>=0?'N':'S');
+    const fmtH = v => useImperial ? mmToFrac(Math.abs(v)) + (v>=0?' E':' W') : Math.round(v)+' mm '+(v>=0?'E':'W');
+    document.getElementById('calcNS').textContent = fmtV(nsV);
+    document.getElementById('calcEW').textContent = fmtH(ewV);
+  }
   updateFracHints();
 }
 
@@ -1429,13 +1542,11 @@ function initThree(){
     new THREE.CylinderGeometry(0.035, 0.045, 0.34, 16),
     new THREE.MeshStandardMaterial({ color: 0xc8623f, roughness: 0.5, metalness: 0.2 })
   );
-  scene.add(ota);
 
   const apertureRing = new THREE.Mesh(
     new THREE.TorusGeometry(0.05, 0.006, 8, 32),
     new THREE.MeshBasicMaterial({ color: 0xffd9a8 })
   );
-  scene.add(apertureRing);
 
   // Optical axis rendered as a solid tube (not a THREE.Line) so it reads as
   // a bold line regardless of browser/GPU — WebGL caps THREE.Line width at
@@ -1444,7 +1555,6 @@ function initThree(){
     new THREE.CylinderGeometry(0.008, 0.008, 1, 10),
     new THREE.MeshBasicMaterial({ color: 0xffb27a, transparent: true, opacity: 0.95 })
   );
-  scene.add(ray);
 
   const hitMarker = new THREE.Mesh(
     new THREE.SphereGeometry(0.025, 16, 16),
@@ -1457,21 +1567,18 @@ function initThree(){
     new THREE.MeshStandardMaterial({ color: 0x6f93b8, roughness: 0.5, metalness: 0.2 })
   );
   ota2.visible = false;
-  scene.add(ota2);
 
   const apertureRing2 = new THREE.Mesh(
     new THREE.TorusGeometry(0.05, 0.006, 8, 32),
     new THREE.MeshBasicMaterial({ color: 0xa9c4dd })
   );
   apertureRing2.visible = false;
-  scene.add(apertureRing2);
 
   const ray2 = new THREE.Mesh(
     new THREE.CylinderGeometry(0.008, 0.008, 1, 10),
     new THREE.MeshBasicMaterial({ color: 0xa9c4dd, transparent: true, opacity: 0.95 })
   );
   ray2.visible = false;
-  scene.add(ray2);
 
   const hitMarker2 = new THREE.Mesh(
     new THREE.SphereGeometry(0.025, 16, 16),
@@ -1485,6 +1592,46 @@ function initThree(){
     new THREE.MeshBasicMaterial({ color: 0x8b93a3 })
   );
   scene.add(mountMarker);
+
+  // Pier group — all pier/mount elements parented here so they move as one unit.
+  // The group origin = pier base at floor level directly below the mount.
+  const pierGroup = new THREE.Group();
+  scene.add(pierGroup);
+
+  // Pier — tapered red cylinder rising from group origin (floor) upward
+  const pier = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.055, 0.07, 1, 16),
+    new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.6, metalness: 0.4 })
+  );
+  pierGroup.add(pier);
+
+  // Pier flange plate — flat disc at top of pier
+  const pierFlange = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.09, 0.09, 0.012, 20),
+    new THREE.MeshStandardMaterial({ color: 0x3a4555, roughness: 0.4, metalness: 0.8 })
+  );
+  pierGroup.add(pierFlange);
+
+  // Mount head body — latitude wedge. Geometry rebuilt each frame in updateThreeScene.
+  const mountHead = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 1, 1),
+    new THREE.MeshStandardMaterial({ color: 0x2d3a4a, roughness: 0.5, metalness: 0.6, side: THREE.DoubleSide })
+  );
+  pierGroup.add(mountHead);
+
+  // RA axis pivot marker — small sphere at the RA/Dec intersection (= originMm)
+  const raPivot = new THREE.Mesh(
+    new THREE.SphereGeometry(0.028, 14, 14),
+    new THREE.MeshStandardMaterial({ color: 0xc8623f, roughness: 0.3, metalness: 0.5 })
+  );
+  pierGroup.add(raPivot);
+  // OTA and associated meshes rotate around the RA/Dec pivot — children of pierGroup
+  pierGroup.add(ota);
+  pierGroup.add(apertureRing);
+  pierGroup.add(ray);
+  pierGroup.add(ota2);
+  pierGroup.add(apertureRing2);
+  pierGroup.add(ray2);
 
   // Ghost aperture outlines: show each OTA's actual aperture footprint at
   // the point it crosses the dome, so you can see exactly how much of the
@@ -1543,6 +1690,7 @@ function initThree(){
   animate();
 
   three = { scene, camera, renderer, domeWire, wall, floor, ota, apertureRing, ray, hitMarker, mountMarker,
+            pierGroup, pier, pierFlange, mountHead, raPivot,
     ota2, apertureRing2, ray2, hitMarker2, ghostAperture, ghostAperture2, skyHorizonLine, horizonBand, meridianLine, poleMarker,
     cardinalN, cardinalE, cardinalS, cardinalW,
     getSlit: () => slitMesh, setSlit: (m) => { slitMesh = m; } };
@@ -1591,28 +1739,35 @@ function updateGhostAperture(mesh, positionV, dirNorm, apertureRadiusWorld){
   mesh.visible = true;
 }
 
-function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, tubeLen, tubeRad){
+function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, tubeLen, tubeRad, groupOffset, visualOriginL){
+  // groupOffset: subtract the pierGroup world position to get local coords,
+  // since OTA/ring/ray are children of pierGroup.
+  const toLocal = v => groupOffset ? v.clone().sub(groupOffset) : v.clone();
+  const originL = visualOriginL || toLocal(originV);
+  const hitL    = toLocal(hitV);
+
   if(otaMesh.geometry) otaMesh.geometry.dispose();
   otaMesh.geometry = new THREE.CylinderGeometry(tubeRad, tubeRad * 1.15, tubeLen, 16);
-  otaMesh.position.copy(originV).addScaledVector(dirNorm, -tubeLen/2);
+  // OTA centre at the mount head top (visualOriginL) or aperture origin
+  otaMesh.position.copy(originL);
   const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), dirNorm);
   otaMesh.quaternion.copy(quat);
   otaMesh.visible = true;
 
   ringMesh.geometry.dispose();
   ringMesh.geometry = new THREE.TorusGeometry(tubeRad, Math.max(tubeRad*0.06, 0.002), 8, 32);
-  ringMesh.position.copy(originV);
+  ringMesh.position.copy(originL);
   ringMesh.quaternion.copy(quat);
   ringMesh.visible = true;
 
   const rayLen = Math.max(originV.distanceTo(hitV), 0.001);
   rayLine.geometry.dispose();
   rayLine.geometry = new THREE.CylinderGeometry(0.008, 0.008, rayLen, 10);
-  rayLine.position.copy(originV).addScaledVector(dirNorm, rayLen/2);
+  rayLine.position.copy(originL).addScaledVector(dirNorm, rayLen/2);
   rayLine.quaternion.copy(quat);
   rayLine.visible = true;
 
-  marker.position.copy(hitV);
+  marker.position.copy(hitV); // hitMarker stays in world space (it's on the dome surface)
   marker.visible = true;
 }
 
@@ -1628,9 +1783,9 @@ function getGeometryInputs(){
     lateral: 0,
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   } : {
-    ns: numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value),
-    ew: numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value),
-    ud: numMmDome('hMount') - numMmDome('hDome'),
+    ...getNsEwFromWalls(),
+    
+    ud: (numMmDome('pierHeight') + numMmDome('mountHeadHeight')) - numMmDome('hDome'),
     gem: (mountType==='GEM') ? (numMmDome('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*numMmDome('guideDist') : 0)) : 0,
     lateral: 0,
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
@@ -1767,7 +1922,7 @@ function updateSkyHorizonWireframe(latDeg, radiusMm, scale){
   three.poleMarker.visible = showMeridian;
 }
 
-function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm, floorHeightMm, otaLengthMm, otaApertureMm, dualSaddleActive, origin2Mm, ota2LengthMm, ota2ApertureMm, hit2, origin1Mm, hit1, latDeg, horizonClamped){
+function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm, floorHeightMm, otaLengthMm, otaApertureMm, dualSaddleActive, origin2Mm, ota2LengthMm, ota2ApertureMm, hit2, origin1Mm, hit1, latDeg, horizonClamped, nsMm, ewMm){
   if(!three) return;
   const scale = 1.6 / Math.max(radiusMm, 1); // fit dome to a ~1.6 unit radius scene
   three.domeWire.scale.setScalar(radiusMm * scale);
@@ -1789,6 +1944,106 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
 
   const originV = toThree(originMm, scale);
   three.mountMarker.position.copy(originV);
+
+  // ── Pier and mount head ──────────────────────────────────────────────────
+  // Read pier and mount head heights from fields (in mm, converted via numMmDome)
+  // entryMode guard: only show pier in measure mode, not direct entry
+  const inMeasureMode = typeof entryMode !== 'undefined' && entryMode === 'measure';
+  const pierMm      = inMeasureMode ? (typeof numMmDome !== 'undefined' ? numMmDome('pierHeight') : 0) : 0;
+  const mountHdMm   = inMeasureMode ? (typeof numMmDome !== 'undefined' ? numMmDome('mountHeadHeight') : 0) : 0;
+  const pierH       = pierMm * scale;
+  const mountHdH    = mountHdMm * scale;
+  const pierBaseY   = floorY;
+  const pierTopY    = floorY + pierH;
+  const pivotY      = floorY + (pierMm + mountHdMm) * scale; // = originV.y when NS/EW = 0
+
+  // Pier, flange, mount head and RA pivot are all children of pierGroup.
+  // pierGroup is positioned at the pier base (floor level, NS/EW offset).
+  // All child positions are LOCAL (group-relative): Y=0 is the floor, X/Z=0 is the pier centre.
+  const pierDiamMm = inMeasureMode ? numMmDome('pierDiameter') : 200;
+  const pierR      = Math.max(pierDiamMm / 2, 1) * scale;
+  const flangeR    = pierR * 1.4;
+  const flangeThk  = Math.max(pierDiamMm * 0.06, 10) * scale;
+
+  if(three.pierGroup){
+    // pierGroup is always visible so the OTA (a child) always renders.
+    // The pier/flange/wedge children are individually hidden when not in measure mode.
+    const pierFloorX = (ewMm  || 0) * scale;
+    const pierFloorZ = -(nsMm || 0) * scale;
+    three.pierGroup.position.set(pierFloorX, floorY, pierFloorZ);
+    three.pierGroup.visible = true;
+  }
+
+  if(three.pier){
+    three.pier.visible = pierMm > 0;
+    if(pierMm > 0){
+      three.pier.geometry.dispose();
+      three.pier.geometry = new THREE.CylinderGeometry(pierR * 0.88, pierR, pierH, 20);
+      three.pier.position.set(0, pierH / 2, 0);
+    }
+  }
+
+  if(three.pierFlange){
+    three.pierFlange.visible = pierMm > 0;
+    if(pierMm > 0){
+      three.pierFlange.geometry.dispose();
+      three.pierFlange.geometry = new THREE.CylinderGeometry(flangeR, flangeR, flangeThk, 24);
+      three.pierFlange.position.set(0, pierH, 0);
+    }
+  }
+
+  if(three.mountHead){
+    three.mountHead.visible = mountHdMm > 0;
+  }
+  if(three.mountHead && mountHdMm > 0){
+    three.mountHead.geometry.dispose();
+    // Latitude wedge in LOCAL space — base at Y=pierH, top face tilts north at lat angle.
+    // North = −Z, Up = +Y, East = +X in Three.js
+    const s  = pierR * 2.0;
+    const hs = s / 2;
+    const latRad = Math.max(0, Math.min(89, latDeg || 45)) * Math.PI / 180;
+    const hN = mountHdH;
+    const hS = Math.max(mountHdH * (1 - Math.tan(latRad) * s / mountHdH), mountHdH * 0.15);
+    const base = pierH; // LOCAL: base of mount head = top of pier
+
+    const verts = new Float32Array([
+      -hs, base,     hs,   // 0 SW-bot
+       hs, base,     hs,   // 1 SE-bot
+       hs, base,    -hs,   // 2 NE-bot
+      -hs, base,    -hs,   // 3 NW-bot
+      -hs, base+hS,  hs,   // 4 SW-top
+       hs, base+hS,  hs,   // 5 SE-top
+       hs, base+hN, -hs,   // 6 NE-top
+      -hs, base+hN, -hs,   // 7 NW-top
+    ]);
+    const idx = new Uint16Array([
+      0,1,2, 0,2,3,
+      4,7,6, 4,6,5,
+      0,4,5, 0,5,1,
+      2,6,7, 2,7,3,
+      1,5,6, 1,6,2,
+      3,7,4, 3,4,0,
+    ]);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+    geo.setIndex(new THREE.BufferAttribute(idx, 1));
+    geo.computeVertexNormals();
+    three.mountHead.geometry = geo;
+    three.mountHead.position.set(0, 0, 0); // local — vertices already placed correctly
+  }
+
+  if(three.raPivot){
+    if(pierMm > 0){
+      // Measure mode: pivot is at top of mount head in local coords
+      three.raPivot.position.set(0, pierH + mountHdH, 0);
+    } else {
+      // Direct mode: pivot is at originV (world coords) — convert to local
+      const pg = three.pierGroup.position;
+      three.raPivot.position.set(originV.x - pg.x, originV.y - floorY, originV.z - pg.z);
+    }
+    three.raPivot.visible = true;
+  }
+
   updateSkyHorizonWireframe(latDeg, radiusMm, scale);
 
   const R = radiusMm * scale;
@@ -1860,7 +2115,10 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       const origin1V = toThree(origin1Mm, scale);
       const hit1V = toThree(hit1.intersection, scale);
       const dir1Norm = new THREE.Vector3().subVectors(hit1V, origin1V).normalize();
-      drawScope(origin1V, dir1Norm, hit1V, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad);
+      const _vizL1 = (three.pierGroup && typeof pierH !== 'undefined')
+        ? new THREE.Vector3(0, pierH + mountHdH, 0)
+        : null;
+      drawScope(origin1V, dir1Norm, hit1V, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad, three.pierGroup ? three.pierGroup.position : null, _vizL1);
       updateGhostAperture(three.ghostAperture, hit1V, dir1Norm, tubeRad);
       ota1Clears = checkShutterFootprint(hit1V, otaApertureMm, phi, tangent, R, scale, shutterWidthMm);
     } else if(dualSaddleActive){
@@ -1871,7 +2129,10 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       three.hitMarker.visible = false;
       three.ghostAperture.visible = false;
     } else {
-      drawScope(originV, dirNorm, hitV, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad);
+      const _vizL2 = (three.pierGroup && typeof pierH !== 'undefined')
+        ? new THREE.Vector3(0, pierH + mountHdH, 0)
+        : null;
+      drawScope(originV, dirNorm, hitV, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad, three.pierGroup ? three.pierGroup.position : null, _vizL2);
       updateGhostAperture(three.ghostAperture, hitV, dirNorm, tubeRad);
     }
 
@@ -1969,7 +2230,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
 
 // ================= Save / load setup =================
 const SAVE_FIELD_IDS = [
-  'hDome','hMount','nsDist','nsDir','ewDist','ewDir',
+  'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW',
   'radius','haveDiameter','shutterWidth','rotatorRes','wallHeight',
   'gemRaw','hasGuidescope','guideDist','decHoriz',
   'hasDualSaddle','lateralDist','lateralDir','centerScope',
@@ -2134,9 +2395,9 @@ function computeLiveDomeAim(){
     lateral: computeSignedLateral(),
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
   } : {
-    ns: numMmDome('nsDist') * parseFloat(document.getElementById('nsDir').value),
-    ew: numMmDome('ewDist') * parseFloat(document.getElementById('ewDir').value),
-    ud: numMmDome('hMount') - numMmDome('hDome'),
+    ...getNsEwFromWalls(),
+    
+    ud: (numMmDome('pierHeight') + numMmDome('mountHeadHeight')) - numMmDome('hDome'),
     gem: (mountType==='GEM') ? (numMmDome('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5*numMmDome('guideDist') : 0)) : 0,
     lateral: computeSignedLateral(),
     decHoriz: mountType==='AltAz' ? num('decHoriz') : 0
@@ -2241,7 +2502,7 @@ function computeLiveDomeAim(){
   }
 
   if(!three) initThree();
-  updateThreeScene(origin, direction, hit, radius, numMmDome('shutterWidth'), numMmDome('wallHeight'), num('otaLength'), num('otaAperture'), dualSaddleActive, origin2, num('ota2Length'), num('ota2Aperture'), hit2, origin1, hit1, lat, horizonClamped);
+  updateThreeScene(origin, direction, hit, radius, numMmDome('shutterWidth'), numMmDome('wallHeight'), num('otaLength'), num('otaAperture'), dualSaddleActive, origin2, num('ota2Length'), num('ota2Aperture'), hit2, origin1, hit1, lat, horizonClamped, off.ns, off.ew);
   updateStatusBanner();
 }
 
@@ -2264,6 +2525,11 @@ document.getElementById('loadSetupFile').addEventListener('change', function(){
 });
 
 compute();
+// Apply initial unit labels — useImperial=true by default so labels show "in"
+refreshDomeUnitLabels();
+updateFracHints();
+document.getElementById('btnUnitMetric').classList.toggle('active', false);
+document.getElementById('btnUnitImperial').classList.toggle('active', true);
 </script>
 </body>
 </html>

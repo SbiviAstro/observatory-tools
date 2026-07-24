@@ -155,10 +155,8 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <li>GEM and Alt/Az/Fork mount support with meridian-flip pier-side handling</li>
   <li>Automatic pointing constraints</li>
   <li>Full-sky coverage sweep, stretched to your building's actual width/length aspect ratio</li>
-  <li>Interactive <strong>pier-layout floor plan</strong> — click to place each telescope's pier, drag to reposition; NS/EW fields stay in sync</li>
-  <li>Up to 4 telescopes on <strong>independent mounts</strong>, each with its own absolute position (NS/EW from building centre), mount height, mount type (GEM/Alt-Az), axis length, tube length, and aperture</li>
-  <li>Per-telescope swing-radius wall clearance and telescope-to-telescope collision checking with configurable minimum walkway gap</li>
-  <li><strong>Telescope selector dropdown</strong> — any of the 4 mounts can drive the live pointing preview and sky coverage sweep</li>
+  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place</li>
+  <li><strong>Pier and mount 3D model</strong> — red pier cylinder, steel flange, latitude-angle wedge mount head, and orange RA/Dec pivot in the 3D preview</li>
   <li>Exportable horizon profile (.hrz) — walls, roof, and terrain combined</li>
   <li>Save/Load, dark/light mode, Reset to Defaults</li>
 </ul>
@@ -176,9 +174,9 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Roll-Off Roof</h2>
 <p>Pick which wall the roof rolls off past and how far. Three roof shapes:</p>
 <ul>
-  <li><strong>Flat</strong> — one constant height.</li>
-  <li><strong>Peaked (gable)</strong> — ridge parallel to travel, tapering down to eave height on both sides.</li>
-  <li><strong>Wedge (mono-slope)</strong> — a single slope from low to high across the roof's full width. The most common real-world shape for a roll-off roof.</li>
+  <li><strong>Flat</strong> — one constant height. Default 6".</li>
+  <li><strong>Peaked (gable)</strong> — ridge parallel to travel. Enter a pitch ratio (rise:run, default 1:6); the ridge height is computed automatically from the pitch and building span and shown as an orange readout. Eave height is always the wall height.</li>
+  <li><strong>Wedge (mono-slope)</strong> — a single slope from low to high across the roof's full width. Defaults to 12" low side, 36" high side. The most common real-world shape for a roll-off roof.</li>
 </ul>
 
 <h2>Pier Layout &amp; Floor Plan</h2>

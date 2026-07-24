@@ -146,15 +146,63 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h1>Changelog</h1>
 
 <h2>Dome Calculator</h2>
-<p>Versioned as <code>v[major].[three-digit-minor]</code> — e.g. v5.040.</p>
+<p>Versioned as <code>v[major].[three-digit-minor]</code> — e.g. v5.040.000.</p>
 
-<div class="card"><div class="eyebrow">v5.042 — Current</div>
+<div class="card"><div class="eyebrow">v6.00.012 — Current</div>
+<p>Fixed gap between OTA and mount head. The tube was positioned at the GEM aperture origin (which includes the axis offset), floating it above the mount. The OTA centre now sits at the local mount head top so it connects flush. Dome geometry calculations still use the correct aperture origin — only the visual placement changed. (Note: v6.00.011 reverted v6.00.009/010 OTA position experiments and is superseded by v6.00.012.)</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.011</div>
+<p>Imperial units set as default on page load with clean whole-inch defaults: 41" dome radius, 36" dome/wall height, 35" pier height, 8" pier diameter, 11" mount head, 39" wall-to-mount distances, 20" shutter width, 11" GEM axis. Unit labels and fraction hints update immediately on load.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.010</div>
+<p>OTA tube position adjusted — sits 40% of the way between the mount head top and the aperture origin, giving a natural look with a small gap above the mount rather than being flush against it.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.009</div>
+<p>Fixed gap between OTA tube and mount head in the 3D preview. The OTA was positioned at the aperture origin (which includes the GEM axis offset), creating visible space between the tube and the red pivot dot. In measure mode the OTA centre now sits at the mount head top (the local pivot position), so the tube visually sits flush on the mount. The dome geometry calculations still use the correct aperture origin — only the visual placement changed.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.008</div>
+<p>Removed step numbers from all panel headers.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.007</div>
+<p>Fixed: OTA tube disappeared when switching to "I already have my NINA values" (direct entry) mode. The OTA and RA/Dec pivot marker are now always visible regardless of entry mode. The pier cylinder, flange, and wedge mount head correctly hide in direct mode since those measurements aren't entered there — but the telescope itself always renders.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.006</div>
+<p>Two layout changes: (1) Optical Axis Offset card merged into Mount Position — GEM axis, Dec horizontal offset, and direct-entry fields now sit below a divider in the Mount card, reducing the section count. (2) Sky Coverage moved out of the collapsible left column into a full-width collapsible row that spans the page between the NINA options row and the three-column layout, matching how it appeared before the column redesign.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.005</div>
+<p>Telescope Dimensions card renamed to <strong>Optical System</strong>. Guide scope toggle and OTA-to-guidescope distance field moved from Optical Axis Offset into the Optical System card, alongside the dual saddle settings and OTA dimensions — grouping all light-path configuration in one place.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.004</div>
+<p>Schematic diagram updated for dual saddle — when dual saddle is enabled, the top-view schematic now shows OTA 1 (orange) and OTA 2 (blue) as separate dots offset laterally from the mount pivot, connected by a dashed line. The mount dot dims to show it's the geometric pivot, not the aperture. Both dots update live as the lateral offset changes. Single-scope mode is unchanged.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.003</div>
+<p>Dual saddle / Lateral Axis Length toggle and all associated fields moved from Optical Axis Offset into the Telescope Dimensions card, where they belong alongside the OTA tube length and aperture fields.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.002</div>
+<p>OTA tube length and clear aperture moved into a new collapsible <strong>Telescope Dimensions</strong> card, sitting between Optical Axis Offset and Sky Coverage. The Optical Axis Offset card now contains only the geometric offset fields. Both OTA 1 and OTA 2 fields are in the new card. Fields always remain in mm regardless of the Metric/Imperial toggle.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.001</div>
+<p>OTA tube is now centred on the RA/Dec pivot (the red sphere) — the midpoint of the tube aligns with the mount's balance point, matching how a telescope actually sits on a GEM saddle plate.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.000</div>
+<p>Major version — substantial rewrite of the 3D preview and Step 1 measurement workflow.</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><strong>Pier &amp; mount 3D model</strong> — red pier cylinder (user-defined diameter, defaults to 8"), steel flange plate, and square mount head block now appear in the 3D preview. All elements are parented in a single group so they move together. Pier base is fixed at the floor at the mount's NS/EW position and never moves with pointing.</li>
+  <li><strong>Latitude wedge</strong> — mount head is a wedge shape whose top face tilts north at the site latitude, representing the polar axis alignment of a GEM mount.</li>
+  <li><strong>OTA rotates around the mount</strong> — the OTA, aperture ring, and pointing ray are children of the pier group. As HA/Dec changes, the pier and mount stay fixed; only the OTA rotates around the RA/Dec pivot at the top of the mount head.</li>
+  <li><strong>Four-wall measurement workflow</strong> — Step 1 now asks for north wall → mount, south wall → mount, east wall → mount, and west wall → mount. NS/EW offset is derived automatically as <code>(distS − distN) / 2</code> and <code>(distW − distE) / 2</code>, displayed in an orange readout.</li>
+  <li><strong>Pier height split into two fields</strong> — pier height (floor to flange) and mount head height (flange to RA/Dec pivot) entered separately; RA/Dec pivot height is displayed live as their sum.</li>
+  <li><strong>Pier diameter field</strong> — drives the physical width of the pier, flange, and mount head in the 3D scene.</li>
+  <li><strong>Versioning</strong> — switched to <code>v[major].[minor].[patch]</code> matching the ROR calculator. Next change: v6.00.001.</li>
+</ul></div>
+
+<div class="card"><div class="eyebrow">v5.042.000</div>
 <p>Metric / Imperial unit toggle added to the dome calculator, matching the ROR calculator. All non-OTA fields (dome height, mount height, N/S, E/W and Up/Down offsets, direct offsets, shutter width, wall height, GEM axis fields, dome radius) switch between mm and decimal inches. Fraction hints (to the nearest 1/16") appear beside each field in imperial mode. Summary stat chips (N/S, E/W, Up/Down, Dome Radius, GEM Axis, Lateral Axis) also update. OTA fields always remain in mm.</p></div>
 
-<div class="card"><div class="eyebrow">v5.041</div>
+<div class="card"><div class="eyebrow">v5.041.000</div>
 <p>Three-column layout applied to the dome calculator — collapsible setup sections left (Mount Position, Dome & Rotator, Optical Axis, Sky Coverage, Local Horizon), Telescope Pointing middle (persistent/sticky), 3D Preview right (persistent/sticky). Equal <code>1fr 1fr 1fr</code> columns aligned to the header width. CygnusWave rebranded to one word throughout.</p></div>
 
-<div class="card"><div class="eyebrow">v5.040</div>
+<div class="card"><div class="eyebrow">v5.040.000</div>
 <p>Added Subresource Integrity (SRI) hash to the Three.js CDN script tag, fetched from cdnjs's own official SRI repository. Last gap in the client-side security surface.</p></div>
 
 <div class="card"><div class="eyebrow">v5.039</div>
@@ -182,7 +230,43 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Roll-Off-Roof Calculator</h2>
 <p>Versioned as <code>v2.00.000</code>, incrementing <code>.00.001</code> per change.</p>
 
-<div class="card"><div class="eyebrow">v2.00.012 — Current</div>
+<div class="card"><div class="eyebrow">v2.00.024 — Current</div>
+<p>Peaked roof: eave height field removed — the eave is always the wall height. Ridge height is derived from the pitch and displayed as an orange computed readout (e.g. <code>8'11 1/16" from floor</code>).</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.023</div>
+<p>Three changes: (1) Wedge roof defaults updated to 12" low side, 36" high side. (2) Peaked roof now uses a pitch input (rise:run, default 1:6) instead of a manual ridge height. (3) Flat roof default remains 6".</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.022</div>
+<p>Flat roof height default changed to 6".</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.021</div>
+<p>Fixed flat and wedge roof positions in the 3D preview — roof bottoms now sit at the top of the walls rather than at floor level.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.020</div>
+<p>OTA midpoint centred at the RA/Dec pivot — half the tube on each side of the mount attachment point.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.019</div>
+<p>OTA base now sits at the RA/Dec pivot (red dot) and extends in the pointing direction above the mount head — matching the dome calculator assembly: pier → flange → wedge mount head → OTA above.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.018</div>
+<p>OTA positioning matches dome calculator v6.00.008 — tube centre sits at the RA/Dec pivot (red dot), balanced on the saddle at its midpoint.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.017</div>
+<p>OTA base now sits at the red RA/Dec pivot dot — the tube extends above it in the pointing direction, like a scope on a saddle plate.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.016</div>
+<p>OTA tube now connects flush to the mount head — the tube centre sits at the RA/Dec pivot (top of mount head) and is a child of the pier group, so it rotates around the fixed mount as pointing changes. The pier, flange, wedge, and pivot stay stationary.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.015</div>
+<p>Pier and mount head ported from the dome calculator into the 3D preview. A red pier cylinder rises from the floor at the mount's NS/EW position, topped by a steel flange and a latitude-angle wedge mount head (square cross-section, north face taller than south, angle matches site latitude). The RA/Dec pivot orange sphere sits at the top of the mount head. Three new fields added to the Telescopes card: pier height, pier diameter (defaults 35" and 8"), and mount head height (11"). Pier base is a fixed floor point — only the OTA rotates with pointing.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.014</div>
+<p>Multiple telescope feature temporarily hidden from the UI — Telescopes 2/3/4, the Pier Layout &amp; Swing Clearance section, Telescope 1 separate position fields, the pointing telescope dropdown, and the minimum pier gap field are all hidden. The full multi-mount code remains in the file and can be re-enabled by restoring the display styles.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.013</div>
+<p>Imperial units are now the default on page load, matching the dome calculator. All building, roof, and mount fields default to clean whole-inch values (e.g. 157" building, 94" wall height, 47" mount height, 165" roof travel, 11" GEM axis, 20" minimum pier gap). Step numbers removed from all panel headers.</p></div>
+
+<div class="card"><div class="eyebrow">v2.00.012</div>
 <p>Fraction hints added to every non-OTA input field in imperial mode. Each cm/mm-class field now shows a small fractional-inch annotation beside it (e.g. <code>13'1 1/2"</code>) that updates live as you type. Hints are hidden in metric mode and for zero-value fields. Applies to all building, roof, mount position, height, axis offset, pier gap, and custom wall fields.</p></div>
 
 <div class="card"><div class="eyebrow">v2.00.011</div>
