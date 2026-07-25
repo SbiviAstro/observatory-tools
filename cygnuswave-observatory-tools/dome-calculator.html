@@ -218,8 +218,8 @@
       </div>
       <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
         <div class="mount-type-toggle" style="margin:0;">
-          <button id="btnUnitMetric" class="active" onclick="setUnitSystem(false)" title="Metric units (mm)">Metric</button>
-          <button id="btnUnitImperial" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
+          <button id="btnUnitMetric" onclick="setUnitSystem(false)" title="Metric units (mm)">Metric</button>
+          <button id="btnUnitImperial" class="active" onclick="setUnitSystem(true)" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
         </div>
         <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
         <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
@@ -334,7 +334,7 @@
   <details class="section-card" id="sec-mount" open>
     <summary class="section-header"><span class="section-title">Mount Position</span></summary>
     <div class="section-body">
-<h2><span class="step-num">1</span><span id="step1Title">Mount Position</span></h2>
+<h2><span id="step1Title">Mount Position</span></h2>
         <div class="mount-type-toggle" style="margin-top:8px;">
           <button id="btnModeMeasure" class="active">I'll measure my dome</button>
           <button id="btnModeDirect">I already have my NINA values</button>
@@ -344,19 +344,19 @@
         <div id="step1Measure">
           <div class="row" style="margin-top:6px;">
             <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, not the rim</span></div>
-            <div class="field"><input type="number" id="hDome" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="hDome" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Pier height</label><span class="hint">floor to top of pier flange</span></div>
-            <div class="field"><input type="number" id="pierHeight" value="900"><span class="unit">mm</span><span class="frac-hint" id="hint_pierHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="pierHeight" value="35"><span class="unit">mm</span><span class="frac-hint" id="hint_pierHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Pier diameter</label><span class="hint">outer diameter of the pier tube</span></div>
-            <div class="field"><input type="number" id="pierDiameter" value="203"><span class="unit">mm</span><span class="frac-hint" id="hint_pierDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="pierDiameter" value="8"><span class="unit">mm</span><span class="frac-hint" id="hint_pierDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Mount head height</label><span class="hint">pier flange to RA/Dec pivot</span></div>
-            <div class="field"><input type="number" id="mountHeadHeight" value="285"><span class="unit">mm</span><span class="frac-hint" id="hint_mountHeadHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="mountHeadHeight" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_mountHeadHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:10px 14px; margin-top:4px; margin-bottom:8px;">
             <div style="font-size:12px; color:#c8623f; font-family:'Courier New',monospace;">
@@ -367,19 +367,19 @@
           <p class="step-note" style="margin-top:6px; margin-bottom:10px;">Measure the distance from each wall to directly below the mount's RA/Dec pivot point on the floor.</p>
           <div class="row" style="margin-top:6px;">
             <div><label>North wall → mount center</label></div>
-            <div class="field"><input type="number" id="distN" value="1000"><span class="unit">mm</span><span class="frac-hint" id="hint_distN" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="distN" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distN" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>South wall → mount center</label></div>
-            <div class="field"><input type="number" id="distS" value="1000"><span class="unit">mm</span><span class="frac-hint" id="hint_distS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="distS" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>East wall → mount center</label></div>
-            <div class="field"><input type="number" id="distE" value="1000"><span class="unit">mm</span><span class="frac-hint" id="hint_distE" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="distE" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distE" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>West wall → mount center</label></div>
-            <div class="field"><input type="number" id="distW" value="1000"><span class="unit">mm</span><span class="frac-hint" id="hint_distW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="distW" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:10px 14px; margin-top:4px;">
             <div style="font-size:12px; color:var(--text-dim); font-family:'Courier New',monospace; margin-bottom:4px;">
@@ -394,7 +394,7 @@
         <div id="step1Direct" style="display:none;">
           <div class="row" style="margin-top:6px;">
             <div><label>Scope Position +N/-S</label></div>
-            <div class="field"><input type="number" id="directNS" value="80"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="directNS" value="3"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Scope Position +E/-W</label></div>
@@ -402,11 +402,11 @@
           </div>
           <div class="row">
             <div><label>Scope Position +Up/-Down</label></div>
-            <div class="field"><input type="number" id="directUD" value="272"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="directUD" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
         </div>
       <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
-      <h2><span class="step-num">3</span>Optical Axis Offset</h2>
+      <h2>Optical Axis Offset</h2>
         <p class="step-note">Mount type changes what NINA needs here.</p>
         <div class="mount-type-toggle">
           <button id="btnGEM" class="active">Equatorial (GEM)</button>
@@ -419,12 +419,12 @@
               <label>GEM Axis Length (raw)</label>
               <span class="hint">Slew RA to ±90° from the meridian and measure the lateral distance from the RA axis to the center of the OTA aperture.</span>
             </div>
-            <div class="field"><input type="number" id="gemRaw" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemRaw" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="gemRaw" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_gemRaw" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
 
           <div class="row" id="gemDirectRow" style="display:none;">
             <div><label>GEM Axis Length</label></div>
-            <div class="field"><input type="number" id="gemDirect" value="280"><span class="unit">mm</span><span class="frac-hint" id="hint_gemDirect" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div class="field"><input type="number" id="gemDirect" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_gemDirect" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
         </div>
 
@@ -442,10 +442,10 @@
   <details class="section-card" id="sec-dome">
     <summary class="section-header"><span class="section-title">Dome &amp; Rotator</span></summary>
     <div class="section-body">
-<h2><span class="step-num">2</span>Dome &amp; Rotator</h2>
+<h2>Dome &amp; Rotator</h2>
         <div class="row">
           <div><label>Dome radius</label><span class="hint">measured center-to-rim, along the base</span></div>
-          <div class="field"><input type="number" id="radius" value="1040"><span class="unit">mm</span><span class="frac-hint" id="hint_radius" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          <div class="field"><input type="number" id="radius" value="41"><span class="unit">mm</span><span class="frac-hint" id="hint_radius" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
         <div class="toggle-row">
           <input type="checkbox" id="haveDiameter">
@@ -453,7 +453,7 @@
         </div>
         <div class="row" style="margin-top:12px;">
           <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
-          <div class="field"><input type="number" id="shutterWidth" value="500"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          <div class="field"><input type="number" id="shutterWidth" value="20"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
         <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
           <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
@@ -465,7 +465,7 @@
         </div>
         <div class="row" style="margin-top:12px;">
           <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts — only affects the 3D preview, not the NINA math</span></div>
-          <div class="field"><input type="number" id="wallHeight" value="913"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
     </div>
   </details>
@@ -482,7 +482,7 @@
       <div class="sub-fields" id="guidescopeFields" style="display:none;">
         <div class="row">
           <div><label>OTA-to-guidescope aperture distance</label></div>
-          <div class="field"><input type="number" id="guideDist" value="140"><span class="unit">mm</span><span class="frac-hint" id="hint_guideDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          <div class="field"><input type="number" id="guideDist" value="6"><span class="unit">mm</span><span class="frac-hint" id="hint_guideDist" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
       </div>
       <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
@@ -573,7 +573,7 @@
   <div class="section-card persistent" id="sec-pointing">
     <div class="section-header persistent-header"><span class="section-title">Telescope Pointing</span></div>
     <div class="section-body">
-<h2><span class="step-num">4</span>Telescope Pointing</h2>
+<h2>Telescope Pointing</h2>
         <p class="step-note">Drives the live azimuth calculation and the 3D preview, using the exact same math NINA runs internally.</p>
         <div class="row">
           <div><label>Site latitude</label></div>
@@ -710,7 +710,7 @@ function num(id){ const v = parseFloat(document.getElementById(id).value); retur
 // ── Unit system ──────────────────────────────────────────────────────────────
 // All internal math runs in mm. OTA fields (otaLength, otaAperture, ota2Length,
 // ota2Aperture) are always mm regardless of unit mode.
-let useImperial = false;
+let useImperial = true;
 let _convertingUnits = false;
 const IN_TO_MM = 25.4;
 
@@ -2510,6 +2510,10 @@ document.getElementById('loadSetupFile').addEventListener('change', function(){
 });
 
 compute();
+refreshDomeUnitLabels();
+updateFracHints();
+document.getElementById('btnUnitMetric').classList.remove('active');
+document.getElementById('btnUnitImperial').classList.add('active');
 </script>
 </body>
 </html>
