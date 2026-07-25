@@ -148,25 +148,28 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dome Calculator</h2>
 <p>Versioned as <code>v[major].[three-digit-minor]</code> — e.g. v5.040.000.</p>
 
-<div class="card"><div class="eyebrow">v6.00.012 — Current</div>
+<div class="card"><div class="eyebrow">v6.00.013 — rolled back</div>
+<p>OTA tube no longer intersects the mount head or pier when pointing at low or diagonal angles. The tube base is clamped to the RA/Dec pivot height — regardless of pointing direction the back end of the tube never drops below the mount head top.</p></div>
+
+<div class="card"><div class="eyebrow">v6.00.012 — rolled back</div>
 <p>Fixed gap between OTA and mount head. The tube was positioned at the GEM aperture origin (which includes the axis offset), floating it above the mount. The OTA centre now sits at the local mount head top so it connects flush. Dome geometry calculations still use the correct aperture origin — only the visual placement changed. (Note: v6.00.011 reverted v6.00.009/010 OTA position experiments and is superseded by v6.00.012.)</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.011</div>
+<div class="card"><div class="eyebrow">v6.00.011 — rolled back</div>
 <p>Imperial units set as default on page load with clean whole-inch defaults: 41" dome radius, 36" dome/wall height, 35" pier height, 8" pier diameter, 11" mount head, 39" wall-to-mount distances, 20" shutter width, 11" GEM axis. Unit labels and fraction hints update immediately on load.</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.010</div>
+<div class="card"><div class="eyebrow">v6.00.010 — rolled back</div>
 <p>OTA tube position adjusted — sits 40% of the way between the mount head top and the aperture origin, giving a natural look with a small gap above the mount rather than being flush against it.</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.009</div>
+<div class="card"><div class="eyebrow">v6.00.009 — rolled back</div>
 <p>Fixed gap between OTA tube and mount head in the 3D preview. The OTA was positioned at the aperture origin (which includes the GEM axis offset), creating visible space between the tube and the red pivot dot. In measure mode the OTA centre now sits at the mount head top (the local pivot position), so the tube visually sits flush on the mount. The dome geometry calculations still use the correct aperture origin — only the visual placement changed.</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.008</div>
+<div class="card"><div class="eyebrow">v6.00.008 — rolled back</div>
 <p>Removed step numbers from all panel headers.</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.007</div>
+<div class="card"><div class="eyebrow">v6.00.007 — rolled back</div>
 <p>Fixed: OTA tube disappeared when switching to "I already have my NINA values" (direct entry) mode. The OTA and RA/Dec pivot marker are now always visible regardless of entry mode. The pier cylinder, flange, and wedge mount head correctly hide in direct mode since those measurements aren't entered there — but the telescope itself always renders.</p></div>
 
-<div class="card"><div class="eyebrow">v6.00.006</div>
+<div class="card"><div class="eyebrow">v6.00.006 — Current</div>
 <p>Two layout changes: (1) Optical Axis Offset card merged into Mount Position — GEM axis, Dec horizontal offset, and direct-entry fields now sit below a divider in the Mount card, reducing the section count. (2) Sky Coverage moved out of the collapsible left column into a full-width collapsible row that spans the page between the NINA options row and the three-column layout, matching how it appeared before the column redesign.</p></div>
 
 <div class="card"><div class="eyebrow">v6.00.005</div>

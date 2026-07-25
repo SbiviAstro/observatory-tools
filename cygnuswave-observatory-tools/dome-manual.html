@@ -148,22 +148,22 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Feature list</h2>
 <ul>
-  <li>Physical-measurement <strong>or</strong> direct-entry workflow for calibrating dome/mount geometry</li>
-  <li>Live conversion to NINA's exact signed Options → Dome fields, with one-click clipboard copy</li>
-  <li>Real-time dome-azimuth and shutter-clearance calculation, ported from NINA's own sync math</li>
-  <li>Interactive 3D observatory model — dome, wall, floor, OTA, optical axis, shutter door, aperture footprint</li>
-  <li>Dual-saddle support with independent clearance checking for both OTAs</li>
-  <li>GEM and Alt/Az/Fork mount support, including meridian-flip pier-side handling (manual or auto)</li>
-  <li>Local horizon modeling — flat minimum or full custom profile (.hrz/CSV)</li>
-  <li>Automatic pointing constraints: can't point below the horizon or at a non-rising declination</li>
-  <li>Full-sky coverage sweep, split by pier side</li>
-  <li>Celestial equator and elevated-pole reference lines, both genuinely latitude-aware</li>
-  <li>Save/Load complete setup as a portable JSON file; Reset to Defaults</li>
+  <li>NINA dome-sync geometry — ported directly from <code>DomeSynchronization.cs</code></li>
+  <li>Live azimuth and dome-opening offset for any HA/Dec target</li>
+  <li>GEM and Alt/Az/Fork mount support with meridian-flip pier-side handling</li>
+  <li>Dual-saddle (side-by-side OTA) support with lateral axis length</li>
+  <li>Guide-scope correction</li>
+  <li>Shutter aperture clearance check — ghosted aperture circle on the dome surface</li>
+  <li>Full-sky coverage sweep showing which sky regions the shutter can and cannot reach</li>
+  <li>Local terrain horizon layered on top of dome geometry</li>
+  <li>Exportable horizon profile (.hrz)</li>
+  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place with 1/16" fraction hints; OTA optics always in mm</li>
+  <li><strong>Three-column layout</strong> — data input left, telescope pointing centre, 3D preview right</li>
+  <li><strong>Four-wall measurement workflow</strong> (Step 1) — enter N/S/E/W wall-to-mount distances; NS/EW offset derived automatically as (distS−distN)/2 and (distW−distE)/2</li>
+  <li><strong>Optical System card</strong> — guide scope, dual-saddle, and OTA dimensions grouped together</li>
+  <li><strong>Sky Coverage</strong> as a full-width collapsible row above the three-column layout</li>
+  <li>Save/Load JSON setup, dark/light mode, Reset to Defaults</li>
 </ul>
-
-<h2>Units</h2>
-<p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all dome and mount measurement fields (dome height, mount height, N/S/E/W/Up offsets, shutter width, wall height, GEM axis, dome radius) between mm and decimal inches. <strong>OTA tube length and aperture always remain in mm.</strong></p>
-<p>In imperial mode a fractional-inch hint (to the nearest 1/16") appears beside each converted field. The summary chips at the top of the page (N/S, E/W, Up/Down, Dome Radius, GEM Axis, Lateral Axis) also display in the chosen unit.</p>
 
 <h2>What this tool does</h2>
 <p>NINA can slave your dome to your telescope, but only if it knows precisely where your mount sits relative to the dome's center. Getting those numbers right by hand is easy to get wrong. This tool converts either a physical measurement or values you already have into the exact signed fields NINA's Options → Dome tab expects, then shows you live whether your shutter will actually clear the OTA at any given pointing.</p>
