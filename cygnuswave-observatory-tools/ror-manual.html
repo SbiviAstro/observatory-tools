@@ -126,6 +126,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="index.html">Home</a>
     <a href="dome-calculator.html">Dome Calculator</a>
     <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
+    <a href="overview.html">Overview</a>
     <a href="help.html">Help</a>
     <a href="changelog.html">Changelog</a>
     <a href="license.html">License</a>
@@ -133,7 +134,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.00.007</span>
+  <span class="nav-version">v7.00.013</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -206,6 +207,12 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dual Saddle (side-by-side OTAs)</h2>
 <p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
 <p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
+
+<h2>Mount Types</h2>
+<p class="note">Selecting Alt/Az sets the pier height to 12&Prime;, the shortest PlaneWave offers for the L-500 (piers come in 12&Prime; steps up to 48&Prime;). Your equatorial pier height is restored if you switch back.</p>
+<p class="note">The guide-scope correction applies to both mount types &mdash; it shifts the tracked optical axis regardless of whether the mount is equatorial or Alt/Az.</p>
+<p><strong>Equatorial (GEM)</strong> draws a German equatorial: latitude-tilted RA axis, RA and Dec rotors, and a counterweight shaft. Swing clearance is measured from the RA axis and includes the counterweight sweep.</p>
+<p><strong>Alt/Az or Fork</strong> draws a PlaneWave L-500 direct drive: wide base drum, single offset arm and altitude drive drum. There is no counterweight, and the tube pivots about the altitude axis near its balance point, so the swept radius is the longer half of the tube plus the aperture radius &mdash; floored at the L-500's published 650.748&nbsp;mm swing-through. This is materially smaller than the equatorial figure, so an alt/az is not asked to clear a swept volume it never occupies.</p>
 
 <h2>The 3D Mount Model</h2>
 <p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>

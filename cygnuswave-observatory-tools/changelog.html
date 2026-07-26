@@ -126,6 +126,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="index.html">Home</a>
     <a href="dome-calculator.html">Dome Calculator</a>
     <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
+    <a href="overview.html">Overview</a>
     <a href="help.html">Help</a>
     <a href="changelog.html">Changelog</a>
     <a href="license.html">License</a>
@@ -133,7 +134,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.00.007</span>
+  <span class="nav-version">v7.00.013</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -152,17 +153,57 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dome Calculator</h2>
 <p>Versioned as <code>v[major].[three-digit-minor]</code> — e.g. v5.040.000.</p>
 
-<div class="card"><div class="eyebrow">v7.00.007 — Current</div>
+<div class="card"><div class="eyebrow">v7.00.013 — Current</div>
+<p><strong>Removed the up/down spinner arrows from number fields</strong> in both calculators &mdash; 32 fields in the dome tool, 58 in the roll-off-roof tool. The arrows crowded the narrow fields and sat awkwardly next to the fractional-inch hints.</p>
+<p>Nothing else changes: keyboard up/down still steps a field while it has focus, and the pointing sliders and jog buttons are untouched.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Dome defaults resized around the Alt/Az mount, and the Alt/Az pier lowered to 6&Prime;</strong> (dome calculator).</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li>Dome radius 41&Prime; &rarr; <strong>47&Prime;</strong> (2.4&nbsp;m dome, a standard size for this mount and OTA class)</li>
+  <li>Dome height 36&Prime; &rarr; <strong>38&Prime;</strong></li>
+  <li>Alt/Az pier default 12&Prime; &rarr; <strong>6&Prime;</strong></li>
+</ul>
+<p>The point of the 6&Prime; pier is where it puts the altitude axis. The L-500 carries its altitude axis 820&nbsp;mm (32.3&Prime;) above the pier flange, so a 6&Prime; pier places it 38.3&Prime; above the floor &mdash; within 0.3&Prime; of the 38&Prime; springline. The swing sphere is then almost exactly concentric with the dome hemisphere, which is the condition that needs the smallest dome: required radius falls to 25.9&Prime; against 47&Prime; available, a 21.1&Prime; margin.</p>
+<p>By comparison the previous 12&Prime; pier lifted the altitude axis 8.3&Prime; above the springline and pushed the required radius to 33.9&Prime;. The equatorial default pier stays at 35&Prime; and is restored when switching back.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Fixed: the pointing ray did not start at the telescope in Alt/Az (roll-off-roof tool).</strong> The ray was built from the German equatorial model's optical axis even while the L-500 was the mount on screen. Its direction was right, but it began about 0.17 scene units to one side, so the line appeared to miss the tube. It now takes its optical axis from whichever mount is actually displayed, and starts exactly at the tube in both mount types.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Alt/Az defaults to a 12&Prime; pier.</strong> Selecting Alt/Az sets the pier height to 12&Prime; &mdash; the shortest PlaneWave sells for the L-500, which offers piers in 12&Prime; steps from 12&Prime; to 48&Prime;. The equatorial pier height is remembered and restored when switching back, so nothing is lost. Works in metric too (305&nbsp;mm on the dome tool, 30.5&nbsp;cm on the roll-off-roof tool).</p>
+<p><strong>Fixed: pier fields were wrong in metric (roll-off-roof tool).</strong> Pier height, pier diameter and mount head height convert with the unit toggle, but were being read as though always in inches. Switching to metric multiplied them by 2.54 &mdash; an 889&nbsp;mm pier became 2258&nbsp;mm, and the 3D model, pier seating and clearance all followed the inflated figure. They now honour the unit toggle, so 35&Prime; and 88.9&nbsp;cm both give 889&nbsp;mm.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Alt/Az maths corrected.</strong> Auditing the Alt/Az path after the L-500 model went in turned up three faults where the calculations still assumed a German equatorial:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><strong>Guide-scope correction was GEM-only.</strong> The half-separation offset was added to the GEM axis and nowhere else, so ticking "I'm using a guide scope" had no effect at all on an Alt/Az. A guide scope shifts the tracked optical axis whatever the mount is; it now applies to the Alt/Az axis in both tools.</li>
+  <li><strong>Alt/Az swing radius ignored the axis offset.</strong> Any offset between the altitude axis and the optical axis adds to the swept reach, but was being dropped. A 20&Prime; offset on a 2000&nbsp;mm tube now raises the swept radius from 1220&nbsp;mm to 1728&nbsp;mm, so wall and ceiling clearance reflect it.</li>
+  <li><strong>The Alt/Az axis field ignored the unit toggle (dome).</strong> Every other geometry field converted between metric and imperial; this one stayed in millimetres while the rest of the page read in inches &mdash; a trap only Alt/Az users could hit. It now converts with everything else.</li>
+</ul>
+<p>Already correct and left alone: the dome azimuth solver has a proper Alt/Az branch, pier side is excluded from it, the pier-side control and GEM-only fields are hidden, and sky coverage collapses to a single plot since an Alt/Az has no meridian flip.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Alt/Az and Fork now use a PlaneWave L-500 direct drive model.</strong> Selecting Alt/Az swaps the German equatorial model for the L-500: wide base drum, single offset arm, large altitude drive drum, and an open-truss OTA. Switching back to Equatorial restores the GEM. Only one mount is ever drawn.</p>
+<p>The L-500 is driven from each tool's own <code>haDecToAltAz()</code>, so the rendered tube and the calculated sky position come from one source. Verified across 15 pointing combinations per tool: <strong>0.0000&deg; in both altitude and azimuth</strong>.</p>
+<p><strong>Swing clearance now matches the mount type</strong> (roll-off-roof tool). The old formula assumed a counterweight sweeping opposite the tube, which overstates an alt/az by a wide margin. Alt/Az now uses the longer half of the tube plus the aperture radius, floored at the L-500's published 650.748&nbsp;mm swing-through:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li>600&nbsp;mm OTA &mdash; GEM 979&nbsp;mm, Alt/Az 651&nbsp;mm</li>
+  <li>2000&nbsp;mm OTA &mdash; GEM 2379&nbsp;mm, Alt/Az 1220&nbsp;mm</li>
+</ul>
+<p>Wall, floor and ceiling clearance follow that figure, so an alt/az is no longer told it needs a GEM's swept volume.</p></div>
+
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>RA is now the mechanical Right Ascension axis angle, &minus;80&deg; to +80&deg; with 0 at the middle.</strong> At RA&nbsp;0 the mount sits in park: the counterweight swings down into line with the pier, and with Dec&nbsp;90 the tube lies along the polar axis. The counterweight rises symmetrically either side of 0.</p>
-<p>RA maps to hour angle internally as <code>HA = &minus;6h + RA/15</code>, applied in one place so the 3D view, the clearance verdict, the status line and the sky-coverage sweep all read from the same value. Verified across 36 pointing combinations per tool: the rendered tube matches each tool's own calculated sky position to <strong>0.0000&deg; in both altitude and azimuth</strong> &mdash; the picture and the numbers can no longer disagree, which was the open issue in v7.00.007.</p>
+<p>RA maps to hour angle internally as <code>HA = &minus;6h + RA/15</code>, applied in one place so the 3D view, the clearance verdict, the status line and the sky-coverage sweep all read from the same value. Verified across 36 pointing combinations per tool: the rendered tube matches each tool's own calculated sky position to <strong>0.0000&deg; in both altitude and azimuth</strong> &mdash; the picture and the numbers can no longer disagree, which was the open issue in v7.00.013.</p>
 <p>The RA jog buttons now step in degrees to match the control.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
-<p><strong>RA rotation reverted to its original direction</strong> (<code>180 + haDeg</code>), as requested. Declination keeps the corrected 0&ndash;180&deg; sweep from v7.00.007 &mdash; that change is unaffected.</p>
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>RA rotation reverted to its original direction</strong> (<code>180 + haDeg</code>), as requested. Declination keeps the corrected 0&ndash;180&deg; sweep from v7.00.013 &mdash; that change is unaffected.</p>
 <p><strong>Known issue this reintroduces.</strong> With the original direction the 3D view and the calculations disagree for any RA other than 0h, mirrored east&harr;west &mdash; about 66&deg; apart at RA&nbsp;2h and 82&deg; at RA&nbsp;4h. The clearance verdict, status line and sky-coverage sweep all follow the calculated value, so the picture can show the tube on the opposite side of the sky from the pointing being assessed.</p>
 <p>The underlying cause is that the pointing field is labelled Right Ascension but is treated as hour angle throughout the maths, and the two run in opposite directions (HA = LST &minus; RA). Resolving it means either restoring the Hour Angle label, or converting RA to hour angle at the input so the label, the picture and the numbers all agree.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>Declination now sweeps the full mount range, 0&ndash;180&deg; with the pole at 90&deg;.</strong> The Dec control runs 0 to 180 with 90 in the middle: 90 puts the tube on the polar axis, and moving either way swings it symmetrically down toward the horizon. Past 90 the tube carries over the pole and down the far side, which is what the Dec axis physically does.</p>
 <p><strong>Fixed: the 3D pointing did not match the sky.</strong> Two faults were found while verifying the new range:</p>
 <ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
@@ -171,7 +212,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </ul>
 <p>Pointing is now validated against textbook hour-angle/declination to altitude/azimuth across 140 combinations per tool, spanning latitudes +60&deg; to &minus;33&deg;: worst altitude error 0.0000&deg;, worst azimuth error 0.0000&deg;.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>Removed the pointing clamps.</strong> Declination and hour angle can now be driven across their full range in both tools. Three separate clamps were rewriting the input fields as you typed or dragged, which made the controls feel stuck:</p>
 <ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
   <li>An obstruction clamp that snapped HA and Dec back onto the wall/roof/horizon limit whenever a pointing was blocked.</li>
@@ -180,22 +221,22 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </ul>
 <p>Nothing is lost: blocked pointings are still reported by the status line and the red pointing ray, and the "never rises at this latitude" warning still appears. The tools now report rather than override.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>Fixed: the pier-side selector did nothing, so Dec appeared to move only one way.</strong> Both tools have an East/West pier-side control, but the 3D mount was being updated with <code>pierSide</code> hard-coded to east, so the meridian flip never happened and the tube stayed on one side of the pier permanently.</p>
 <p>There was a second fault behind it: the selector emits <code>"East"</code>/<code>"West"</code> while the mount model compares lowercase, so even passing the value straight through would have failed silently. The value is now normalised. Switching pier side inverts the counterweight and swings the tube across the pier while continuing to aim at the same point in the sky.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>Fixed: the telescope disappeared in some states.</strong> The 3D mount was gated behind a pier measurement, so it was hidden entirely whenever no pier height existed &mdash; most visibly in the dome tool's "I already have my NINA values" mode, where the telescope vanished every time. Setting pier height to zero did the same, and on the roll-off-roof tool it left the mount frozen on stale geometry instead.</p>
 <p>The telescope now always renders. When there is no pier measurement the mount is drawn with nominal structure and only the pier and base flange are hidden, via a new <code>showPier()</code> control on the mount model. This restores the behaviour originally fixed in v6.00.007, which the switch to the kinematic mount had undone.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
+<div class="card"><div class="eyebrow">v7.00.013</div>
 <p><strong>Dual saddle on the roll-off-roof tool</strong> &mdash; closes the parity gap with the dome calculator. New controls in the Optical System card: a dual-saddle toggle, the off-axis offset for each tube, and OTA&nbsp;2 length and aperture. Both tubes are drawn side by side in the 3D preview and share the same pointing.</p>
 <p>The offset also feeds the clearance maths: swing radius now includes the lateral offset and uses the larger of the two tubes, so the wall, floor and ceiling checks account for the extra reach rather than under-reporting it.</p>
 <p><strong>Swept-volume radius now tracks the optics.</strong> It was computed once when the mount was built, so widening the dual-saddle separation or lengthening a tube left the swept sphere at its original size. It is recomputed whenever the optics change, in both tools.</p>
 <p><strong>Fixed: guide-scope distance field was unreachable (ROR).</strong> The guide-scope panel had no show/hide listener, so ticking the box never revealed the OTA-to-guidescope distance input. Both the guide-scope and dual-saddle panels are now wired to a shared handler.</p></div>
 
-<div class="card"><div class="eyebrow">v7.00.007</div>
-<p><strong>Unified versioning.</strong> Both calculators now share a single version line starting at v7.00.007 (previously dome v6.00.012 and ROR v2.00.042). The version is now shown in the page header of each tool, so the build can be identified from the UI rather than only the filename.</p>
+<div class="card"><div class="eyebrow">v7.00.013</div>
+<p><strong>Unified versioning.</strong> Both calculators now share a single version line starting at v7.00.013 (previously dome v6.00.012 and ROR v2.00.042). The version is now shown in the page header of each tool, so the build can be identified from the UI rather than only the filename.</p>
 <p>Consolidated in this release:</p>
 <ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
   <li><strong>GEM mount model</strong> — both tools render the telescope through <code>createGEMMount</code>, a proper kinematic chain (latitude-tilted RA axis &rarr; RA rotor &rarr; Dec axis &rarr; Dec rotor &rarr; optics). All legacy hand-drawn OTA, ray and pier meshes are retired.</li>

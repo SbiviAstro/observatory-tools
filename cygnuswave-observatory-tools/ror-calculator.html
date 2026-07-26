@@ -154,6 +154,14 @@
   @media(max-width:800px){ .two-col-layout{ grid-template-columns:1fr; padding:0 16px 48px; } .col-persistent,.col-preview{ position:static; } }
   @media(max-width:480px){ .two-col-layout{ padding:0 10px 36px; } .section-body{ padding:14px 14px 16px; } .section-header{ padding:11px 14px; } }
 
+
+  /* Hide the browser's native number spinners. Keyboard arrow keys still step
+     the value, and the pointing sliders / jog buttons are unaffected. */
+  input[type=number]::-webkit-outer-spin-button,
+  input[type=number]::-webkit-inner-spin-button{
+    -webkit-appearance:none; appearance:none; margin:0;
+  }
+  input[type=number]{ -moz-appearance:textfield; appearance:textfield; }
 </style>
 <style>
 #cw-sitenav a:hover { color:#c8623f !important; }
@@ -207,7 +215,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.00.007</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.00.013</span>
 </div>
 <div class="wrap">
   <header>
@@ -900,6 +908,13 @@ function numGemAxis(){
   const guideCorr = hasGuide ? 0.5 * num('guideDist') * IN_TO_MM : 0;
   return base + guideCorr;
 }
+// Guide-scope correction belongs to the optical train, not the mount type, so
+// it applies to the Alt/Az (fork) axis as well - previously GEM only.
+function numAltAzAxis(){
+  const hasGuide = document.getElementById('hasGuidescope') && document.getElementById('hasGuidescope').checked;
+  return numCm('decHoriz') + (hasGuide ? 0.5 * num('guideDist') * IN_TO_MM : 0);
+}
+
 
 
 const CM_TO_MM = 10;
@@ -976,6 +991,27 @@ function mmToFrac(mm){ return toFracInches(mm / IN_TO_MM); }
 
 // Dual saddle: distance of each OTA from the mount axis (mm); 0 when disabled.
 function rorDualOn(){ const e=document.getElementById('hasDualSaddle'); return !!(e && e.checked); }
+
+// Swept radius for the current mount type.
+//  GEM   - counterweight shaft sweeps opposite the tube, so reach is measured
+//          from the RA axis: axis offset + full tube + aperture radius.
+//  AltAz - fork/single-arm direct drive has no counterweight. The tube pivots
+//          about the altitude axis near its balance point, so the reach is the
+//          longer half of the tube plus the aperture radius, floored at the
+//          mount's published swing-through (PlaneWave L-500: 650.748 mm).
+const L500_SWING_THROUGH = 650.748;
+function rorSwingRadius(axisMm){
+  const len = Math.max(num('otaLength'), rorDualOn() ? num('ota2Length') : 0);
+  const ap  = Math.max(num('otaAperture'), rorDualOn() ? num('ota2Aperture') : 0);
+  if(mountType === 'GEM'){
+    return axisMm + rorLateral() + len + ap / 2;
+  }
+  // Any offset between the altitude axis and the optical axis adds to the reach.
+  const backFocus = 0.44;                       // matches the L-500 OTA model
+  const longerHalf = len * Math.max(backFocus, 1 - backFocus);
+  return Math.max(L500_SWING_THROUGH,
+                  Math.abs(axisMm) + longerHalf + ap / 2 + rorLateral());
+}
 function rorLateral(){ return rorDualOn() ? Math.abs(num('lateralDist')) : 0; }
 
 function getRorNsEwFromWalls(){
@@ -1361,7 +1397,7 @@ function getPointingScope(){
       mx: getRorNsEwFromWalls().ew, my: getRorNsEwFromWalls().ns,
       mountH: numCm('scope1MountH'),
       mtype: mountType,
-      axis: mountType === 'GEM' ? numGemAxis() : numCm('decHoriz'),
+      axis: mountType === 'GEM' ? numGemAxis() : numAltAzAxis(),
       otaLen: num('otaLength'), otaAp: num('otaAperture')
     };
   }
@@ -1387,7 +1423,22 @@ let flipAnimating = false;
 document.getElementById('btnGEM').addEventListener('click', () => setMountType('GEM'));
 document.getElementById('btnAltAz').addEventListener('click', () => setMountType('AltAz'));
 function setMountType(t){
+  const prev = mountType;
   mountType = t;
+  // The L-500 ships on piers in 12" steps starting at 12", so an Alt/Az defaults
+  // to the shortest. Remember the equatorial pier so switching back restores it.
+  if(t !== prev){
+    const ph = document.getElementById('rorPierHeight');
+    if(ph){
+      if(t === 'AltAz'){
+        if(prev === 'GEM') ph.dataset.gemValue = ph.value;
+        ph.value = useImperial ? 12 : 30.5;
+      } else if(ph.dataset.gemValue !== undefined){
+        ph.value = ph.dataset.gemValue;
+      }
+      ph.dispatchEvent(new Event('input'));
+    }
+  }
   document.getElementById('btnGEM').classList.toggle('active', t==='GEM');
   document.getElementById('btnAltAz').classList.toggle('active', t==='AltAz');
   document.getElementById('gemFields').style.display = t==='GEM' ? 'block' : 'none';
@@ -1542,7 +1593,7 @@ function setScope4MountType(t){ setScopeMountType(4,t); }
 // point — independent of every other mount in the building.
 function getScopeList(){
   const scopes = [];
-  const t1Axis = mountType === 'GEM' ? numGemAxis() : numCm('decHoriz');
+  const t1Axis = mountType === 'GEM' ? numGemAxis() : numAltAzAxis();
   scopes.push({
     name: 'Telescope 1',
     mx: getRorNsEwFromWalls().ew,
@@ -1551,9 +1602,7 @@ function getScopeList(){
     // Dual saddle puts the outer tube `lateral` off-axis, so the swept reach
     // grows. Take the larger tube and add the offset, keeping the same
     // conservative linear form already used for the single-OTA case.
-    swingRadius: t1Axis + rorLateral()
-      + Math.max(num('otaLength'), rorDualOn() ? num('ota2Length') : 0)
-      + Math.max(num('otaAperture'), rorDualOn() ? num('ota2Aperture') : 0) / 2
+    swingRadius: rorSwingRadius(t1Axis)
   });
   [2,3,4].forEach(n => {
     if(!document.getElementById(`scope${n}Enabled`).checked) return;
@@ -1947,7 +1996,7 @@ const FP = {
 
       // Swing radius circle (faint)
       const axis = n===1
-        ? (typeof mountType!=='undefined' && mountType==='GEM' ? numGemAxis() : numCm('decHoriz'))
+        ? (typeof mountType!=='undefined' && mountType==='GEM' ? numGemAxis() : numAltAzAxis())
         : (scopeMountTypes[n]==='GEM' ? numCm(`scope${n}GemAxis`) : numCm(`scope${n}DecHoriz`));
       const otaLen = n===1 ? num('otaLength') : num(`scope${n}Length`);
       const otaAp  = n===1 ? num('otaAperture') : num(`scope${n}Aperture`);
@@ -2925,6 +2974,456 @@ function createGEMMount(THREE, options) {
 
 if (typeof module !== 'undefined' && module.exports) module.exports = createGEMMount;
 
+/*
+ * l500-mount-v2.js — PlaneWave L-500 Direct Drive Mount (SKU 600550)
+ * three.js r128. Drop-in replacement for l500-mount.js: same API, corrected
+ * geometry. Works standalone or inside createMountArray() from ror-mounts.js.
+ *
+ * WHAT CHANGED FROM v1, and why it matters to the calculator:
+ *
+ * 1. footprintRadius is now the swing radius, not swingRadius + saddleOffset.
+ *    The single arm stands off to one side but the TELESCOPE sits over the
+ *    azimuth axis — that is the point of a single-arm design. v1 overstated
+ *    the wall clearance requirement by roughly 230 mm.
+ * 2. Wide low base drum (~680 mm across, ~200 mm tall) on a narrower pier
+ *    adapter, with the arm rising from its edge. v1 had a tall pedestal.
+ * 3. Large altitude drum at the top of the arm — the direct drive motor and
+ *    bearing housing, ~450 mm across, protruding outboard past the arm face.
+ *    It is the dominant visual feature and v1 omitted it entirely.
+ * 4. Open-truss OTA option, since the CDK line this mount is sold with is a
+ *    truss design. Set otaStyle:'tube' for a solid tube instead.
+ *
+ * DIMENSIONS — published by PlaneWave:
+ *   swingThrough 650.748 mm (25.62") from the altitude axis
+ *   encoderRing  152 mm stainless rings on BOTH axes
+ *   six 1/2-13 hold-down screws; piers in 12" steps from 12" to 48"
+ *   latitude 0-90 deg, equatorial only via the wedge (built per latitude,
+ *   +/-3 deg of adjustment)
+ *
+ * DIMENSIONS — estimated from photographs scaled against the known 152 mm
+ * encoder rings. PlaneWave publishes no dimensioned drawing. Every one of
+ * these is an option: measure your mount and override.
+ *   baseDiameter baseHeight armOffset armDepth armWidth
+ *   altAxisHeight altDrumDiameter altDrumLength
+ *
+ * UNITS: unit-agnostic, but the defaults are millimetres.
+ */
+
+function createL500Mount(THREE, options) {
+  var o = options || {};
+  var DEG = Math.PI / 180;
+  function num(v, d) { return (v === null || v === undefined || isNaN(v)) ? d : +v; }
+
+  var SPEC = { swingThrough: 650.748, encoderRing: 152, weightKg: 100, loadKg: 91 };
+
+  var P = {
+    mode: o.mode === 'eq' ? 'eq' : 'altaz',
+    detail: o.detail === 'high' ? 'high' : 'low',
+    shading: o.shading === 'lit' ? 'lit' : 'flat',
+    otaStyle: o.otaStyle === 'tube' ? 'tube' : 'truss',
+
+    pierHeight: num(o.pierHeight, 609.6),
+    pierDiameter: num(o.pierDiameter, 340),
+
+    // estimated mount geometry
+    baseDiameter: num(o.baseDiameter, 680),
+    baseHeight: num(o.baseHeight, 200),
+    armOffset: num(o.armOffset, 290),        // azimuth axis to arm centreline
+    armDepth: num(o.armDepth, 250),          // arm thickness, along the alt axis
+    armWidth: num(o.armWidth, 470),          // arm width, across the alt axis
+    altAxisHeight: num(o.altAxisHeight, 820),// pier flange to altitude axis
+    altDrumDiameter: num(o.altDrumDiameter, 450),
+    altDrumLength: num(o.altDrumLength, 290),
+
+    // optics — defaults are CDK17 class
+    otaOffset: num(o.otaOffset, 0),          // azimuth axis to OTA centreline
+    otaAperture: num(o.otaAperture, 432),
+    otaLength: num(o.otaLength, 1100),
+    otaBackFocus: num(o.otaBackFocus, 0.44), // fraction of length behind the axis
+
+    wedgeLatitude: num(o.wedgeLatitude, 40),
+    armSide: o.armSide === 'west' ? -1 : 1,
+    position: Object.assign({ east: 0, north: 0, height: null }, o.position || {}),
+    upAxis: o.upAxis || 'y',
+    northAxis: o.northAxis || '-z',
+    segments: o.segments || 24,
+    label: o.label || 'L-500'
+  };
+
+  var C = Object.assign({
+    body: 0xf4f3f0, bodyDark: 0xdcd9d3, trim: 0x2a2a28, black: 0x1f1f1e,
+    steel: 0x9aa0a4, pier: 0xbfbdb6, axis: 0x7e8b99, optical: 0xffb020,
+    sweep: 0x4a90d9, clash: 0xd9534f, estop: 0xc24634
+  }, o.colors || {});
+
+  var A = P.altAxisHeight, flangeZ = -A;
+  var baseR = P.baseDiameter / 2, drumR = P.altDrumDiameter / 2;
+  var ringR = SPEC.encoderRing / 2;
+  var armX = P.armSide * P.armOffset, armHalfD = P.armDepth / 2;
+
+  // ---- helpers ------------------------------------------------------------
+  var store = [], matCache = {};
+  function keep(x) { store.push(x); return x; }
+  function surf(color) {
+    var k = P.shading + ':' + color;
+    if (!matCache[k]) matCache[k] = keep(P.shading === 'lit'
+      ? new THREE.MeshStandardMaterial({ color: color, roughness: 0.62, metalness: 0.08 })
+      : new THREE.MeshBasicMaterial({ color: color }));
+    return matCache[k];
+  }
+  function lineMat(color, opacity) {
+    var k = 'L:' + color + ':' + opacity;
+    if (!matCache[k]) matCache[k] = keep(new THREE.LineBasicMaterial({
+      color: color, transparent: true, opacity: opacity }));
+    return matCache[k];
+  }
+  function solid(geom, color, opacity) {
+    var g = new THREE.Group(), m = surf(color);
+    if (opacity !== undefined && opacity < 1) {
+      m = m.clone(); m.transparent = true; m.opacity = opacity; keep(m);
+    }
+    g.add(new THREE.Mesh(keep(geom), m));
+    g.add(new THREE.LineSegments(keep(new THREE.EdgesGeometry(geom, 28)),
+      lineMat(0x000000, P.shading === 'lit' ? 0.15 : 0.26)));
+    return g;
+  }
+  function cylZ(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateX(Math.PI / 2); return solid(g, color, opacity);
+  }
+  function cylX(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateZ(Math.PI / 2); return solid(g, color, opacity);
+  }
+  function cylY(r, len, color, opacity, open) {
+    return solid(new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open), color, opacity);
+  }
+  function boxAt(w, d, h, color) { return solid(new THREE.BoxGeometry(w, d, h), color); }
+  function segment(a, b, color, opacity) {
+    var g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3().fromArray(a), new THREE.Vector3().fromArray(b)]);
+    return new THREE.Line(keep(g), lineMat(color, opacity));
+  }
+
+  // ---- scene graph --------------------------------------------------------
+  var group = new THREE.Group();
+  group.name = 'mount:' + P.label;
+  var frame = new THREE.Group();
+  if (P.upAxis === 'y') frame.rotation.x = -Math.PI / 2;
+  group.add(frame);
+
+  function placeGroup() {
+    var e = P.position.east, n = P.position.north;
+    var h = P.position.height === null ? (P.pierHeight + A) : P.position.height;
+    if (P.upAxis === 'y') group.position.set(e, h, P.northAxis === '+z' ? n : -n);
+    else group.position.set(e, n, h);
+  }
+  placeGroup();
+
+  var lowBins = [], highBins = [];
+  function bins(node) {
+    var lo = new THREE.Group(), hi = new THREE.Group();
+    node.add(lo); node.add(hi);
+    lowBins.push(lo); highBins.push(hi);
+    return { lo: lo, hi: hi };
+  }
+
+  // ---- pier and wedge (static) -------------------------------------------
+  var bFrame = bins(frame);
+  (function base() {
+    var pr = P.pierDiameter / 2;
+    var lo = cylZ(pr, P.pierHeight, C.pier, 0.9);
+    lo.position.z = flangeZ - P.pierHeight / 2; bFrame.lo.add(lo);
+
+    var hi = cylZ(pr, P.pierHeight * 0.9, C.pier);
+    hi.position.z = flangeZ - P.pierHeight * 0.55; bFrame.hi.add(hi);
+    var foot = cylZ(pr * 1.9, P.pierHeight * 0.05, C.pier);
+    foot.position.z = flangeZ - P.pierHeight + P.pierHeight * 0.025; bFrame.hi.add(foot);
+    var adapter = cylZ(pr * 1.4, A * 0.06, C.pier);
+    adapter.position.z = flangeZ - A * 0.03; bFrame.hi.add(adapter);
+    for (var i = 0; i < 6; i++) {
+      var a = i * Math.PI / 3;
+      var b = cylZ(A * 0.016, A * 0.02, C.trim);
+      b.position.set(Math.cos(a) * pr * 0.85, Math.sin(a) * pr * 0.85, flangeZ + A * 0.01);
+      bFrame.hi.add(b);
+    }
+  })();
+
+  var wedge = new THREE.Group(); frame.add(wedge);
+  var bWedge = bins(wedge);
+  if (P.mode === 'eq') {
+    wedge.rotation.x = -(90 - P.wedgeLatitude) * DEG;
+    var wLo = boxAt(P.baseDiameter * 0.9, P.baseDiameter * 0.95, A * 0.05, C.bodyDark);
+    wLo.position.z = -A * 0.025; bWedge.lo.add(wLo);
+    var wHi = boxAt(P.baseDiameter * 0.95, P.baseDiameter * 1.05, A * 0.09, C.bodyDark);
+    wHi.position.z = -A * 0.045; bWedge.hi.add(wHi);
+  }
+
+  // ---- azimuth rotor: base drum plus the single arm ----------------------
+  var azRotor = new THREE.Group(); wedge.add(azRotor);
+  var bAz = bins(azRotor);
+
+  var axes = new THREE.Group(); wedge.add(axes);
+  axes.add(segment([0, 0, flangeZ - A * 0.3], [0, 0, A * 1.6], C.axis, 0.7));
+  azRotor.add(segment([-A * 1.1, 0, 0], [armX + P.armSide * A * 0.5, 0, 0], C.axis, 0.7));
+
+  (function azBody() {
+    var baseTop = flangeZ + P.baseHeight;
+    var armTop = A * 0.18;   // arm carries a little past the altitude axis
+
+    // low: drum plus a plain slab arm
+    var dLo = cylZ(baseR, P.baseHeight, C.body, 0.95);
+    dLo.position.z = flangeZ + P.baseHeight / 2; bAz.lo.add(dLo);
+    var aLo = boxAt(P.armDepth, P.armWidth, armTop - baseTop + A * 0.02, C.body, 0.95);
+    aLo.position.set(armX, 0, (baseTop + armTop) / 2); bAz.lo.add(aLo);
+
+    // high: drum with trim ring, arm with hardware, altitude drum
+    var dHi = cylZ(baseR, P.baseHeight, C.body);
+    dHi.position.z = flangeZ + P.baseHeight / 2; bAz.hi.add(dHi);
+    var trimRing = cylZ(baseR * 1.02, P.baseHeight * 0.09, C.bodyDark);
+    trimRing.position.z = baseTop - P.baseHeight * 0.12; bAz.hi.add(trimRing);
+    var hatch = boxAt(baseR * 0.62, baseR * 0.45, A * 0.012, C.bodyDark);
+    hatch.position.set(-baseR * 0.12, 0, baseTop + A * 0.005); bAz.hi.add(hatch);
+    var estop = cylY(A * 0.042, A * 0.03, C.estop);
+    estop.rotation.x = Math.PI / 2;
+    estop.position.set(-baseR * 0.45, -baseR * 0.97, baseTop - P.baseHeight * 0.45);
+    bAz.hi.add(estop);
+    var panel = boxAt(baseR * 0.2, A * 0.01, baseR * 0.16, C.trim);
+    panel.position.set(baseR * 0.18, -baseR * 0.99, baseTop - P.baseHeight * 0.45);
+    bAz.hi.add(panel);
+
+    var aHi = boxAt(P.armDepth, P.armWidth, armTop - baseTop + A * 0.02, C.body);
+    aHi.position.set(armX, 0, (baseTop + armTop) / 2); bAz.hi.add(aHi);
+    var handle = boxAt(A * 0.02, A * 0.05, A * 0.11, C.trim);
+    handle.position.set(armX + P.armSide * (armHalfD + A * 0.02), 0, -A * 0.42);
+    bAz.hi.add(handle);
+    // Arc of lightening holes on the outer face.
+    for (var i = 0; i < 7; i++) {
+      var t = (-52 + i * 17) * DEG;
+      var hole = cylX(A * 0.018, A * 0.012, C.bodyDark);
+      hole.position.set(armX + P.armSide * (armHalfD + A * 0.005),
+        Math.sin(t) * A * 0.36, Math.cos(t) * A * 0.36 - A * 0.30);
+      bAz.hi.add(hole);
+    }
+
+    // Altitude drum: direct drive housing, protruding past the outer face.
+    var drumLo = cylX(drumR * 0.85, P.armDepth * 1.1, C.body, 0.95);
+    drumLo.position.set(armX, 0, 0); bAz.lo.add(drumLo);
+
+    var drum = cylX(drumR, P.altDrumLength, C.body);
+    drum.position.set(armX + P.armSide * (P.altDrumLength / 2 - armHalfD), 0, 0);
+    bAz.hi.add(drum);
+    var cap = cylX(drumR * 0.52, A * 0.015, C.bodyDark);
+    cap.position.set(armX + P.armSide * (P.altDrumLength - armHalfD + A * 0.008), 0, 0);
+    bAz.hi.add(cap);
+    var hub = cylX(drumR * 0.23, A * 0.04, C.trim);
+    hub.position.set(armX + P.armSide * (P.altDrumLength - armHalfD + A * 0.01), 0, 0);
+    bAz.hi.add(hub);
+    // Altitude encoder ring, 152 mm, inboard face of the drum.
+    var encAlt = cylX(ringR, A * 0.02, C.steel);
+    encAlt.position.set(armX - P.armSide * (armHalfD + A * 0.012), 0, 0);
+    bAz.hi.add(encAlt);
+    // Azimuth encoder ring at the base joint.
+    var encAz = cylZ(ringR, A * 0.02, C.steel);
+    encAz.position.z = flangeZ + A * 0.012; bAz.hi.add(encAz);
+  })();
+
+  // ---- altitude rotor -----------------------------------------------------
+  var altRotor = new THREE.Group(); azRotor.add(altRotor);
+  var optics = new THREE.Group(); altRotor.add(optics);
+  var otas = [];
+
+  // Optical axis runs along +Y of the altitude rotor; at altitude 0 the
+  // telescope looks at the horizon, at 90 it looks at the zenith.
+  function buildTruss(detailed) {
+    var g = new THREE.Group();
+    var r = P.otaAperture * 0.58;          // mirror cell radius
+    var back = -P.otaLength * P.otaBackFocus;
+    var ringY = P.otaLength * (1 - P.otaBackFocus) * 0.72;
+
+    var cell = cylY(r, P.otaLength * 0.17, C.black);
+    cell.position.y = back + P.otaLength * 0.085; g.add(cell);
+    if (detailed) {
+      var rear = cylY(r * 0.6, P.otaLength * 0.04, C.trim);
+      rear.position.y = back - P.otaLength * 0.02; g.add(rear);
+      var saddle = boxAt(r * 1.2, P.otaLength * 0.19, P.otaLength * 0.03, C.trim);
+      saddle.position.set(0, back + P.otaLength * 0.09, -r * 1.05); g.add(saddle);
+    }
+    var poles = detailed ? 6 : 3;
+    for (var i = 0; i < poles; i++) {
+      var a = (i * (360 / poles) + 30) * DEG;
+      var len = ringY - (back + P.otaLength * 0.17);
+      var pole = cylY(P.otaLength * 0.012, len, C.trim);
+      pole.position.set(Math.cos(a) * r * 0.93,
+        back + P.otaLength * 0.17 + len / 2, Math.sin(a) * r * 0.93);
+      g.add(pole);
+    }
+    var ring = cylY(r, P.otaLength * 0.035, C.black);
+    ring.position.y = ringY; g.add(ring);
+    if (detailed) {
+      for (var v = 0; v < 4; v++) {
+        var av = (v * 90 + 45) * DEG;
+        var vane = boxAt(r * 0.98, P.otaLength * 0.004, P.otaLength * 0.006, C.trim);
+        vane.rotation.y = av;
+        vane.position.y = ringY + P.otaLength * 0.03; g.add(vane);
+      }
+    }
+    var sec = cylY(r * 0.32, P.otaLength * 0.12, C.black);
+    sec.position.y = ringY + P.otaLength * 0.09; g.add(sec);
+    return { group: g, apertureY: ringY, apertureR: r };
+  }
+
+  function buildTube(detailed) {
+    var g = new THREE.Group();
+    var r = P.otaAperture * 0.5;
+    var front = P.otaLength * (1 - P.otaBackFocus);
+    g.add(cylY(r, P.otaLength, C.body, detailed ? 1 : 0.8, !detailed)
+      .translateY(P.otaLength * (0.5 - P.otaBackFocus)));
+    if (detailed) {
+      var cell = cylY(r * 1.04, P.otaLength * 0.05, C.trim);
+      cell.position.y = -P.otaLength * P.otaBackFocus; g.add(cell);
+    }
+    return { group: g, apertureY: front * 0.96, apertureR: r };
+  }
+
+  function buildOptics() {
+    otas.forEach(function (t) { optics.remove(t); });
+    otas = [];
+    var detailed = P.detail === 'high';
+    var built = (P.otaStyle === 'tube') ? buildTube(detailed) : buildTruss(detailed);
+    var g = built.group;
+    var ring = new THREE.Mesh(
+      keep(new THREE.RingGeometry(built.apertureR * 0.82, built.apertureR, P.segments)),
+      keep(new THREE.MeshBasicMaterial({ color: C.optical, side: THREE.DoubleSide,
+        transparent: true, opacity: 0.9 })));
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = built.apertureY;
+    g.add(ring);
+    g.add(segment([0, built.apertureY, 0], [0, built.apertureY + P.otaLength * 1.6, 0],
+      C.optical, 0.9));
+    g.position.x = P.otaOffset;
+    optics.add(g);
+    otas.push(g);
+  }
+
+  // ---- swing envelope -----------------------------------------------------
+  var swingRadius = num(o.swingRadius, SPEC.swingThrough);
+  // Corrected: the telescope sits over the azimuth axis, so the plan-view
+  // footprint is the swing radius itself. The arm's outer face is checked
+  // separately and is normally well inside it.
+  var armReach = Math.abs(armX) + armHalfD;
+  var footprintRadius = Math.max(swingRadius, armReach);
+
+  var sweep = new THREE.Mesh(
+    keep(new THREE.SphereGeometry(swingRadius, 32, 20)),
+    keep(new THREE.MeshBasicMaterial({ color: C.sweep, transparent: true,
+      opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
+  var sweepWire = new THREE.LineSegments(
+    keep(new THREE.WireframeGeometry(new THREE.SphereGeometry(swingRadius, 16, 10))),
+    lineMat(C.sweep, 0.18));
+  sweep.visible = false; sweepWire.visible = false;
+  azRotor.add(sweep); azRotor.add(sweepWire);
+
+  // ---- pointing -----------------------------------------------------------
+  var state = { latitude: P.wedgeLatitude, altitude: 45, azimuth: 180,
+                hourAngle: 0, dec: 45 };
+
+  function update(s) {
+    if (s) Object.assign(state, s);
+    if (P.mode === 'eq') {
+      wedge.rotation.x = -(90 - state.latitude) * DEG;
+      azRotor.rotation.z = (180 + state.hourAngle * 15) * DEG;
+      altRotor.rotation.x = (state.dec - 90) * DEG;
+    } else {
+      azRotor.rotation.z = -state.azimuth * DEG;
+      altRotor.rotation.x = state.altitude * DEG;
+    }
+    group.updateMatrixWorld(true);
+    return api;
+  }
+
+  function pointAt(altDeg, azDeg) {
+    if (P.mode === 'altaz') return update({ altitude: altDeg, azimuth: azDeg });
+    var D = Math.PI / 180, lat = state.latitude * D, al = altDeg * D, azr = azDeg * D;
+    var dec = Math.asin(Math.max(-1, Math.min(1,
+      Math.sin(al) * Math.sin(lat) + Math.cos(al) * Math.cos(lat) * Math.cos(azr))));
+    var ha = Math.atan2(-Math.cos(al) * Math.sin(azr),
+      Math.sin(al) * Math.cos(lat) - Math.cos(al) * Math.sin(lat) * Math.cos(azr));
+    return update({ hourAngle: (ha / D) / 15, dec: dec / D });
+  }
+
+  // ---- readouts -----------------------------------------------------------
+  function wallClearance(walls) {
+    if (!walls || !walls.length) return null;
+    var e = P.position.east, n = P.position.north, worst = null, which = -1;
+    for (var i = 0; i < walls.length; i++) {
+      var a = walls[i].azimuth * DEG;
+      var gap = walls[i].distance - (e * Math.sin(a) + n * Math.cos(a)) - footprintRadius;
+      if (worst === null || gap < worst) { worst = gap; which = i; }
+    }
+    return { clearance: worst, wallIndex: which };
+  }
+  function ceilingClearance(ceilingHeight) {
+    var h = P.position.height === null ? (P.pierHeight + A) : P.position.height;
+    return ceilingHeight - (h + swingRadius);
+  }
+  function floorClearance() {
+    var h = P.position.height === null ? (P.pierHeight + A) : P.position.height;
+    return h - swingRadius;
+  }
+  function opticalAxis() {
+    group.updateMatrixWorld(true);
+    return {
+      origin: new THREE.Vector3(0, 0, 0).applyMatrix4(otas[0].matrixWorld),
+      direction: new THREE.Vector3(0, 1, 0).transformDirection(otas[0].matrixWorld).normalize()
+    };
+  }
+
+  function applyDetail() {
+    var hi = P.detail === 'high';
+    lowBins.forEach(function (b) { b.visible = !hi; });
+    highBins.forEach(function (b) { b.visible = hi; });
+    buildOptics();
+  }
+  function setDetail(level) {
+    P.detail = (level === 'high') ? 'high' : 'low'; applyDetail(); return update();
+  }
+  function setPosition(pos) { Object.assign(P.position, pos || {}); placeGroup(); return api; }
+  function setOptics(next) { Object.assign(P, next || {}); buildOptics(); return update(); }
+  function showSweptVolume(v) { sweep.visible = !!v; sweepWire.visible = !!v; return api; }
+  function markClash(v) {
+    sweep.material.color.setHex(v ? C.clash : C.sweep);
+    sweepWire.material.color.setHex(v ? C.clash : C.sweep);
+    return api;
+  }
+  function showOTA(v) { optics.visible = !!v; return api; }
+  function showAxes(v) { axes.visible = !!v; return api; }
+  function dispose() { store.forEach(function (r) { r.dispose && r.dispose(); }); }
+
+  var api = {
+    group: group, frame: frame, optics: optics, params: P, spec: SPEC,
+    swingRadius: swingRadius, footprintRadius: footprintRadius, armReach: armReach,
+    mountType: P.mode === 'eq' ? 'gem' : 'altaz',
+    update: update, pointAt: pointAt, setDetail: setDetail,
+    setPosition: setPosition, setOptics: setOptics,
+    wallClearance: wallClearance, ceilingClearance: ceilingClearance,
+    floorClearance: floorClearance, opticalAxis: opticalAxis,
+    showSweptVolume: showSweptVolume, showOTA: showOTA, showAxes: showAxes,
+    markClash: markClash, dispose: dispose
+  };
+
+  applyDetail();
+  update();
+  return api;
+}
+
+var L500_PIERS = { 12: 304.8, 24: 609.6, 36: 914.4, 48: 1219.2 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { createL500Mount: createL500Mount, L500_PIERS: L500_PIERS };
+}
+
+let l500Mount = null;
 let three = null;
 let gemMount = null;
 function toThree(v, scale){ return new THREE.Vector3(v[0]*scale, v[2]*scale, -v[1]*scale); }
@@ -3407,9 +3906,11 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
   // ROR coordinate: pier base at floor (Y=0), centred at mount NS/EW position.
   if(three.rorPierGroup){
     const IN = 25.4;
-    const pierMm  = num('rorPierHeight')   * IN;
-    const mountHdMm = num('rorMountHead')  * IN;
-    const pierDiamMm = num('rorPierDiameter') * IN;
+    // numCm() honours the unit toggle; num()*IN assumed inches and was 2.54x
+    // out in metric.
+    const pierMm  = numCm('rorPierHeight');
+    const mountHdMm = numCm('rorMountHead');
+    const pierDiamMm = numCm('rorPierDiameter');
     const pierH  = pierMm   * sceneScale;
     const mountHdH = mountHdMm * sceneScale;
     const pierR  = Math.max(pierDiamMm / 2, 1) * sceneScale;
@@ -3424,9 +3925,9 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
       // Telescope always renders. With no pier height we draw nominal structure
       // and hide the pier itself, rather than freezing or blanking the mount.
       const _havePier = num('rorPierHeight') > 0;
-      const _pierMm  = _havePier ? num('rorPierHeight') * IN : 900;
-      const _pierDmm = num('rorPierDiameter') * IN;
-      const _mountMm = (num('rorMountHead') > 0 ? num('rorMountHead') : 11) * IN;
+      const _pierMm  = _havePier ? numCm('rorPierHeight') : 900;
+      const _pierDmm = numCm('rorPierDiameter');
+      const _mountMm = num('rorMountHead') > 0 ? numCm('rorMountHead') : 279.4;
       const _gemMm   = numGemAxis();
       const _otaLmm  = num('otaLength');
       const _otaAmm  = num('otaAperture');
@@ -3476,6 +3977,37 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
       });
       gemMount.group.visible = true;
       if(gemMount.showPier) gemMount.showPier(_havePier);
+
+      // ── Alt/Az or Fork: PlaneWave L-500 direct drive model ────────────────
+      // Fed from the tool's own haDecToAltAz() so picture and numbers agree.
+      const _isAltAz = (typeof mountType !== 'undefined' && mountType !== 'GEM');
+      if(_isAltAz){
+        const _sky = haDecToAltAz(haHours(), num('dec'), num('lat'));
+        const _sig = [_pierMm, _pierDmm, _otaLmm, _otaAmm].join('|');
+        if(l500Mount && l500Mount._sig !== _sig){
+          if(l500Mount.group.parent) l500Mount.group.parent.remove(l500Mount.group);
+          if(l500Mount.dispose) l500Mount.dispose();
+          l500Mount = null;
+        }
+        if(!l500Mount){
+          l500Mount = createL500Mount(THREE, {
+            mode:'altaz', detail:'low', shading:'lit', upAxis:'y',
+            pierHeight:_pierMm, pierDiameter:_pierDmm,
+            otaLength:_otaLmm, otaAperture:_otaAmm
+          });
+          l500Mount.group.rotation.set(0, -Math.PI/2, 0);
+          three.rorPierGroup.add(l500Mount.group);
+          l500Mount._sig = _sig;
+        }
+        l500Mount.group.scale.setScalar(sceneScale);
+        l500Mount.group.position.set(
+          0, (_pierMm + l500Mount.params.altAxisHeight) * sceneScale, 0);
+        l500Mount.update({ altitude:_sky.altDeg, azimuth:_sky.azDeg });
+        l500Mount.group.visible = true;
+        gemMount.group.visible = false;
+      } else if(l500Mount){
+        l500Mount.group.visible = false;
+      }
     }
     // Position pierGroup at floor NS/EW — gemMount is its child
     three.rorPierGroup.position.set(my * sceneScale, 0, mx * sceneScale);
@@ -3500,8 +4032,13 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
   three.ota.visible = false;
   // Restore the clear/blocked pointing ray, aligned to the tube gemMount
   // actually drew (so the cue can never disagree with the render).
-  if(gemMount && !multiScope){
-    const _oa = gemMount.opticalAxis();
+  // Take the optical axis from whichever mount is actually on screen. Reading it
+  // from the GEM while the L-500 was drawn left the ray starting beside the tube
+  // instead of out of it.
+  const _activeMount = (typeof mountType !== 'undefined' && mountType !== 'GEM' && l500Mount)
+    ? l500Mount : gemMount;
+  if(_activeMount && !multiScope){
+    const _oa = _activeMount.opticalAxis();
     const _pg = three.rorPierGroup.position;              // ray is a child of this group
     const _o  = _oa.origin.clone().sub(_pg);              // world -> group-local
     const _len = Math.max(halfNS, halfEW) * 2.4;
@@ -3558,8 +4095,8 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
     // The pivot is exactly the rorRaPivot position: top of mount head.
     // Use the same pierH + mountHdH that positions the pivot sphere.
     const _IN2 = 25.4;
-    const _pierH2   = num('rorPierHeight') * _IN2 * sceneScale;
-    const _mountHd2 = num('rorMountHead')  * _IN2 * sceneScale;
+    const _pierH2   = numCm('rorPierHeight') * sceneScale;
+    const _mountHd2 = numCm('rorMountHead')  * sceneScale;
     const localPivot = new THREE.Vector3(0, _pierH2 + _mountHd2, 0);
 
     // OTA position FIXED at pivot — only quaternion changes with pointing.
