@@ -218,7 +218,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.00.013</span>
+    flex-shrink:0;">v7.00.018</span>
 </div>
 <div class="wrap">
   <header>
@@ -505,7 +505,7 @@
         <div class="row" id="lateralMeasureRow">
           <div><label>Offset of imaging OTA center from mount axis</label></div>
           <div class="field">
-            <input type="number" id="lateralDist" value="0">
+            <input type="number" id="lateralDist" value="100"><span class="unit">mm</span>
             <select id="lateralDir"><option value="1">right</option><option value="-1">left</option></select>
           </div>
         </div>
@@ -726,7 +726,25 @@ function num(id){ const v = parseFloat(document.getElementById(id).value); retur
 // Everything downstream (sky position, clearance, sweep, 3D mount) uses this
 // single conversion, so the picture and the numbers cannot drift apart.
 function raAxisDeg(){ return num('ha'); }
-function haHours(){ return -6 + raAxisDeg() / 15; }
+function haHours(){ return 6 + raAxisDeg() / 15; }
+
+// Effective pointing for the 3D model. In Alt/Az pointing mode the alt/az fields
+// are authoritative and the RA field is stale, so the model must convert from
+// them - reading the RA field directly left the telescope frozen while the dome
+// followed the target.
+function effectivePointing(){
+  const _lat = num('lat');
+  if(typeof pointingMode !== 'undefined' && pointingMode === 'AltAz'){
+    const cv = altAzToHaDec(num('targetAlt'), num('targetAz'), _lat);
+    return { ha: cv.haHours, dec: cv.decDeg,
+             alt: num('targetAlt'), az: num('targetAz'),
+             altDeg: num('targetAlt'), azDeg: num('targetAz') };
+  }
+  const _ha = haHours(), _dec = num('dec');
+  const sk = haDecToAltAz(_ha, _dec, _lat);
+  return { ha: _ha, dec: _dec, alt: sk.altDeg, az: sk.azDeg,
+           altDeg: sk.altDeg, azDeg: sk.azDeg };
+}
 
 // ── Unit system ──────────────────────────────────────────────────────────────
 // All internal math runs in mm. OTA fields (otaLength, otaAperture, ota2Length,
@@ -926,6 +944,24 @@ let entryMode = 'measure';
 document.getElementById('btnModeMeasure').addEventListener('click', () => setEntryMode('measure'));
 document.getElementById('btnModeDirect').addEventListener('click', () => setEntryMode('direct'));
 function setEntryMode(m){
+  // Seed the direct-entry fields from the measured geometry so switching modes
+  // does not change the setup. Without this the direct fields kept their own
+  // defaults and the offsets jumped on the way across.
+  if(typeof entryMode !== 'undefined' && m !== entryMode && m === 'direct'){
+    const w = getNsEwFromWalls();
+    const ud = (numMmDome('pierHeight') + numMmDome('mountHeadHeight')) - numMmDome('hDome');
+    const gem = numMmDome('gemRaw')
+      + (document.getElementById('hasGuidescope').checked ? 0.5 * numMmDome('guideDist') : 0);
+    const toField = mm => useImperial ? (mm / IN_TO_MM) : mm;
+    const put = (id, mm) => {
+      const el = document.getElementById(id);
+      if(el) el.value = toField(mm).toFixed(useImperial ? 2 : 0);
+    };
+    put('directNS', w.ns);
+    put('directEW', w.ew);
+    put('directUD', ud);
+    if(mountType === 'GEM') put('gemDirect', gem);
+  }
   entryMode = m;
   document.getElementById('btnModeMeasure').classList.toggle('active', m==='measure');
   document.getElementById('btnModeDirect').classList.toggle('active', m==='direct');
@@ -951,6 +987,12 @@ document.getElementById('hasGuidescope').addEventListener('change', function(){
   compute();
 });
 document.getElementById('hasDualSaddle').addEventListener('change', function(){
+  // A zero offset would put both tubes on the mount axis, so seed the default
+  // separation when the user turns dual saddle on without one set.
+  if(this.checked){
+    const ld = document.getElementById('lateralDist');
+    if(ld && parseFloat(ld.value) === 0) ld.value = 100;
+  }
   document.getElementById('lateralFields').style.display = this.checked ? 'block' : 'none';
   document.getElementById('ota2Fields').style.display = this.checked ? 'block' : 'none';
   document.getElementById('otaLengthLabel').textContent = this.checked ? 'OTA 1 tube length' : 'OTA tube length';
@@ -1109,6 +1151,34 @@ function syncPierSideDisplay(resolved){
 }
 
 function setPointingMode(m){
+  // Carry the current pointing across the switch. The target fields otherwise
+  // keep their own stale values, so changing mode made the telescope jump
+  // (park points north; the Alt/Az defaults pointed due south).
+  if(typeof pointingMode !== 'undefined' && m !== pointingMode){
+    const _lat = num('lat');
+    const setV = (id, v) => {
+      const el = document.getElementById(id); if(!el) return;
+      const lo = el.min !== '' ? parseFloat(el.min) : -Infinity;
+      const hi = el.max !== '' ? parseFloat(el.max) :  Infinity;
+      el.value = Math.max(lo, Math.min(hi, v)).toFixed(2);
+    };
+    if(m === 'AltAz'){
+      const s = haDecToAltAz(haHours(), num('dec'), _lat);
+      setV('targetAlt', s.altDeg);
+      setV('targetAz', ((s.azDeg % 360) + 360) % 360);
+      const a = document.getElementById('altSlider'), z = document.getElementById('azSlider');
+      if(a) a.value = num('targetAlt');
+      if(z) z.value = num('targetAz');
+    } else {
+      const c = altAzToHaDec(num('targetAlt'), num('targetAz'), _lat);
+      // RA field is the mechanical axis angle: HA = 6h + RA/15, so RA = (HA-6)*15
+      setV('ha', (c.haHours - 6) * 15);
+      setV('dec', c.decDeg);
+      const h = document.getElementById('haSlider'), d = document.getElementById('decSlider');
+      if(h) h.value = num('ha');
+      if(d) d.value = num('dec');
+    }
+  }
   pointingMode = m;
   document.getElementById('btnHADec').classList.toggle('active', m==='HADec');
   document.getElementById('btnAltAzMode').classList.toggle('active', m==='AltAz');
@@ -1535,6 +1605,10 @@ function createGEMMount(THREE, options) {
   var H = P.mountHeadHeight;
   var flangeZ = -H;
   var pierR = P.pierDiameter / 2;
+  // Counterweight always sits opposite the OTA; cwSide follows the sign of
+  // gemAxisLength so the model stays coherent if the tube is placed on the
+  // other side of the declination axis.
+  var cwSide = (P.gemAxisLength < 0) ? -1 : 1;
   var shaftLen = P.counterweightShaft || Math.max(P.gemAxisLength * 2.2, H * 2.4);
   var shaftStart = H * 0.31;
 
@@ -1647,10 +1721,10 @@ function createGEMMount(THREE, options) {
 
   bDec.lo.add(cylZ(H * 0.22, H * 0.62, C.structure, 0.9));
   place(bDec.lo.add(cylZ(H * 0.055, shaftLen, C.steel)).children[1],
-    0, 0, -(shaftStart + shaftLen / 2));
+    0, 0, -cwSide * (shaftStart + shaftLen / 2));
   [0.52, 0.72].forEach(function (f) {
     var w = cylZ(H * 0.26, shaftLen * 0.12, C.steel);
-    bDec.lo.add(w); w.position.z = -(shaftStart + shaftLen * f);
+    bDec.lo.add(w); w.position.z = -cwSide * (shaftStart + shaftLen * f);
   });
 
   // ---- HIGH: modelled castings -------------------------------------------
@@ -1738,11 +1812,11 @@ function createGEMMount(THREE, options) {
     d.add(decMotor);
 
     var sh = cylZ(H * 0.06, shaftLen, C.steel);
-    sh.position.z = -(shaftStart + shaftLen / 2);
+    sh.position.z = -cwSide * (shaftStart + shaftLen / 2);
     d.add(sh);
     [0.52, 0.72].forEach(function (fr) {
       var w = cylZ(H * 0.30, shaftLen * 0.13, C.steel);
-      w.position.z = -(shaftStart + shaftLen * fr);
+      w.position.z = -cwSide * (shaftStart + shaftLen * fr);
       d.add(w);
       var knob = cylX(H * 0.045, H * 0.16, C.trim);
       knob.position.set(H * 0.34, 0, -(shaftStart + shaftLen * fr));
@@ -2886,8 +2960,11 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
   // Read pier and mount head heights from fields (in mm, converted via numMmDome)
   // entryMode guard: only show pier in measure mode, not direct entry
   const inMeasureMode = typeof entryMode !== 'undefined' && entryMode === 'measure';
-  const pierMm      = inMeasureMode ? (typeof numMmDome !== 'undefined' ? numMmDome('pierHeight') : 0) : 0;
-  const mountHdMm   = inMeasureMode ? (typeof numMmDome !== 'undefined' ? numMmDome('mountHeadHeight') : 0) : 0;
+  // The pier is a physical property of the observatory, so it is drawn in both
+  // entry modes. The fields sit in the measure panel but retain their values
+  // when it is hidden, so direct entry keeps the last pier you described.
+  const pierMm      = (typeof numMmDome !== 'undefined') ? numMmDome('pierHeight') : 0;
+  const mountHdMm   = (typeof numMmDome !== 'undefined') ? numMmDome('mountHeadHeight') : 0;
   const pierH       = pierMm * scale;
   const mountHdH    = mountHdMm * scale;
   const pierBaseY   = floorY;
@@ -2910,7 +2987,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // structural dimension needs a full rebuild, otherwise the pier mesh keeps
     // its old length while the group offset uses the new one (pier sinks/floats).
     const _dualOn = document.getElementById('hasDualSaddle').checked;
-    const _gemSig = [_pierDraw, inMeasureMode ? numMmDome('pierDiameter') : 203,
+    const _gemSig = [_pierDraw, numMmDome('pierDiameter'),
                      _headDraw, numMmDome('gemRaw')].join('|');
     if(gemMount && gemMount._sig !== _gemSig){
       if(gemMount.group.parent) gemMount.group.parent.remove(gemMount.group);
@@ -2921,9 +2998,11 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       gemMount = createGEMMount(THREE, {
         detail: 'low', shading: 'lit',
         pierHeight: _pierDraw,
-        pierDiameter: inMeasureMode ? numMmDome('pierDiameter') : 203,
+        pierDiameter: numMmDome('pierDiameter'),
         mountHeadHeight: _headDraw,
-        gemAxisLength: numMmDome('gemRaw'),
+        // Negative: the dome maths (ported from NINA) puts the optical axis on
+        // the opposite side of the declination axis from the model's default.
+        gemAxisLength: -numMmDome('gemRaw'),
         otaLength: num('otaLength'),
         otaAperture: num('otaAperture'),
         // Dual saddle: use the RAW physical separation, not computeSignedLateral()
@@ -2952,7 +3031,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // Pier side drives the meridian flip. The selector emits "East"/"West" but the
     // mount model compares lowercase, so normalise or the flip silently never fires.
     gemMount.update({
-      latitude: latDeg, hourAngle: haHours(), dec: num('dec'),
+      latitude: latDeg, hourAngle: effectivePointing().ha, dec: effectivePointing().dec,
       pierSide: (document.getElementById('pierSide').value || 'East').toLowerCase()
     });
     gemMount.group.visible = true;
@@ -2966,8 +3045,8 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
   {
     const _isAltAz = (typeof mountType !== 'undefined' && mountType !== 'GEM');
     if(_isAltAz){
-      const _sky = haDecToAltAz(haHours(), num('dec'), latDeg);
-      const _pd  = inMeasureMode ? numMmDome('pierDiameter') : 203;
+      const _sky = effectivePointing();
+      const _pd  = numMmDome('pierDiameter');
       const _sig = [_pierDraw, _pd, num('otaLength'), num('otaAperture')].join('|');
       if(l500Mount && l500Mount._sig !== _sig){
         if(l500Mount.group.parent) l500Mount.group.parent.remove(l500Mount.group);

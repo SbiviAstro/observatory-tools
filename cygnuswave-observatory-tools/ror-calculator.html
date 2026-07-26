@@ -215,7 +215,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.00.013</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.00.018</span>
 </div>
 <div class="wrap">
   <header>
@@ -892,6 +892,24 @@ function num(id){ const v = parseFloat(document.getElementById(id).value); retur
 function raAxisDeg(){ return num('ha'); }
 function haHours(){ return -6 + raAxisDeg() / 15; }
 
+// Effective pointing for the 3D model. In Alt/Az pointing mode the alt/az fields
+// are authoritative and the RA field is stale, so the model must convert from
+// them - reading the RA field directly left the telescope frozen while the dome
+// followed the target.
+function effectivePointing(){
+  const _lat = num('lat');
+  if(typeof pointingMode !== 'undefined' && pointingMode === 'AltAz'){
+    const cv = altAzToHaDec(num('targetAlt'), num('targetAz'), _lat);
+    return { ha: cv.haHours, dec: cv.decDeg,
+             alt: num('targetAlt'), az: num('targetAz'),
+             altDeg: num('targetAlt'), azDeg: num('targetAz') };
+  }
+  const _ha = haHours(), _dec = num('dec');
+  const sk = haDecToAltAz(_ha, _dec, _lat);
+  return { ha: _ha, dec: _dec, alt: sk.altDeg, az: sk.azDeg,
+           altDeg: sk.altDeg, azDeg: sk.azDeg };
+}
+
 // ── Unit system ──────────────────────────────────────────────────────────────
 // All internal math runs in mm. Fields are entered in the user's chosen unit.
 // OTA fields (tube length, aperture) are always mm regardless of unit mode.
@@ -1451,6 +1469,34 @@ function setMountType(t){
 document.getElementById('btnHADec').addEventListener('click', () => setPointingMode('HADec'));
 document.getElementById('btnAltAzMode').addEventListener('click', () => setPointingMode('AltAz'));
 function setPointingMode(m){
+  // Carry the current pointing across the switch. The target fields otherwise
+  // keep their own stale values, so changing mode made the telescope jump
+  // (park points north; the Alt/Az defaults pointed due south).
+  if(typeof pointingMode !== 'undefined' && m !== pointingMode){
+    const _lat = num('lat');
+    const setV = (id, v) => {
+      const el = document.getElementById(id); if(!el) return;
+      const lo = el.min !== '' ? parseFloat(el.min) : -Infinity;
+      const hi = el.max !== '' ? parseFloat(el.max) :  Infinity;
+      el.value = Math.max(lo, Math.min(hi, v)).toFixed(2);
+    };
+    if(m === 'AltAz'){
+      const s = haDecToAltAz(haHours(), num('dec'), _lat);
+      setV('targetAlt', s.altDeg);
+      setV('targetAz', ((s.azDeg % 360) + 360) % 360);
+      const a = document.getElementById('altSlider'), z = document.getElementById('azSlider');
+      if(a) a.value = num('targetAlt');
+      if(z) z.value = num('targetAz');
+    } else {
+      const c = altAzToHaDec(num('targetAlt'), num('targetAz'), _lat);
+      // RA field is the mechanical axis angle: HA = 6h + RA/15, so RA = (HA-6)*15
+      setV('ha', (c.haHours - 6) * 15);
+      setV('dec', c.decDeg);
+      const h = document.getElementById('haSlider'), d = document.getElementById('decSlider');
+      if(h) h.value = num('ha');
+      if(d) d.value = num('dec');
+    }
+  }
   pointingMode = m;
   document.getElementById('btnHADec').classList.toggle('active', m==='HADec');
   document.getElementById('btnAltAzMode').classList.toggle('active', m==='AltAz');
@@ -3972,7 +4018,7 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
       // Pier side drives the meridian flip; selector emits "East"/"West" and the
       // mount compares lowercase, so normalise before passing it in.
       gemMount.update({
-        latitude: num('lat'), hourAngle: haHours(), dec: num('dec'),
+        latitude: num('lat'), hourAngle: effectivePointing().ha, dec: effectivePointing().dec,
         pierSide: (document.getElementById('pierSide').value || 'East').toLowerCase()
       });
       gemMount.group.visible = true;
@@ -3982,7 +4028,7 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
       // Fed from the tool's own haDecToAltAz() so picture and numbers agree.
       const _isAltAz = (typeof mountType !== 'undefined' && mountType !== 'GEM');
       if(_isAltAz){
-        const _sky = haDecToAltAz(haHours(), num('dec'), num('lat'));
+        const _sky = effectivePointing();
         const _sig = [_pierMm, _pierDmm, _otaLmm, _otaAmm].join('|');
         if(l500Mount && l500Mount._sig !== _sig){
           if(l500Mount.group.parent) l500Mount.group.parent.remove(l500Mount.group);
