@@ -29,6 +29,9 @@ nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700
 
 @media(max-width:680px){
   .nav-toggle{ display:block; }
+  .nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
+    opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;}
+  @media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
   .nav-links{ display:none; flex-direction:column; width:100%;
     padding:0; border-top:1px solid var(--line); }
   .nav-links.open{ display:flex; }
@@ -130,6 +133,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
+  <span class="nav-version">v7.00.007</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -166,6 +170,12 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>In imperial mode each field shows a fractional-inch hint (e.g. <code>13'1 1/2"</code>) beside it, updating live as you type. The summary chips at the top of the page (Footprint, Wall Height, Roof Travel, Mount Offset) also display in the chosen unit.</p>
 
 <h2>Building &amp; Mount Position</h2>
+<p>Enter the building's width, length and wall height, then locate the mount by measuring from each wall to directly below the RA/Dec pivot on the floor &mdash; North, South, East and West. The signed offsets are derived automatically:</p>
+<ul>
+  <li><strong>N/S offset</strong> = (South &minus; North) &divide; 2 &mdash; positive = North of centre</li>
+  <li><strong>E/W offset</strong> = (West &minus; East) &divide; 2 &mdash; positive = East of centre</li>
+</ul>
+<p>Both are shown in orange below the fields and update as you type. Because the building size is also entered, the four measurements are over-determined: N+S should equal the building's North/South span and E+W its East/West span. If they disagree, a warning appears naming the conflict. The offset itself comes from the difference, so it stays correct even when the sums are off.</p>
 <p>Building width, length, wall height, and mount pivot position — height above floor, and N/S and E/W offset from the building's center. All in centimetres.</p>
 
 <h2>Building Shape</h2>
@@ -192,6 +202,14 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Sky Coverage</h2>
 <p>Same concept as the dome tool. The plot is stretched to your building's actual width/length ratio. Includes an <strong>Export as Horizon File (.hrz)</strong> button.</p>
+
+<h2>Dual Saddle (side-by-side OTAs)</h2>
+<p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
+<p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
+
+<h2>The 3D Mount Model</h2>
+<p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>
+<p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
 
 <h2>Telescope Pointing &amp; 3D Preview</h2>
 <p>Same Hour Angle/Dec or Alt/Az controls, jog pad, and pier-side handling as the dome tool. The 3D view shows the actual building shape, the parked roof, cardinal directions, the celestial equator, and wireframe swing-radius spheres per telescope (red if any fails to clear).</p>

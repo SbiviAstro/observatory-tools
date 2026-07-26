@@ -29,6 +29,9 @@ nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700
 
 @media(max-width:680px){
   .nav-toggle{ display:block; }
+  .nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
+    opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;}
+  @media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
   .nav-links{ display:none; flex-direction:column; width:100%;
     padding:0; border-top:1px solid var(--line); }
   .nav-links.open{ display:flex; }
@@ -130,6 +133,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
+  <span class="nav-version">v7.00.007</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -197,6 +201,11 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <tr><td style="color:#8b93a3;">⚪ Grey</td><td>Mount geometry invalid there</td></tr>
 </table>
 </div>
+
+<h2>The 3D Mount Model</h2>
+<p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>
+<p>With <strong>dual saddle</strong> enabled, both tubes are drawn side by side, separated by the lateral axis length you enter. The ghost aperture circles projected on the dome surface, the shutter clearance checks and the hit markers all continue to work for each tube independently.</p>
+<p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
 
 <h2>3D Preview</h2>
 <p>Drag to orbit, scroll to zoom. The shutter turns red whenever it doesn't clear. Toggle the local horizon and celestial equator from the preview header.</p>

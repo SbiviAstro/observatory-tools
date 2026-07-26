@@ -208,6 +208,9 @@
     <a href="help.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Help</a>
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
   </div>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
+    font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
+    flex-shrink:0;">v7.00.007</span>
 </div>
 <div class="wrap">
   <header>
@@ -351,7 +354,7 @@
             <div class="field"><input type="number" id="pierHeight" value="35"><span class="unit">mm</span><span class="frac-hint" id="hint_pierHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
-            <div><label>Pier diameter</label><span class="hint">outer diameter of the pier tube</span></div>
+            <div><label>Pier diameter</label></div>
             <div class="field"><input type="number" id="pierDiameter" value="8"><span class="unit">mm</span><span class="frac-hint" id="hint_pierDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
@@ -587,15 +590,15 @@
 
         <div id="haDecFields">
           <div class="row">
-            <div><label>Hour Angle</label><span class="hint">0 = on the meridian, + = west of meridian</span></div>
-            <div class="field"><input type="number" id="ha" value="0" step="0.1"><span class="unit">h</span></div>
+            <div><label>Right Ascension (RA)</label><span class="hint">0 = on the meridian, + = west of meridian</span></div>
+            <div class="field"><input type="number" id="ha" value="0" min="-80" max="80" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="haSlider" min="-6" max="6" step="0.05" value="0" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <input type="range" id="haSlider" min="-80" max="80" step="1" value="0" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
           <div class="row">
-            <div><label>Declination</label></div>
-            <div class="field"><input type="number" id="dec" value="45" step="1"><span class="unit">°</span></div>
+            <div><label>Declination (Dec)</label></div>
+            <div class="field"><input type="number" id="dec" value="90" min="0" max="180" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="decSlider" min="-90" max="90" step="1" value="45" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          <input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
             <button class="preset-btn" data-ha="0" data-dec="45">Meridian</button>
             <button class="preset-btn" data-ha="-5.5" data-dec="20">6h East</button>
@@ -706,6 +709,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
+
+// ---- RA axis convention -------------------------------------------------
+// The RA control is the mechanical Right Ascension axis angle in degrees,
+// -80..+80, with 0 = park: counterweight swung down in line with the pier.
+// Park corresponds to an hour angle of 6h, so RA maps to hour angle as
+//   HA(hours) = 6 + RA(deg)/15
+// Everything downstream (sky position, clearance, sweep, 3D mount) uses this
+// single conversion, so the picture and the numbers cannot drift apart.
+function raAxisDeg(){ return num('ha'); }
+function haHours(){ return -6 + raAxisDeg() / 15; }
 
 // ── Unit system ──────────────────────────────────────────────────────────────
 // All internal math runs in mm. OTA fields (otaLength, otaAperture, ota2Length,
@@ -1162,12 +1175,11 @@ document.getElementById('haSlider').addEventListener('input', function(){ docume
 document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = this.value; });
 
 function clampDecToVisible(){
-  const minDec = num('lat') - 90;
-  document.getElementById('decSlider').min = Math.max(-90, minDec);
-  if(num('dec') < minDec){
-    document.getElementById('dec').value = minDec.toFixed(2);
-    document.getElementById('decSlider').value = Math.max(-90, minDec);
-  }
+  // No longer clamps. Dec below (lat - 90) never rises at this site, but the
+  // mount can still be driven there, so the full -90..+90 range stays available
+  // and the out-of-range case is reported by the Dec warning instead.
+  document.getElementById('decSlider').min = 0;
+  document.getElementById('decSlider').max = 180;
 }
 document.getElementById('decSlider').addEventListener('input', function(){ document.getElementById('dec').value = this.value; clampDecToVisible(); compute(); });
 document.getElementById('dec').addEventListener('input', function(){ document.getElementById('decSlider').value = this.value; clampDecToVisible(); });
@@ -1286,7 +1298,7 @@ function jog(dx, dy){
   } else {
     let dec = num('dec') + dy * jogStep;
     dec = Math.max(num('lat') - 90, Math.min(90, dec));
-    let ha = num('ha') + dx * (jogStep/15);
+    let ha = num('ha') + dx * jogStep;
     ha = Math.max(-12, Math.min(12, ha));
     document.getElementById('dec').value = dec.toFixed(2);
     document.getElementById('decSlider').value = dec;
@@ -1425,7 +1437,469 @@ function haDecToAltAz(haHours, decDeg, latDeg){
 function THREE_clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
 // ================= 3D scene =================
+/*
+ * gem-mount-lod.js — German equatorial mount for three.js r128,
+ * in two builds off one kinematic chain.
+ *
+ *   detail: 'low'   measured skeleton. Every element is a number the user
+ *                   typed. Cheap, unambiguous, right for the live preview.
+ *   detail: 'high'  modelled castings — base block, motor housings, saddle,
+ *                   dew shield. Right for a hero shot or a print export.
+ *
+ * Both share the same axes, pivot and offsets, so switching detail can never
+ * move the optical axis. Only the shells around it change.
+ *
+ * ORIGIN = the RA/Dec pivot, the point your N/S, E/W and Up/Down offsets
+ * already locate. Everything is in millimetres.
+ *
+ *   var mount = createGEMMount(THREE, {
+ *     detail: 'low', shading: 'flat',
+ *     pierHeight: 900, pierDiameter: 250, mountHeadHeight: 285,
+ *     gemAxisLength: 210, otaLength: 800, otaAperture: 200
+ *   });
+ *   scene.add(mount.group);
+ *   mount.update({ latitude: 40.2, hourAngle: 0, dec: 90, pierSide: 'east' });
+ *   mount.setDetail('high');     // instant, no rebuild
+ *
+ * shading 'flat' uses MeshBasicMaterial and needs no lights — safe to drop
+ * into a wireframe scene. 'lit' uses MeshStandardMaterial and expects at
+ * least a hemisphere light.
+ */
+
+function createGEMMount(THREE, options) {
+  var o = options || {};
+  var DEG = Math.PI / 180;
+  function num(v, d) { return (v === null || v === undefined || isNaN(v)) ? d : +v; }
+
+  var P = {
+    pierHeight: num(o.pierHeight, 900),
+    pierDiameter: num(o.pierDiameter, 250),
+    mountHeadHeight: num(o.mountHeadHeight, 285),
+    gemAxisLength: num(o.gemAxisLength, 210),
+    lateralAxis: o.lateralAxis || 0,
+    otaLength: num(o.otaLength, 800),
+    otaAperture: num(o.otaAperture, 200),
+    ota2Length: o.ota2Length || 0,
+    ota2Aperture: o.ota2Aperture || 0,
+    counterweightShaft: o.counterweightShaft || null,
+    detail: o.detail === 'high' ? 'high' : 'low',
+    shading: o.shading === 'lit' ? 'lit' : 'flat',
+    upAxis: o.upAxis || 'y',
+    segments: o.segments || 20
+  };
+
+  var C = Object.assign({
+    body: 0xdedbd2,
+    bodyDark: 0xc3c0b6,
+    structure: 0xb9b6ac,
+    trim: 0x33332f,
+    steel: 0x9aa0a4,
+    pier: 0x53524e,
+    axis: 0x7e8b99,
+    optical: 0xffb020,
+    sweep: 0x4a90d9
+  }, o.colors || {});
+
+  var H = P.mountHeadHeight;
+  var flangeZ = -H;
+  var pierR = P.pierDiameter / 2;
+  var shaftLen = P.counterweightShaft || Math.max(P.gemAxisLength * 2.2, H * 2.4);
+  var shaftStart = H * 0.31;
+
+  // ---- material and geometry helpers -------------------------------------
+  var store = [], matCache = {};
+  function keep(x) { store.push(x); return x; }
+
+  function surf(color) {
+    var k = P.shading + ':' + color;
+    if (!matCache[k]) {
+      matCache[k] = keep(P.shading === 'lit'
+        ? new THREE.MeshStandardMaterial({ color: color, roughness: 0.72, metalness: 0.06 })
+        : new THREE.MeshBasicMaterial({ color: color }));
+    }
+    return matCache[k];
+  }
+  function lineMat(color, opacity) {
+    var k = 'L:' + color + ':' + opacity;
+    if (!matCache[k]) {
+      matCache[k] = keep(new THREE.LineBasicMaterial({
+        color: color, transparent: true, opacity: opacity
+      }));
+    }
+    return matCache[k];
+  }
+
+  // Solid plus an edge outline, so shapes read even with flat shading.
+  function solid(geom, color, opacity) {
+    var g = new THREE.Group();
+    var m = surf(color);
+    if (opacity !== undefined && opacity < 1) {
+      m = m.clone(); m.transparent = true; m.opacity = opacity; keep(m);
+    }
+    g.add(new THREE.Mesh(keep(geom), m));
+    g.add(new THREE.LineSegments(
+      keep(new THREE.EdgesGeometry(geom, 25)),
+      lineMat(0x000000, P.shading === 'lit' ? 0.18 : 0.3)
+    ));
+    return g;
+  }
+  function cylZ(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateX(Math.PI / 2);
+    return solid(g, color, opacity);
+  }
+  function cylX(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateZ(Math.PI / 2);
+    return solid(g, color, opacity);
+  }
+  function boxAt(w, d, h, color) {
+    return solid(new THREE.BoxGeometry(w, d, h), color);
+  }
+  // Disc sector standing in the X plane — the latitude clamp bracket.
+  function sectorX(rOuter, thick, startDeg, sweepDeg, color) {
+    var g = new THREE.CylinderGeometry(rOuter, rOuter, thick, 24, 1, false,
+      startDeg * DEG, sweepDeg * DEG);
+    g.rotateZ(Math.PI / 2);
+    return solid(g, color);
+  }
+  function segment(a, b, color, opacity) {
+    var g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3().fromArray(a), new THREE.Vector3().fromArray(b)
+    ]);
+    return new THREE.Line(keep(g), lineMat(color, opacity));
+  }
+  function place(obj, x, y, z) { obj.position.set(x, y, z); return obj; }
+
+  // ---- kinematic chain ----------------------------------------------------
+  var group = new THREE.Group(); group.name = 'gemMount';
+  var frame = new THREE.Group();              // +X east, +Y north, +Z up
+  if (P.upAxis === 'y') frame.rotation.x = -Math.PI / 2;
+  group.add(frame);
+
+  var head = new THREE.Group(); frame.add(head);            // tilts to latitude
+  var raRotor = new THREE.Group(); head.add(raRotor);       // hour angle
+  var decGroup = new THREE.Group();
+  decGroup.rotation.y = Math.PI / 2;                        // +Z = dec axis
+  raRotor.add(decGroup);
+  var decRotor = new THREE.Group(); decGroup.add(decRotor); // declination
+  var optics = new THREE.Group(); decRotor.add(optics);
+
+  // Per-node detail bins. Toggling visibility swaps builds with no rebuild.
+  var lowBins = [], highBins = [];
+  function bins(node) {
+    var lo = new THREE.Group(), hi = new THREE.Group();
+    node.add(lo); node.add(hi);
+    lowBins.push(lo); highBins.push(hi);
+    return { lo: lo, hi: hi };
+  }
+  var bFrame = bins(frame), bHead = bins(head), bDec = bins(decGroup);
+
+  // ---- always-on: the measurement lines ----------------------------------
+  var axes = new THREE.Group();
+  axes.add(segment([0, 0, -H * 1.2], [0, 0, H * 2.2], C.axis, 0.7));
+  head.add(axes);
+  var decAxisLine = segment(
+    [0, 0, -(shaftLen + shaftStart)], [0, 0, P.gemAxisLength * 1.35], C.axis, 0.7
+  );
+  decGroup.add(decAxisLine);
+
+  // ---- LOW: measured skeleton --------------------------------------------
+  place(bFrame.lo.add(cylZ(pierR, P.pierHeight, C.structure, 0.85)).children[0],
+    0, 0, flangeZ - P.pierHeight / 2);
+  place(bFrame.lo.add(cylZ(pierR * 1.25, H * 0.04, C.structure)).children[1],
+    0, 0, flangeZ);
+
+  place(bHead.lo.add(cylZ(H * 0.20, H * 0.92, C.structure, 0.9)).children[0],
+    0, 0, -H * 0.5);
+
+  bDec.lo.add(cylZ(H * 0.22, H * 0.62, C.structure, 0.9));
+  place(bDec.lo.add(cylZ(H * 0.055, shaftLen, C.steel)).children[1],
+    0, 0, -(shaftStart + shaftLen / 2));
+  [0.52, 0.72].forEach(function (f) {
+    var w = cylZ(H * 0.26, shaftLen * 0.12, C.steel);
+    bDec.lo.add(w); w.position.z = -(shaftStart + shaftLen * f);
+  });
+
+  // ---- HIGH: modelled castings -------------------------------------------
+  (function buildHigh() {
+    var f = bFrame.hi;
+
+    var pierTube = cylZ(pierR, P.pierHeight * 0.94, C.pier);
+    pierTube.position.z = flangeZ - H * 0.06 - P.pierHeight * 0.47;
+    f.add(pierTube);
+
+    var baseFlange = cylZ(pierR * 1.55, H * 0.07, C.pier);
+    baseFlange.position.z = flangeZ - P.pierHeight + H * 0.035;
+    f.add(baseFlange);
+
+    // Welded gussets at the foot.
+    var tri = new THREE.Shape();
+    tri.moveTo(pierR * 0.98, 0);
+    tri.lineTo(pierR * 1.5, 0);
+    tri.lineTo(pierR * 0.98, P.pierHeight * 0.22);
+    tri.lineTo(pierR * 0.98, 0);
+    for (var gi = 0; gi < 4; gi++) {
+      var gus = solid(
+        new THREE.ExtrudeGeometry(tri, { depth: H * 0.05, bevelEnabled: false }),
+        C.pier
+      );
+      gus.rotation.x = Math.PI / 2;
+      gus.rotation.z = 0;
+      var holder = new THREE.Group();
+      holder.add(gus);
+      holder.rotation.z = gi * Math.PI / 2 + Math.PI / 4;
+      holder.position.z = flangeZ - P.pierHeight + H * 0.07;
+      f.add(holder);
+    }
+
+    var topFlange = cylZ(pierR * 1.35, H * 0.06, C.pier);
+    topFlange.position.z = flangeZ - H * 0.03;
+    f.add(topFlange);
+
+    var basePlate = boxAt(H * 1.00, H * 1.12, H * 0.08, C.body);
+    basePlate.position.z = flangeZ + H * 0.04;
+    f.add(basePlate);
+
+    var block = boxAt(H * 0.64, H * 0.88, H * 0.58, C.body);
+    block.position.set(0, -H * 0.03, flangeZ + H * 0.37);
+    f.add(block);
+
+    var blockCap = boxAt(H * 0.70, H * 0.92, H * 0.06, C.bodyDark);
+    blockCap.position.set(0, -H * 0.03, flangeZ + H * 0.69);
+    f.add(blockCap);
+
+    var cp = boxAt(H * 0.10, H * 0.38, H * 0.34, C.trim);
+    cp.position.set(-H * 0.37, -H * 0.10, flangeZ + H * 0.36);
+    f.add(cp);
+
+    // Latitude pivot pin and its clamp brackets.
+    var pinZ = flangeZ + H * 0.29, pinY = H * 0.06;
+    var pinM = cylX(H * 0.07, H * 0.92, C.steel);
+    pinM.position.set(0, pinY, pinZ);
+    f.add(pinM);
+
+    [-1, 1].forEach(function (s) {
+      var br = sectorX(H * 0.60, H * 0.06, 70, 60, C.bodyDark);
+      br.position.set(s * H * 0.37, pinY, pinZ);
+      f.add(br);
+    });
+
+    var h = bHead.hi;
+    var raBody = cylZ(H * 0.26, H * 0.86, C.body);
+    raBody.position.z = -H * 0.50;
+    h.add(raBody);
+    var raCollar = cylZ(H * 0.29, H * 0.10, C.bodyDark);
+    raCollar.position.z = -H * 0.10;
+    h.add(raCollar);
+    var raMotor = boxAt(H * 0.32, H * 0.26, H * 0.44, C.trim);
+    raMotor.position.set(0, -H * 0.40, -H * 0.52);
+    h.add(raMotor);
+
+    var d = bDec.hi;
+    d.add(cylZ(H * 0.28, H * 0.72, C.body));
+    var decCap = cylZ(H * 0.30, H * 0.08, C.trim);
+    decCap.position.z = H * 0.40;
+    d.add(decCap);
+    var decMotor = boxAt(H * 0.30, H * 0.24, H * 0.38, C.trim);
+    decMotor.position.set(0, H * 0.36, H * 0.12);
+    d.add(decMotor);
+
+    var sh = cylZ(H * 0.06, shaftLen, C.steel);
+    sh.position.z = -(shaftStart + shaftLen / 2);
+    d.add(sh);
+    [0.52, 0.72].forEach(function (fr) {
+      var w = cylZ(H * 0.30, shaftLen * 0.13, C.steel);
+      w.position.z = -(shaftStart + shaftLen * fr);
+      d.add(w);
+      var knob = cylX(H * 0.045, H * 0.16, C.trim);
+      knob.position.set(H * 0.34, 0, -(shaftStart + shaftLen * fr));
+      d.add(knob);
+    });
+    var stop = cylZ(H * 0.10, H * 0.08, C.trim);
+    stop.position.z = -(shaftStart + shaftLen + H * 0.04);
+    d.add(stop);
+  })();
+
+  // ---- optics -------------------------------------------------------------
+  var otas = [];
+  function buildOTA(len, aperture, lateral, detailed) {
+    var g = new THREE.Group();
+    var r = aperture * 0.5;
+    g.add(cylX(r, len, detailed ? C.body : C.structure, detailed ? 1 : 0.75, !detailed));
+    if (detailed) {
+      var dew = cylX(r * 1.08, len * 0.16, C.bodyDark);
+      dew.position.x = len * 0.5;
+      g.add(dew);
+      var cell = cylX(r * 1.02, len * 0.06, C.trim);
+      cell.position.x = -len * 0.5;
+      g.add(cell);
+      [-0.22, 0.16].forEach(function (fr) {
+        var ring = cylX(r * 1.14, len * 0.045, C.trim);
+        ring.position.x = len * fr;
+        g.add(ring);
+      });
+      var foc = cylZ(r * 0.22, r * 1.1, C.trim);
+      foc.position.set(-len * 0.42, 0, -r * 0.9);
+      g.add(foc);
+    }
+    var ring = new THREE.Mesh(
+      keep(new THREE.RingGeometry(aperture * 0.42, aperture * 0.5, P.segments)),
+      keep(new THREE.MeshBasicMaterial({
+        color: C.optical, side: THREE.DoubleSide, transparent: true, opacity: 0.9
+      }))
+    );
+    ring.rotation.y = Math.PI / 2;
+    ring.position.x = len * (detailed ? 0.58 : 0.5);
+    g.add(ring);
+    g.add(segment([-len * 0.5, 0, 0], [len * 2.4, 0, 0], C.optical, 0.9));
+    g.position.set(0, lateral || 0, P.gemAxisLength);
+    return g;
+  }
+
+  function buildOptics() {
+    otas.forEach(function (t) { optics.remove(t); });
+    otas = [];
+    var hi = P.detail === 'high';
+    otas.push(buildOTA(P.otaLength, P.otaAperture, P.lateralAxis ? -P.lateralAxis : 0, hi));
+    if (P.ota2Length > 0 && P.lateralAxis) {
+      otas.push(buildOTA(P.ota2Length, P.ota2Aperture || P.otaAperture, P.lateralAxis, hi));
+    }
+    otas.forEach(function (t) { optics.add(t); });
+    if (typeof refreshSweep === 'function') refreshSweep();
+  }
+
+  // Saddle only exists in the high build.
+  var saddle = boxAt(H * 0.64, H * 0.36, H * 0.14, C.trim);
+  saddle.position.set(0, 0, P.gemAxisLength - P.otaAperture * 0.5 - H * 0.07);
+  decRotor.add(saddle);
+
+  // ---- swept volume -------------------------------------------------------
+  // reach must track the optics: widening the dual-saddle separation or changing
+  // OTA length grows the swept sphere. Recomputed by computeReach() on every
+  // buildOptics() so the sphere can never go stale.
+  function computeReach() {
+    var longest = Math.max(P.otaLength, P.ota2Length || 0);
+    return Math.max(
+      Math.sqrt(Math.pow(P.gemAxisLength + Math.abs(P.lateralAxis), 2) +
+                Math.pow(longest * 0.5, 2)),
+      shaftStart + shaftLen
+    );
+  }
+  var reach = computeReach();
+  var sweep = new THREE.Mesh(
+    keep(new THREE.SphereGeometry(reach, 32, 20)),
+    keep(new THREE.MeshBasicMaterial({
+      color: C.sweep, transparent: true, opacity: 0.07,
+      side: THREE.DoubleSide, depthWrite: false
+    }))
+  );
+  var sweepWire = new THREE.LineSegments(
+    keep(new THREE.WireframeGeometry(new THREE.SphereGeometry(reach, 16, 10))),
+    lineMat(C.sweep, 0.18)
+  );
+  sweep.visible = false; sweepWire.visible = false;
+  frame.add(sweep); frame.add(sweepWire);
+
+  // Rebuild the sweep geometry to match the current optics.
+  function refreshSweep() {
+    reach = computeReach();
+    sweep.geometry.dispose();
+    sweep.geometry = keep(new THREE.SphereGeometry(reach, 32, 20));
+    sweepWire.geometry.dispose();
+    sweepWire.geometry = keep(new THREE.WireframeGeometry(new THREE.SphereGeometry(reach, 16, 10)));
+    if (api) api.reach = reach;
+  }
+
+  // ---- state --------------------------------------------------------------
+  var state = { latitude: 45, hourAngle: 0, dec: 90, pierSide: 'east' };
+
+  var pierShown = true;
+  function applyPierVisibility() {
+    var hi = P.detail === 'high';
+    bFrame.lo.visible = !hi && pierShown;
+    bFrame.hi.visible =  hi && pierShown;
+  }
+  function applyDetail() {
+    var hi = P.detail === 'high';
+    lowBins.forEach(function (b) { b.visible = !hi; });
+    highBins.forEach(function (b) { b.visible = hi; });
+    saddle.visible = hi;
+    applyPierVisibility();
+    buildOptics();
+  }
+  // Hide just the pier + base flange, keeping head, dec axis and OTA visible.
+  function showPier(v) { pierShown = !!v; applyPierVisibility(); return api; }
+
+  function update(s) {
+    if (s) Object.assign(state, s);
+    head.rotation.x = (state.latitude - 90) * DEG;
+    var haDeg = state.hourAngle * 15;
+    var flip = (state.pierSide === 'west') ? 180 : 0;
+    // This form keeps the rendered azimuth matching the calculated sky
+    // position; the RA->HA offset below places park at RA 0.
+    raRotor.rotation.z = (180 - haDeg + flip) * DEG;
+    decRotor.rotation.z = (flip ? -1 : 1) * (90 + state.dec) * DEG;
+    group.updateMatrixWorld(true);
+    return api;
+  }
+
+  function setDetail(level) {
+    P.detail = (level === 'high') ? 'high' : 'low';
+    applyDetail();
+    return update();
+  }
+
+  // ---- readouts -----------------------------------------------------------
+  function opticalAxis(which) {
+    var t = otas[(which === 2 && otas[1]) ? 1 : 0];
+    group.updateMatrixWorld(true);
+    return {
+      origin: new THREE.Vector3(0, 0, 0).applyMatrix4(t.matrixWorld),
+      direction: new THREE.Vector3(1, 0, 0).transformDirection(t.matrixWorld).normalize()
+    };
+  }
+
+  var _p = new THREE.Vector3();
+  function pierClearance() {
+    group.updateMatrixWorld(true);
+    var best = null, end = -(shaftStart + shaftLen);
+    for (var i = 0; i <= 32; i++) {
+      _p.set(0, 0, -shaftStart + (end + shaftStart) * (i / 32));
+      decGroup.localToWorld(_p);
+      frame.worldToLocal(_p);
+      if (_p.z > flangeZ) continue;
+      var d = Math.sqrt(_p.x * _p.x + _p.y * _p.y) - pierR - H * 0.06;
+      if (best === null || d < best) best = d;
+    }
+    return best;
+  }
+
+  function setOptics(next) { Object.assign(P, next || {}); buildOptics(); return update(); }
+  function showOTA(v) { optics.visible = !!v; return api; }
+  function showAxes(v) { axes.visible = !!v; decAxisLine.visible = !!v; return api; }
+  function showSweptVolume(v) { sweep.visible = !!v; sweepWire.visible = !!v; return api; }
+  function dispose() { store.forEach(function (r) { r.dispose && r.dispose(); }); }
+
+  var api = null;
+  api = {
+    group: group, frame: frame, head: head, raRotor: raRotor,
+    decGroup: decGroup, decRotor: decRotor, optics: optics,
+    params: P, reach: reach,
+    update: update, setDetail: setDetail, setOptics: setOptics, showPier: showPier,
+    showOTA: showOTA, showAxes: showAxes, showSweptVolume: showSweptVolume,
+    opticalAxis: opticalAxis, pierClearance: pierClearance, dispose: dispose
+  };
+
+  applyDetail();
+  update();
+  return api;
+}
+
+if (typeof module !== 'undefined' && module.exports) module.exports = createGEMMount;
+
 let three = null;
+let gemMount = null;
 
 function initThree(){
   const container = document.getElementById('threeContainer');
@@ -1593,45 +2067,18 @@ function initThree(){
   );
   scene.add(mountMarker);
 
-  // Pier group — all pier/mount elements parented here so they move as one unit.
-  // The group origin = pier base at floor level directly below the mount.
+  // GEM mount — created via createGEMMount, positioned later in updateThreeScene
   const pierGroup = new THREE.Group();
   scene.add(pierGroup);
-
-  // Pier — tapered red cylinder rising from group origin (floor) upward
-  const pier = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.055, 0.07, 1, 16),
-    new THREE.MeshStandardMaterial({ color: 0xc0392b, roughness: 0.6, metalness: 0.4 })
-  );
-  pierGroup.add(pier);
-
-  // Pier flange plate — flat disc at top of pier
-  const pierFlange = new THREE.Mesh(
-    new THREE.CylinderGeometry(0.09, 0.09, 0.012, 20),
-    new THREE.MeshStandardMaterial({ color: 0x3a4555, roughness: 0.4, metalness: 0.8 })
-  );
-  pierGroup.add(pierFlange);
-
-  // Mount head body — latitude wedge. Geometry rebuilt each frame in updateThreeScene.
-  const mountHead = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1),
-    new THREE.MeshStandardMaterial({ color: 0x2d3a4a, roughness: 0.5, metalness: 0.6, side: THREE.DoubleSide })
-  );
-  pierGroup.add(mountHead);
-
-  // RA axis pivot marker — small sphere at the RA/Dec intersection (= originMm)
-  const raPivot = new THREE.Mesh(
-    new THREE.SphereGeometry(0.028, 14, 14),
-    new THREE.MeshStandardMaterial({ color: 0xc8623f, roughness: 0.3, metalness: 0.5 })
-  );
-  pierGroup.add(raPivot);
-  // OTA and associated meshes rotate around the RA/Dec pivot — children of pierGroup
+  // OTA visuals remain as children of pierGroup for ray/aperture rendering
   pierGroup.add(ota);
   pierGroup.add(apertureRing);
   pierGroup.add(ray);
   pierGroup.add(ota2);
   pierGroup.add(apertureRing2);
   pierGroup.add(ray2);
+  // Placeholders for registry (gemMount handles actual geometry)
+  const pier = null, pierFlange = null, mountHead = null, raPivot = null;
 
   // Ghost aperture outlines: show each OTA's actual aperture footprint at
   // the point it crosses the dome, so you can see exactly how much of the
@@ -1690,7 +2137,7 @@ function initThree(){
   animate();
 
   three = { scene, camera, renderer, domeWire, wall, floor, ota, apertureRing, ray, hitMarker, mountMarker,
-            pierGroup, pier, pierFlange, mountHead, raPivot,
+            pierGroup,
     ota2, apertureRing2, ray2, hitMarker2, ghostAperture, ghostAperture2, skyHorizonLine, horizonBand, meridianLine, poleMarker,
     cardinalN, cardinalE, cardinalS, cardinalW,
     getSlit: () => slitMesh, setSlit: (m) => { slitMesh = m; } };
@@ -1748,8 +2195,16 @@ function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, t
 
   if(otaMesh.geometry) otaMesh.geometry.dispose();
   otaMesh.geometry = new THREE.CylinderGeometry(tubeRad, tubeRad * 1.15, tubeLen, 16);
-  // OTA centre at the RA/Dec pivot — the tube balances on the saddle at its midpoint
-  otaMesh.position.copy(originL);
+  // OTA midpoint at pivot when pointing up/horizontal — back hangs freely (realistic).
+  // When pointing downward (dirNorm.y < 0), slide tube forward so base = pivot.
+  const _halfTubeD = tubeLen / 2;
+  if(dirNorm.y < 0){
+    const _otaCtrD = originL.clone().addScaledVector(dirNorm, _halfTubeD);
+    _otaCtrD.y = Math.max(_otaCtrD.y, originL.y + _halfTubeD);
+    otaMesh.position.copy(_otaCtrD);
+  } else {
+    otaMesh.position.copy(originL);
+  }
   const quat = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), dirNorm);
   otaMesh.quaternion.copy(quat);
   otaMesh.visible = true;
@@ -1957,82 +2412,70 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
   const pierTopY    = floorY + pierH;
   const pivotY      = floorY + (pierMm + mountHdMm) * scale; // = originV.y when NS/EW = 0
 
-  // Pier, flange, mount head and RA pivot are all children of pierGroup.
-  // pierGroup is positioned at the pier base (floor level, NS/EW offset).
-  // All child positions are LOCAL (group-relative): Y=0 is the floor, X/Z=0 is the pier centre.
-  const pierDiamMm = inMeasureMode ? numMmDome('pierDiameter') : 200;
-  const pierR      = Math.max(pierDiamMm / 2, 1) * scale;
-  const flangeR    = pierR * 1.4;
-  const flangeThk  = Math.max(pierDiamMm * 0.06, 10) * scale;
+  // ── GEM mount via createGEMMount ──────────────────────────────────────────
+  const pierFloorX = (ewMm  || 0) * scale;
+  const pierFloorZ = -(nsMm || 0) * scale;
 
-  if(three.pierGroup){
-    const showPier = pierMm > 0;
-    // Pier base is at the fixed NS/EW floor position — never moves with pointing.
-    // nsMm/ewMm are the mount's offset from dome centre; convert to Three.js coords.
-    // Three.js: North=−Z, East=+X → pierNS=−nsMm*scale (north=negative Z), pierEW=ewMm*scale
-    const pierFloorX = (ewMm  || 0) * scale;
-    const pierFloorZ = -(nsMm || 0) * scale;
-    three.pierGroup.position.set(pierFloorX, floorY, pierFloorZ);
-    three.pierGroup.visible = showPier;
-  }
-
-  if(three.pier && pierMm > 0){
-    three.pier.geometry.dispose();
-    three.pier.geometry = new THREE.CylinderGeometry(pierR * 0.88, pierR, pierH, 20);
-    // Centre of cylinder is at half its height above group origin
-    three.pier.position.set(0, pierH / 2, 0);
-  }
-
-  if(three.pierFlange && pierMm > 0){
-    three.pierFlange.geometry.dispose();
-    three.pierFlange.geometry = new THREE.CylinderGeometry(flangeR, flangeR, flangeThk, 24);
-    // Flange sits at top of pier
-    three.pierFlange.position.set(0, pierH, 0);
-  }
-
-  if(three.mountHead && mountHdMm > 0){
-    three.mountHead.geometry.dispose();
-    // Latitude wedge in LOCAL space — base at Y=pierH, top face tilts north at lat angle.
-    // North = −Z, Up = +Y, East = +X in Three.js
-    const s  = pierR * 2.0;
-    const hs = s / 2;
-    const latRad = Math.max(0, Math.min(89, latDeg || 45)) * Math.PI / 180;
-    const hN = mountHdH;
-    const hS = Math.max(mountHdH * (1 - Math.tan(latRad) * s / mountHdH), mountHdH * 0.15);
-    const base = pierH; // LOCAL: base of mount head = top of pier
-
-    const verts = new Float32Array([
-      -hs, base,     hs,   // 0 SW-bot
-       hs, base,     hs,   // 1 SE-bot
-       hs, base,    -hs,   // 2 NE-bot
-      -hs, base,    -hs,   // 3 NW-bot
-      -hs, base+hS,  hs,   // 4 SW-top
-       hs, base+hS,  hs,   // 5 SE-top
-       hs, base+hN, -hs,   // 6 NE-top
-      -hs, base+hN, -hs,   // 7 NW-top
-    ]);
-    const idx = new Uint16Array([
-      0,1,2, 0,2,3,
-      4,7,6, 4,6,5,
-      0,4,5, 0,5,1,
-      2,6,7, 2,7,3,
-      1,5,6, 1,6,2,
-      3,7,4, 3,4,0,
-    ]);
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
-    geo.setIndex(new THREE.BufferAttribute(idx, 1));
-    geo.computeVertexNormals();
-    three.mountHead.geometry = geo;
-    three.mountHead.position.set(0, 0, 0); // local — vertices already placed correctly
-  }
-
-  if(three.raPivot && pierMm > 0){
-    // RA pivot LOCAL position: top of mount head north edge
-    const latRad2 = Math.max(0, Math.min(89, latDeg || 45)) * Math.PI / 180;
-    three.raPivot.position.set(0, pierH + mountHdH, 0);
-  } else if(three.raPivot){
-    three.raPivot.visible = false;
+  // The telescope must always render. In direct-entry mode (and when the pier
+  // height is blank/zero) there is no pier measurement, so draw nominal
+  // structure and hide just the pier + flange via showPier(false).
+  const _havePier = pierMm > 0;
+  const _pierDraw = _havePier ? pierMm : 900;
+  const _headDraw = mountHdMm > 0 ? mountHdMm : 280;
+  {
+    // createGEMMount builds the pier/head geometry ONCE from its constructor
+    // params; setOptics() only rebuilds the OTA tubes. So any change to a
+    // structural dimension needs a full rebuild, otherwise the pier mesh keeps
+    // its old length while the group offset uses the new one (pier sinks/floats).
+    const _dualOn = document.getElementById('hasDualSaddle').checked;
+    const _gemSig = [_pierDraw, inMeasureMode ? numMmDome('pierDiameter') : 203,
+                     _headDraw, numMmDome('gemRaw')].join('|');
+    if(gemMount && gemMount._sig !== _gemSig){
+      if(gemMount.group.parent) gemMount.group.parent.remove(gemMount.group);
+      if(gemMount.dispose) gemMount.dispose();
+      gemMount = null;
+    }
+    if(!gemMount){
+      gemMount = createGEMMount(THREE, {
+        detail: 'low', shading: 'lit',
+        pierHeight: _pierDraw,
+        pierDiameter: inMeasureMode ? numMmDome('pierDiameter') : 203,
+        mountHeadHeight: _headDraw,
+        gemAxisLength: numMmDome('gemRaw'),
+        otaLength: num('otaLength'),
+        otaAperture: num('otaAperture'),
+        // Dual saddle: use the RAW physical separation, not computeSignedLateral()
+        // (that one is the NINA tracking value and is 0 for "between").
+        lateralAxis:  _dualOn ? computeRawLateral() : 0,
+        ota2Length:   _dualOn ? num('ota2Length')   : 0,
+        ota2Aperture: _dualOn ? num('ota2Aperture') : 0,
+      });
+      three.scene.add(gemMount.group);
+      gemMount._sig = _gemSig;
+    } else {
+      gemMount.setOptics({
+        otaLength: num('otaLength'), otaAperture: num('otaAperture'),
+        lateralAxis:  _dualOn ? computeRawLateral() : 0,
+        ota2Length:   _dualOn ? num('ota2Length')   : 0,
+        ota2Aperture: _dualOn ? num('ota2Aperture') : 0,
+      });
+    }
+    gemMount.group.scale.setScalar(scale);
+    // Lift group so pier base sits at floorY.
+    // Pivot is at pierMm+mountHdMm above the pier base in mm * scale.
+    const _pivotOffsetY = (_pierDraw + _headDraw) * scale;
+    gemMount.group.position.set(pierFloorX, floorY + _pivotOffsetY, pierFloorZ);
+    // Dome scene North=-Z. Rotate mount 90° around Y so front faces north.
+    gemMount.group.rotation.y = -Math.PI / 2;
+    // Pier side drives the meridian flip. The selector emits "East"/"West" but the
+    // mount model compares lowercase, so normalise or the flip silently never fires.
+    gemMount.update({
+      latitude: latDeg, hourAngle: haHours(), dec: num('dec'),
+      pierSide: (document.getElementById('pierSide').value || 'East').toLowerCase()
+    });
+    gemMount.group.visible = true;
+    if(gemMount.showPier) gemMount.showPier(_havePier);
+    if(three.pierGroup){ three.pierGroup.position.set(pierFloorX, floorY, pierFloorZ); three.pierGroup.visible = true; }
   }
 
   updateSkyHorizonWireframe(latDeg, radiusMm, scale);
@@ -2106,18 +2549,26 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       const origin1V = toThree(origin1Mm, scale);
       const hit1V = toThree(hit1.intersection, scale);
       const dir1Norm = new THREE.Vector3().subVectors(hit1V, origin1V).normalize();
-      drawScope(origin1V, dir1Norm, hit1V, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad, three.pierGroup ? three.pierGroup.position : null);
+      // createGEMMount draws the tube now — legacy meshes stay hidden.
+      three.ota.visible = false;
+      three.apertureRing.visible = false;
+      three.ray.visible = false;
+      three.hitMarker.position.copy(hit1V); three.hitMarker.visible = true;
       updateGhostAperture(three.ghostAperture, hit1V, dir1Norm, tubeRad);
       ota1Clears = checkShutterFootprint(hit1V, otaApertureMm, phi, tangent, R, scale, shutterWidthMm);
     } else if(dualSaddleActive){
       ota1Clears = false;
-      three.ota.visible = false;
+      three.ota.visible = false; // gemMount renders OTA
       three.apertureRing.visible = false;
-      three.ray.visible = false;
+      three.ray.visible = false; // gemMount renders ray
       three.hitMarker.visible = false;
       three.ghostAperture.visible = false;
     } else {
-      drawScope(originV, dirNorm, hitV, three.ota, three.apertureRing, three.ray, three.hitMarker, tubeLen, tubeRad, three.pierGroup ? three.pierGroup.position : null);
+      // createGEMMount draws the tube now — legacy meshes stay hidden.
+      three.ota.visible = false;
+      three.apertureRing.visible = false;
+      three.ray.visible = false;
+      three.hitMarker.position.copy(hitV); three.hitMarker.visible = true;
       updateGhostAperture(three.ghostAperture, hitV, dirNorm, tubeRad);
     }
 
@@ -2132,8 +2583,11 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       const origin2V = toThree(origin2Mm, scale);
       const hit2V = toThree(hit2.intersection, scale);
       const dir2Norm = new THREE.Vector3().subVectors(hit2V, origin2V).normalize();
-      drawScope(origin2V, dir2Norm, hit2V, three.ota2, three.apertureRing2, three.ray2, three.hitMarker2,
-        Math.max(ota2LengthMm, 1) * scale, Math.max(ota2ApertureMm, 1) * scale / 2);
+      // createGEMMount draws OTA2 as well — legacy meshes stay hidden.
+      three.ota2.visible = false;
+      three.apertureRing2.visible = false;
+      three.ray2.visible = false;
+      three.hitMarker2.position.copy(hit2V); three.hitMarker2.visible = true;
       updateGhostAperture(three.ghostAperture2, hit2V, dir2Norm, Math.max(ota2ApertureMm, 1) * scale / 2);
       ota2Clears = checkShutterFootprint(hit2V, ota2ApertureMm, phi, tangent, R, scale, shutterWidthMm);
     } else if(dualSaddleActive){
@@ -2196,9 +2650,9 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     clEl.style.color = clearance < 0 ? '#c86b6b' : (clearance < worstAperture*0.15 ? '#d9a066' : '');
   } else {
     lastShutterFits = false;
-    three.ray.visible = false;
+    three.ray.visible = false; // gemMount renders ray
     three.hitMarker.visible = false;
-    three.ota.visible = false;
+    three.ota.visible = false; // gemMount renders OTA
     three.apertureRing.visible = false;
     three.ota2.visible = false;
     three.apertureRing2.visible = false;
@@ -2396,7 +2850,7 @@ function computeLiveDomeAim(){
     const conv = altAzToHaDec(num('targetAlt'), num('targetAz'), lat);
     ha = conv.haHours; dec = conv.decDeg;
   } else {
-    ha = num('ha'); dec = num('dec');
+    ha = haHours(); dec = num('dec');
   }
 
   // Northern-hemisphere site: the lowest declination that ever clears the
@@ -2404,47 +2858,17 @@ function computeLiveDomeAim(){
   // never rises at all — a stricter, azimuth-independent constraint than
   // the local horizon obstruction check further down, so it's resolved
   // first and directly, rather than by solving through Alt/Az.
+  // Dec below (lat - 90) never rises here. Flag it, but do not rewrite the
+  // field — the user should be free to rotate anywhere and read the warning.
   const minObservableDec = lat - 90;
-  let decClamped = false;
-  if(dec < minObservableDec){
-    dec = minObservableDec;
-    decClamped = true;
-    document.getElementById('dec').value = dec.toFixed(2);
-    document.getElementById('decSlider').value = Math.max(-90, Math.min(90, dec));
-    if(pointingMode === 'AltAz'){
-      const fixedSky = haDecToAltAz(ha, dec, lat);
-      document.getElementById('targetAlt').value = fixedSky.altDeg.toFixed(2);
-      document.getElementById('altSlider').value = Math.max(0, Math.min(90, fixedSky.altDeg));
-      document.getElementById('targetAz').value = fixedSky.azDeg.toFixed(2);
-      document.getElementById('azSlider').value = fixedSky.azDeg;
-    }
-  }
+  const decClamped = dec < minObservableDec;
   document.getElementById('decWarning').style.display = decClamped ? 'block' : 'none';
 
   let skyPos = haDecToAltAz(ha, dec, lat);
-  let horizonClamped = false;
   const horizonLimit = horizonAltAt(skyPos.azDeg);
-  if(skyPos.altDeg < horizonLimit){
-    // Universal enforcement: clamp altitude at the current azimuth, then
-    // convert back to HA/Dec. This is what actually makes HA/Dec mode
-    // respect the horizon too — it can't be clamped directly (altitude is
-    // derived, not an input), so instead we solve for the HA/Dec that
-    // produces the clamped Alt/Az and adopt that.
-    const conv2 = altAzToHaDec(horizonLimit, skyPos.azDeg, lat);
-    ha = conv2.haHours;
-    dec = conv2.decDeg;
-    skyPos = haDecToAltAz(ha, dec, lat);
-    horizonClamped = true;
-
-    document.getElementById('ha').value = ha.toFixed(3);
-    document.getElementById('haSlider').value = Math.max(-6, Math.min(6, ha));
-    document.getElementById('dec').value = dec.toFixed(2);
-    document.getElementById('decSlider').value = Math.max(-90, Math.min(90, dec));
-    document.getElementById('targetAlt').value = skyPos.altDeg.toFixed(2);
-    document.getElementById('altSlider').value = Math.max(0, Math.min(90, skyPos.altDeg));
-    document.getElementById('targetAz').value = skyPos.azDeg.toFixed(2);
-    document.getElementById('azSlider').value = skyPos.azDeg;
-  }
+  // Blocked pointings are reported (status text + coloured ray), not snapped
+  // back. This previously rewrote HA/Dec, which made the controls refuse to move.
+  const horizonClamped = skyPos.altDeg < horizonLimit;
   document.getElementById('outTargetAltAz').textContent = `Alt ${skyPos.altDeg.toFixed(1)}°, Az ${skyPos.azDeg.toFixed(1)}°`;
   document.getElementById('horizonWarning').style.display = horizonClamped ? 'block' : 'none';
 
