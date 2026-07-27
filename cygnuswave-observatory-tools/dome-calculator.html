@@ -218,7 +218,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.00.018</span>
+    flex-shrink:0;">v7.00.021</span>
 </div>
 <div class="wrap">
   <header>
@@ -282,7 +282,7 @@
         ⚠ Mount offset falls outside the dome radius for this configuration — check your radius and offset measurements.
       </div>
       <div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
-        ⚠ Pointing was pulled up to your local horizon at this azimuth — the requested position was obstructed by terrain/buildings.
+        ⚠ This pointing sits below your local horizon at this azimuth — obstructed by terrain or buildings. The pointing has not been altered.
       </div>
       <div id="decWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
         ⚠ Declination was raised to the lowest value ever observable from this latitude (lat − 90°) — anything below that never clears the horizon, at any hour angle.
@@ -2734,12 +2734,29 @@ function buildShutterGeometry(phiCenter, halfWidth, R, thetaMax, segments){
   return geo;
 }
 
-function updateGhostAperture(mesh, positionV, dirNorm, apertureRadiusWorld){
+function updateGhostAperture(mesh, positionV, dirNorm, apertureRadiusWorld, domeRadiusWorld){
   mesh.geometry.dispose();
   mesh.geometry = new THREE.RingGeometry(apertureRadiusWorld * 0.9, apertureRadiusWorld, 48);
   mesh.position.copy(positionV);
   mesh.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1), dirNorm));
   mesh.visible = true;
+
+  // The footprint is a flat annulus sitting on a curved shell, so roughly half
+  // of it fell inside the dome and was occluded - which is why the aperture drew
+  // as an arc instead of a circle. Lift it clear along the dome radius, by just
+  // enough that its innermost point clears the shell.
+  if(domeRadiusWorld > 0 && positionV.length() > 1e-6){
+    mesh.updateMatrixWorld(true);
+    const attr = mesh.geometry.attributes.position;
+    const p = new THREE.Vector3();
+    let minR = Infinity;
+    for(let i = 0; i < attr.count; i++){
+      p.fromBufferAttribute(attr, i).applyMatrix4(mesh.matrixWorld);
+      minR = Math.min(minR, p.length());
+    }
+    const lift = (domeRadiusWorld - minR) + domeRadiusWorld * 0.004;
+    if(lift > 0) mesh.position.addScaledVector(positionV.clone().normalize(), lift);
+  }
 }
 
 function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, tubeLen, tubeRad, groupOffset){
@@ -2972,15 +2989,37 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
   const pivotY      = floorY + (pierMm + mountHdMm) * scale; // = originV.y when NS/EW = 0
 
   // ── GEM mount via createGEMMount ──────────────────────────────────────────
-  const pierFloorX = (ewMm  || 0) * scale;
-  const pierFloorZ = -(nsMm || 0) * scale;
+  // Match toThree(): [NS, EW, Up] -> (NS, Up, -EW). North is +X and east is -Z.
+  // These were transposed, so the mount stood in the wrong place whenever the
+  // north/south and east/west offsets differed - invisible at the centred
+  // default, obvious once either offset was set.
+  const pierFloorX = (nsMm || 0) * scale;
+  // The geometry matrix stores east/west negated, so after toThree() a positive
+  // east offset lands on +Z. Negating here double-flipped it.
+  const pierFloorZ = (ewMm || 0) * scale;
 
   // The telescope must always render. In direct-entry mode (and when the pier
   // height is blank/zero) there is no pier measurement, so draw nominal
   // structure and hide just the pier + flange via showPier(false).
-  const _havePier = pierMm > 0;
-  const _pierDraw = _havePier ? pierMm : 900;
+  // Height of the RA/Dec pivot above the floor.
+  //   measure mode - it is simply pier + mount head.
+  //   direct entry - the Up/Down offset gives it relative to the dome centre,
+  //     so pivot = hDome + ud. Using the pier fields here drew the mount
+  //     hundreds of mm above where the maths placed the optical axis, which is
+  //     why the tube missed the aperture circle on the shutter.
+  // GEM axis actually in force: the measure panel adds the guide-scope
+  // correction, direct entry supplies it ready-made. The model previously always
+  // read the measure field, so in direct entry it drew the tube using the wrong
+  // axis length entirely.
+  const _gemInForce = inMeasureMode
+    ? (numMmDome('gemRaw') + (document.getElementById('hasGuidescope').checked ? 0.5 * numMmDome('guideDist') : 0))
+    : numMmDome('gemDirect');
   const _headDraw = mountHdMm > 0 ? mountHdMm : 280;
+  const _pivotAboveFloor = inMeasureMode
+    ? (pierMm + mountHdMm)
+    : (numMmDome('hDome') + numMmDome('directUD'));
+  const _pierDraw = Math.max(_pivotAboveFloor - _headDraw, 0);
+  const _havePier = _pierDraw > 0;
   {
     // createGEMMount builds the pier/head geometry ONCE from its constructor
     // params; setOptics() only rebuilds the OTA tubes. So any change to a
@@ -2988,7 +3027,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // its old length while the group offset uses the new one (pier sinks/floats).
     const _dualOn = document.getElementById('hasDualSaddle').checked;
     const _gemSig = [_pierDraw, numMmDome('pierDiameter'),
-                     _headDraw, numMmDome('gemRaw')].join('|');
+                     _headDraw, _gemInForce].join('|');
     if(gemMount && gemMount._sig !== _gemSig){
       if(gemMount.group.parent) gemMount.group.parent.remove(gemMount.group);
       if(gemMount.dispose) gemMount.dispose();
@@ -3002,7 +3041,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
         mountHeadHeight: _headDraw,
         // Negative: the dome maths (ported from NINA) puts the optical axis on
         // the opposite side of the declination axis from the model's default.
-        gemAxisLength: -numMmDome('gemRaw'),
+        gemAxisLength: -_gemInForce,
         otaLength: num('otaLength'),
         otaAperture: num('otaAperture'),
         // Dual saddle: use the RAW physical separation, not computeSignedLateral()
@@ -3024,7 +3063,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     gemMount.group.scale.setScalar(scale);
     // Lift group so pier base sits at floorY.
     // Pivot is at pierMm+mountHdMm above the pier base in mm * scale.
-    const _pivotOffsetY = (_pierDraw + _headDraw) * scale;
+    const _pivotOffsetY = (_pierDraw + _headDraw) * scale;   // == _pivotAboveFloor
     gemMount.group.position.set(pierFloorX, floorY + _pivotOffsetY, pierFloorZ);
     // Dome scene North=-Z. Rotate mount 90° around Y so front faces north.
     gemMount.group.rotation.y = -Math.PI / 2;
@@ -3152,7 +3191,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       three.apertureRing.visible = false;
       three.ray.visible = false;
       three.hitMarker.position.copy(hit1V); three.hitMarker.visible = true;
-      updateGhostAperture(three.ghostAperture, hit1V, dir1Norm, tubeRad);
+      updateGhostAperture(three.ghostAperture, hit1V, dir1Norm, tubeRad, domeR);
       ota1Clears = checkShutterFootprint(hit1V, otaApertureMm, phi, tangent, R, scale, shutterWidthMm);
     } else if(dualSaddleActive){
       ota1Clears = false;
@@ -3167,7 +3206,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       three.apertureRing.visible = false;
       three.ray.visible = false;
       three.hitMarker.position.copy(hitV); three.hitMarker.visible = true;
-      updateGhostAperture(three.ghostAperture, hitV, dirNorm, tubeRad);
+      updateGhostAperture(three.ghostAperture, hitV, dirNorm, tubeRad, domeR);
     }
 
     // Dual saddle: draw the second scope, sharing the exact same pointing
@@ -3186,7 +3225,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
       three.apertureRing2.visible = false;
       three.ray2.visible = false;
       three.hitMarker2.position.copy(hit2V); three.hitMarker2.visible = true;
-      updateGhostAperture(three.ghostAperture2, hit2V, dir2Norm, Math.max(ota2ApertureMm, 1) * scale / 2);
+      updateGhostAperture(three.ghostAperture2, hit2V, dir2Norm, Math.max(ota2ApertureMm, 1) * scale / 2, domeR);
       ota2Clears = checkShutterFootprint(hit2V, ota2ApertureMm, phi, tangent, R, scale, shutterWidthMm);
     } else if(dualSaddleActive){
       // OTA2's own ray never reaches the dome at all — definitely outside.
@@ -3232,7 +3271,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     three.setSlit(mesh);
 
     document.getElementById('shutterAngleNote').textContent = horizonClamped
-      ? `⚠ This pointing was pulled up to your local horizon — obstructed by terrain/buildings, not open sky, regardless of how well the dome geometry itself clears.`
+      ? `⚠ This pointing sits below your local horizon — obstructed by terrain or buildings rather than open sky, regardless of how well the dome geometry itself clears. Check your local horizon profile if you expected it to be clear.`
       : (dualSaddleActive && !(ota1Clears && ota2Clears))
       ? `⚠ ${!ota1Clears && !ota2Clears ? 'Both OTAs fall' : (!ota1Clears ? 'OTA 1 falls' : 'OTA 2 falls')} outside the shutter's footprint at this pointing — a wider shutter, smaller lateral offset, or a different tracked OTA would fix it.`
       : dualSaddleActive
