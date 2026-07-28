@@ -165,7 +165,55 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.24.000 — Current</div>
+<div class="card"><div class="eyebrow">v7.29.000 — Current</div>
+<p><strong>Sky-Watcher HEQ5 Pro, EQ6-R Pro, AZ-EQ6-GT, EQ8-R Pro and CQ350 Pro added</strong> &mdash; named and recognised, but with no geometry. Sky-Watcher publish capacities, saddle types and shaft diameters, not axis dimensions. Selecting one changes nothing, and the card says so and tells you what to measure.</p>
+<p><strong>The mount list is now grouped by how much is actually known</strong>, because it had to be. With 27 entries, more mounts are named than dimensioned, and a flat list made a placeholder look identical to a fully specified mount:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><b>Full dimensions</b> &mdash; the Astro-Physics, Paramount and PlaneWave entries whose figures come from a manufacturer.</li>
+  <li><b>One latitude only</b> &mdash; the 10 Micron mounts, correct at 45&deg;.</li>
+  <li><b>Optical-axis offset only</b> &mdash; AP1200, 900GTO and Mach1GTO, which have C but no declination-axis height.</li>
+  <li><b>Needs measuring</b> &mdash; Sky-Watcher and ZWO, named but not dimensioned.</li>
+</ul>
+<p>A grouping bug caught in testing: the PlaneWave mounts are dimensioned by H rather than by A and B, so classifying on A alone filed three fully specified mounts under "needs measuring".</p>
+<p><strong>Worth saying plainly:</strong> twelve entries carry real geometry and fifteen do not, and that ratio will keep worsening, because only Astro-Physics and Software Bisque publish what this tool needs. Letting owners save and share a measured mount would fix that in a way more searching cannot.</p></div>
+
+<div class="card"><div class="eyebrow">v7.28.001</div>
+<p><strong>The harmonic mount's card drawing now matches its 3D model.</strong> The diagram was a placeholder sketch drawn before the strain-wave model existed, in the wrong colours and the wrong shape &mdash; a card showing one machine beside a preview showing another.</p>
+<p>It is now redrawn from the model itself: the dark azimuth base, the red body tilted to latitude, the RA housing running up the polar axis, the declination housing across it, and the saddle beyond &mdash; with no counterweight shaft, matching what the preview builds. A, B and C are marked in the same places as on the equatorial drawing, so the measurements still transfer.</p>
+<p>Applies to both tools. Verified that the right drawing appears for each mount type and that the preview drops the counterweight entirely for a harmonic mount.</p></div>
+
+<div class="card"><div class="eyebrow">v7.28.000</div>
+<p><strong>Harmonic mounts now use a purpose-built model rather than a German equatorial with its weights hidden.</strong> Selecting an AM5, AM5N or AM7 builds a strain-wave mount: compact tilted body, short declination housing, no counterweight shaft.</p>
+<p>Three behaviours follow from the mechanism rather than from cosmetics:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><strong>The swept envelope is the tube alone.</strong> Nothing extends back from the declination axis, so the same telescope needs materially less clearance than it would on a GEM, where the counterweight shaft usually sets the envelope.</li>
+  <li><strong>No meridian flip.</strong> Nothing swings toward the pier, so these track straight through.</li>
+  <li><strong>The binding clearance is the back of the tube</strong> swinging down toward the pier top at high declination, not a shaft passing the pier.</li>
+</ul>
+<p><strong>The counterbalance bar has been dropped</strong>, as asked. The model is built with no counterweight, and the counterweight reach field is held at zero and locked whenever a harmonic mount is selected, rather than inviting a figure the mount does not carry.</p>
+<p>Verified in a browser on both tools: the model reports itself as harmonic, its envelope as the tube alone, no flip required, and the counterweight field locked at zero. Selecting a conventional mount restores the GEM model and its shaft.</p></div>
+
+<div class="card"><div class="eyebrow">v7.27.000</div>
+<p><strong>Harmonic mounts now have their own diagram and 3D model.</strong> A strain-wave mount is an equatorial, but it looks nothing like a fork-and-counterweight GEM, and drawing it as one was misleading about the thing that most distinguishes it.</p>
+<p><strong>New card diagram</strong> showing the compact tilted body, short declination housing and saddle, with no counterweight arm &mdash; A, B and C marked in the same places so the measurements transfer. It appears whenever a harmonic mount is selected and the equatorial drawing returns for everything else.</p>
+<p><strong>The 3D model now omits the counterweight when its reach is 0.</strong> This is data-driven rather than tied to the mount name, so it is right for anyone running bare, harmonic or not. Verified in a browser: the shaft, weights, locking knobs and safety stop all disappear.</p>
+<p>Two bugs fixed getting there. The counterweight was not part of the structural rebuild signature, so changing its reach left the old shaft on screen until something else forced a rebuild. And the roll-off-roof tool was never passing the counterweight length to the model at all &mdash; its construction call is indented differently from the dome's, so an earlier edit had silently missed it.</p></div>
+
+<div class="card"><div class="eyebrow">v7.26.000</div>
+<p><strong>ZWO AM5, AM5N and AM7 added to the mount list</strong> &mdash; named and described, but with no geometry filled in. ZWO's manual carries a <em>Structural Dimensions</em> section as a diagram rather than a table, so none of the three figures can be transcribed.</p>
+<p>Selecting one of these <strong>deliberately changes nothing</strong>, and the card says exactly that rather than leaving you to wonder: it identifies the mount as harmonic, notes the 0&ndash;90&deg; latitude range and dual equatorial / alt-azimuth operation, and tells you to measure A, B and C against the diagram and enter them under <em>Use my own values</em>.</p>
+<p>One thing it does set: <strong>counterweight reach goes to 0</strong>, which is right for a harmonic mount run bare and is the case the swept-volume check gained in the previous release. If you do fit a bar, ZWO advise the weight 20&ndash;30&nbsp;cm out, and the card says so.</p>
+<p>Also tidied: an entry with no published optical-axis offset was showing the rings caveat that only makes sense when there is an offset to caveat.</p></div>
+
+<div class="card"><div class="eyebrow">v7.25.000</div>
+<p><strong>The counterweight is now part of the swept-volume check.</strong> It never was. Reach was worked out from the telescope alone, so the shaft and weights &mdash; the part nearest the pier and the floor, and the part that in practice hits something &mdash; were invisible to every clearance figure.</p>
+<p>On a short tube this matters. With a 600&nbsp;mm tube on an AP3600, the telescope reaches 448&nbsp;mm and the counterweight 787&nbsp;mm: the tool was reporting a swept radius barely half the truth.</p>
+<p><strong>New input: counterweight reach</strong>, from the RA axis to the far end of the shaft. Selecting a mount seeds it from that mount's published shaft length &mdash; figures already in the library from the manufacturer sources but until now unused. Set it to <b>0</b> for a harmonic mount run without one, and the telescope governs again.</p>
+<p>Whichever reaches further now sets the swept radius, in both tools, and the clearance line says which: <em>&ldquo;The counterweight sweeps a radius of 35.4&Prime; &mdash; wider than the telescope &mdash; and the tightest obstruction, the floor, sits at 47.0&Prime;.&rdquo;</em> The 3D model draws the shaft to the same length.</p>
+<p><strong>This will tighten results for anyone using a counterweight.</strong> That is the correct direction &mdash; the previous figures were optimistic, and on a big mount with a small refractor they were optimistic by a wide margin.</p>
+<p>Found while looking into harmonic mounts, which are commonly run with no counterweight at all &mdash; which is what prompted the question of whether the counterweight was being counted in the first place.</p></div>
+
+<div class="card"><div class="eyebrow">v7.24.000</div>
 <p><strong>Selecting a 10 Micron mount now holds the site latitude at 45&deg;</strong> and locks the field. Those mounts are only dimensioned at 45&deg;, so this makes the sky figures and the mount geometry describe the same site instead of quietly disagreeing &mdash; a 45&deg; mount paired with a 52&deg; sky was the more misleading of the two states.</p>
 <p>Because this changes every sky figure on the page, it is announced rather than done silently: the notice under the latitude field names the mount, states that the whole page now describes a 45&deg; site, and &mdash; if your own latitude differs &mdash; says what it was.</p>
 <p><strong>It is fully reversible.</strong> Your latitude is remembered when the lock goes on and restored the moment you choose any other mount. Verified across both tools: 52.3&deg; in, locked to 45&deg;, back to 52.3&deg; on switching away, and correct again after a second 10 Micron selection.</p></div>

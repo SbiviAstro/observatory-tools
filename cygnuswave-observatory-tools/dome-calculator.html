@@ -223,7 +223,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.24.000</span>
+    flex-shrink:0;">v7.29.000</span>
 </div>
 <div class="wrap">
   <header>
@@ -548,6 +548,10 @@
       <div><label>OTA offset along the tube</label><span class="hint">centre of tube + shield relative to the Dec axis; + = toward the aperture</span></div>
       <div class="field"><input type="number" id="otaOffset" value="0"><span class="unit">mm</span></div>
       </div>
+        <div class="row">
+        <div><label>Counterweight reach</label><span class="hint">RA axis to the far end of the shaft &mdash; 0 if you run without one</span></div>
+        <div class="field"><input type="number" id="cwReach" value="0"><span class="unit">mm</span></div>
+        </div>
       <div id="ota2Fields" style="display:none;">
         <hr style="border:none; border-top:1px solid var(--line); margin:12px 0;">
         <div class="row">
@@ -624,6 +628,65 @@
           </svg>
         </div>
 
+        <svg id="mountDiagramHarmonic" viewBox="0 0 440 300" width="100%" style="max-height:300px; display:none;"
+             xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Harmonic mount measurements">
+          <defs>
+            <marker id="hmArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="#e07a4f"/>
+            </marker>
+            <linearGradient id="hmRed" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#c94034"/><stop offset="60%" stop-color="#b5342b"/>
+              <stop offset="100%" stop-color="#8e2822"/>
+            </linearGradient>
+            <linearGradient id="hmTrim" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3a3a37"/><stop offset="100%" stop-color="#1c1c1a"/>
+            </linearGradient>
+          </defs>
+
+          <line x1="25" y1="278" x2="415" y2="278" stroke="#6b7280" stroke-width="2"/>
+          <path d="M25 284 L415 284" stroke="#6b7280" stroke-width="1" stroke-dasharray="4 5" opacity="0.6"/>
+          <rect x="204" y="211" width="40" height="67" fill="#8d8377" opacity="0.5" stroke="#6b7280"/>
+          <text x="224" y="272" font-size="11" fill="#9aa2ad" text-anchor="middle">pier</text>
+          <rect x="186" y="194" width="76" height="18" rx="3" fill="url(#hmTrim)" stroke="#141412"/>
+
+          <!-- Mirrors the 3D model: red body, dark trim, no counterweight shaft. -->
+          <g transform="rotate(-40 224 160)">
+            <rect x="190" y="130" width="68" height="60" rx="7" fill="url(#hmRed)" stroke="#6d1f19"/>
+            <rect x="196" y="124" width="56" height="9"  rx="2" fill="#8e2822" stroke="#6d1f19"/>
+            <rect x="206" y="80"  width="36" height="52" rx="9" fill="url(#hmRed)" stroke="#6d1f19"/>
+            <rect x="204" y="74"  width="40" height="8"  rx="2" fill="#8e2822" stroke="#6d1f19"/>
+            <rect x="190" y="56"  width="68" height="36" rx="10" fill="url(#hmRed)" stroke="#6d1f19"/>
+            <circle cx="224" cy="74" r="7" fill="#8e2822" stroke="#6d1f19"/>
+            <rect x="258" y="50"  width="16" height="48" rx="2" fill="url(#hmTrim)" stroke="#141412"/>
+            <rect x="272" y="60"  width="26" height="28" rx="2" fill="url(#hmTrim)" stroke="#141412"/>
+          </g>
+
+          <line x1="248" y1="180" x2="140" y2="52" stroke="#7fb4d8" stroke-width="1.4" stroke-dasharray="6 4" opacity="0.9"/>
+          <text x="136" y="44" font-size="10.5" fill="#7fb4d8">polar axis</text>
+          <line x1="224" y1="160" x2="300" y2="160" stroke="#7fb4d8" stroke-width="1" opacity="0.6"/>
+          <path d="M264 160 A 40 40 0 0 0 255 135" fill="none" stroke="#7fb4d8" stroke-width="1.2"/>
+          <text x="270" y="150" font-size="10.5" fill="#7fb4d8">latitude</text>
+
+          <circle cx="224" cy="160" r="4.5" fill="#e07a4f"/>
+          <circle cx="169" cy="94"  r="4.5" fill="#e07a4f"/>
+
+          <line x1="172" y1="194" x2="172" y2="160" stroke="#e07a4f" stroke-width="2"
+                marker-start="url(#hmArr)" marker-end="url(#hmArr)"/>
+          <line x1="166" y1="194" x2="200" y2="194" stroke="#e07a4f" stroke-width="1" opacity="0.55"/>
+          <line x1="166" y1="160" x2="227" y2="160" stroke="#e07a4f" stroke-width="1" opacity="0.55"/>
+          <text x="162" y="182" font-size="17" font-weight="bold" fill="#e07a4f" text-anchor="end">A</text>
+
+          <line x1="236" y1="173" x2="181" y2="107" stroke="#e07a4f" stroke-width="2"
+                marker-start="url(#hmArr)" marker-end="url(#hmArr)"/>
+          <text x="214" y="150" font-size="17" font-weight="bold" fill="#e07a4f">B</text>
+
+          <line x1="176" y1="84" x2="203" y2="61" stroke="#e07a4f" stroke-width="2"
+                marker-start="url(#hmArr)" marker-end="url(#hmArr)"/>
+          <text x="176" y="66" font-size="17" font-weight="bold" fill="#e07a4f">C</text>
+
+          <text x="216" y="34" font-size="11" fill="#9aa2ad">saddle / OTA</text>
+          <text x="292" y="206" font-size="11" fill="#9aa2ad">no counterweight shaft</text>
+        </svg>
         <svg id="mountDiagramAltAz" viewBox="0 0 440 290" width="100%" style="max-height:300px; display:none;"
              xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Alt/Az mount measurements">
           <line x1="25" y1="272" x2="415" y2="272" stroke="#6b7280" stroke-width="2"/>
@@ -877,6 +940,13 @@ function domeTubeRadiusMm(){
   const entered = num('otaOuterDia');
   return entered > 0 ? entered / 2 : num('otaAperture') / 2 * 1.3;
 }
+
+// How far the counterweight sweeps from the RA axis. On a classic GEM the shaft
+// and weights hang opposite the tube, and on a short optical tube they are the
+// widest thing on the mount - the part nearest the pier and the floor, and the
+// part that actually hits something. Harmonic mounts are often run without one,
+// which is what 0 means here.
+function cwReachMm(){ return Math.max(0, num('cwReach')); }
 function otaTotalLength(){ return num('otaLength') + Math.max(0, num('dewShield')); }
 
 // ---- RA axis convention -------------------------------------------------
@@ -1750,7 +1820,7 @@ function createGEMMount(THREE, options) {
     ota2DewShield: num(o.ota2DewShield, 0),
     ota2Offset: num(o.ota2Offset, 0),
     ota2OuterDia: num(o.ota2OuterDia, 0),
-    counterweightShaft: o.counterweightShaft || null,
+    counterweightShaft: (o.counterweightShaft === 0 ? 0 : (o.counterweightShaft || null)),
     detail: o.detail === 'high' ? 'high' : 'low',
     shading: o.shading === 'lit' ? 'lit' : 'flat',
     upAxis: o.upAxis || 'y',
@@ -1777,7 +1847,12 @@ function createGEMMount(THREE, options) {
   // gemAxisLength so the model stays coherent if the tube is placed on the
   // other side of the declination axis.
   var cwSide = (P.gemAxisLength < 0) ? -1 : 1;
-  var shaftLen = P.counterweightShaft || Math.max(P.gemAxisLength * 2.2, H * 2.4);
+  // A counterweight reach of exactly 0 means the mount is run without one -
+  // normal for a harmonic mount. Draw no shaft and no weights in that case,
+  // rather than inventing a counterweight the setup does not have.
+  var noCounterweight = (P.counterweightShaft === 0);
+  var shaftLen = noCounterweight ? 0
+    : (P.counterweightShaft || Math.max(P.gemAxisLength * 2.2, H * 2.4));
   var shaftStart = H * 0.31;
 
   // ---- material and geometry helpers -------------------------------------
@@ -1874,7 +1949,8 @@ function createGEMMount(THREE, options) {
   axes.add(segment([0, 0, -H * 1.2], [0, 0, H * 2.2], C.axis, 0.7));
   head.add(axes);
   var decAxisLine = segment(
-    [0, 0, -(shaftLen + shaftStart)], [0, 0, P.gemAxisLength * 1.35], C.axis, 0.7
+    [0, 0, -(noCounterweight ? P.gemAxisLength * 0.6 : shaftLen + shaftStart)],
+    [0, 0, P.gemAxisLength * 1.35], C.axis, 0.7
   );
   decGroup.add(decAxisLine);
 
@@ -1888,9 +1964,10 @@ function createGEMMount(THREE, options) {
     0, 0, -H * 0.5);
 
   bDec.lo.add(cylZ(H * 0.22, H * 0.62, C.structure, 0.9));
-  place(bDec.lo.add(cylZ(H * 0.055, shaftLen, C.steel)).children[1],
+  if(!noCounterweight) place(bDec.lo.add(cylZ(H * 0.055, shaftLen, C.steel)).children[1],
     0, 0, -cwSide * (shaftStart + shaftLen / 2));
   [0.52, 0.72].forEach(function (f) {
+    if(noCounterweight) return;
     var w = cylZ(H * 0.26, shaftLen * 0.12, C.steel);
     bDec.lo.add(w); w.position.z = -cwSide * (shaftStart + shaftLen * f);
   });
@@ -1979,6 +2056,7 @@ function createGEMMount(THREE, options) {
     decMotor.position.set(0, H * 0.36, H * 0.12);
     d.add(decMotor);
 
+    if(!noCounterweight){
     var sh = cylZ(H * 0.06, shaftLen, C.steel);
     sh.position.z = -cwSide * (shaftStart + shaftLen / 2);
     d.add(sh);
@@ -1993,6 +2071,7 @@ function createGEMMount(THREE, options) {
     var stop = cylZ(H * 0.10, H * 0.08, C.trim);
     stop.position.z = -(shaftStart + shaftLen + H * 0.04);
     d.add(stop);
+    }
   })();
 
   // ---- optics -------------------------------------------------------------
@@ -2744,6 +2823,32 @@ const MOUNT_LIBRARY = [
     A:7.637, B:8.716, C:9.5,   I:16.0 },
 
   // ---- Alt/Az direct drive ----------------------------------------------
+  // ---- Sky-Watcher ---------------------------------------------------------
+  // Sky-Watcher publish capacities, saddle types and shaft diameters, but not
+  // the axis geometry. Named here so the mount is recognised; measure A, B and
+  // C and enter them under "Use my own values".
+  { id:'heq5',      name:'Sky-Watcher HEQ5 Pro',      type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'eq6r',      name:'Sky-Watcher EQ6-R Pro',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'azeq6',     name:'Sky-Watcher AZ-EQ6-GT',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'eq8r',      name:'Sky-Watcher EQ8-R Pro',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'cq350',     name:'Sky-Watcher CQ350 Pro',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  // ---- ZWO harmonic (strain wave) ------------------------------------------
+  // ZWO publish these dimensions only as a diagram in the manual, so none of the
+  // three geometry figures can be transcribed. These entries name the mount and
+  // say what to measure; they deliberately change nothing on selection. The
+  // counterweight reach defaults to 0 because harmonic mounts are commonly run
+  // without one - which is exactly the case the swept-volume check now handles.
+  { id:'am5',       name:'ZWO AM5 (harmonic)',        type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, harmonic:true },
+  { id:'am5n',      name:'ZWO AM5N (harmonic)',       type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, harmonic:true },
+  { id:'am7',       name:'ZWO AM7 (harmonic)',        type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, harmonic:true },
   // ---- 10 Micron -----------------------------------------------------------
   // 10 Micron's published dimension sheet draws every mount at 45 degrees only,
   // so the declination-axis height cannot be split into A and B. These entries
@@ -2824,11 +2929,23 @@ function applyGenericDims(){
   }
   compute();
 }
+// True when the selected mount is a strain-wave type. These get their own
+// model rather than a GEM with the weights hidden: no counterweight shaft, no
+// meridian flip by default, and the swept envelope is the tube alone.
+function isHarmonicMount(){
+  return typeof selectedMountId !== 'undefined' && !!mountById(selectedMountId).harmonic;
+}
+
 function syncMountDiagram(){
   const isGem = (mountType === 'GEM');
+  // A harmonic mount is an equatorial, but it looks nothing like a fork-and-
+  // counterweight GEM, so it gets its own drawing.
+  const isHarmonic = isGem && !!mountById(selectedMountId).harmonic;
   const g = document.getElementById('mountDiagramGEM');
   const a = document.getElementById('mountDiagramAltAz');
-  if(g) g.style.display = isGem ? 'block' : 'none';
+  const h = document.getElementById('mountDiagramHarmonic');
+  if(g) g.style.display = (isGem && !isHarmonic) ? 'block' : 'none';
+  if(h) h.style.display = isHarmonic ? 'block' : 'none';
   if(a) a.style.display = isGem ? 'none' : 'block';
   // The dimension boxes are always visible so they can be read against the
   // diagram; they only become editable when you are measuring your own mount.
@@ -2994,6 +3111,8 @@ function updatePierVerdict(){
     return Math.sqrt(a*a + b*b);
   };
   let sweep = reach(otaTotalLength(), num('otaOffset'), domeTubeRadiusMm());
+  // The counterweight swings its own circle about the RA axis.
+  sweep = Math.max(sweep, cwReachMm());
   if(document.getElementById('hasDualSaddle').checked){
     const d2 = num('ota2OuterDia') > 0 ? num('ota2OuterDia')/2 : (num('ota2Aperture')/2) * 1.3;
     sweep = Math.max(sweep, reach(num('ota2Length'), num('ota2Offset'), d2));
@@ -3049,11 +3168,31 @@ function initMountPresets(){
   const sel = document.getElementById('mountPreset');
   if(!sel) return;
   sel.innerHTML = '';
-  MOUNT_LIBRARY.forEach(m => {
-    const o = document.createElement('option');
-    o.value = m.id;
-    o.textContent = m.name + (m.type === 'GEM' ? '  (equatorial)' : m.type === 'AltAz' ? '  (alt/az)' : '');
-    sel.appendChild(o);
+  // Group by how much is actually known. With more mounts named than
+  // dimensioned, a flat list makes a placeholder look like a full entry.
+  // An alt/az entry is dimensioned by H, not by A and B - classifying on A
+  // alone put the fully-specified PlaneWave mounts under "needs measuring".
+  const band = m =>
+      m.type === null || m.id === 'generic'      ? 0
+    : (m.type === 'AltAz')
+        ? ((m.H !== null && m.H !== undefined) ? 1 : 4)
+    : (m.A !== null && m.A !== undefined)        ? 1
+    : m.fixedLat                                 ? 2
+    : (m.C !== null && m.C !== undefined)        ? 3
+    :                                              4;
+  const titles = ['', 'Full dimensions', 'One latitude only',
+                  'Optical-axis offset only', 'Needs measuring'];
+  [0,1,2,3,4].forEach(b => {
+    const items = MOUNT_LIBRARY.filter(m => band(m) === b);
+    if(!items.length) return;
+    const parent = b === 0 ? sel : document.createElement('optgroup');
+    if(b !== 0){ parent.label = titles[b]; sel.appendChild(parent); }
+    items.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.id;
+      o.textContent = m.name + (m.type === 'GEM' ? '  (equatorial)' : m.type === 'AltAz' ? '  (alt/az)' : '');
+      parent.appendChild(o);
+    });
   });
   sel.value = selectedMountId;
   sel.addEventListener('change', () => { selectedMountId = sel.value; applyMountPreset(true); });
@@ -3118,6 +3257,19 @@ function applyMountPreset(userChanged){
     const setDim = (id,v) => { if(v === null || v === undefined) return;
       if(userChanged || !mountCustomOn()){ const e=document.getElementById(id); if(e) e.value = v.toFixed(2); } };
     setDim('genA', m.A); setDim('genB', m.B); setDim('genC', m.C); setDim('genI', m.I || 0);
+    // Seed the counterweight reach from the mount's published shaft, so the
+    // swept-volume check has something real to work with rather than zero.
+    const _cw = document.getElementById('cwReach');
+    if(_cw && (userChanged || !mountCustomOn())) _cw.value = m.I ? (m.I * 25.4).toFixed(0) : 0;
+    // Strain-wave mounts carry no counterbalance bar, so the field is held at
+    // zero and locked rather than inviting a figure the mount does not have.
+    if(_cw){
+      const harm = !!m.harmonic;
+      if(harm) _cw.value = 0;
+      _cw.readOnly = harm;
+      _cw.style.opacity = harm ? '0.72' : '1';
+      _cw.style.cursor  = harm ? 'not-allowed' : 'auto';
+    }
     // A partial entry has no usable declination-axis height, so the mount head
     // height is left exactly as it was. The offset to the optical axis is known
     // and is still applied.
@@ -3131,9 +3283,11 @@ function applyMountPreset(userChanged){
         'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
         'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ') +
       (m.C === null || m.C === undefined
-        ? '<span style="color:#d9a066;">Declination-axis to optical-axis offset not published for this mount \u2014 measure it and enter it below.</span>'
-        : 'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>')
-      + ' <span style="color:#d9a066;">(saddle only \u2014 your rings raise the tube further, so measure C to the optical axis you actually image through)</span>' +
+        ? (m.harmonic ? ''
+           : '<span style="color:#d9a066;">Declination-axis to optical-axis offset not published for this mount \u2014 measure it and enter it below.</span>')
+        : 'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>'
+          // the rings caveat only makes sense when there is a C to caveat
+          + ' <span style="color:#d9a066;">(saddle only \u2014 your rings raise the tube further, so measure C to the optical axis you actually image through)</span>') +
       (m.I ? ' &middot; counterweight shaft <b>' + m.I.toFixed(1) + '&Prime;</b>' : '') +
       (m.fixedLat
         ? '<br>Declination-axis height <b>' + m.fixedHead.toFixed(2) + '&Prime;</b>, as published for '
@@ -3146,6 +3300,17 @@ function applyMountPreset(userChanged){
                 + (Math.abs(Math.sin(lat*Math.PI/180) - Math.sin(m.fixedLat*Math.PI/180)) * 200 / 25.4).toFixed(1)
                 + '&Prime;. Measure your mount and enter it instead.')
           + '</span>'
+        : m.needsMeasuring
+        ? '<span style="color:#d9a066;">' + m.name + ' is recognised, but its maker does not publish the '
+          + 'axis geometry \u2014 only capacities and saddle types. <b>Selecting it changes nothing.</b> '
+          + 'Measure A, B and C against the diagram above, tick &ldquo;Use my own values&rdquo; and enter them.</span>'
+        : m.harmonic
+        ? '<span style="color:#d9a066;">Harmonic (strain wave) mount, 0&ndash;90&deg; latitude, usable equatorial or alt/az. '
+          + 'ZWO publish its dimensions only as a diagram, so <b>selecting this changes nothing</b> \u2014 '
+          + 'there is no figure to fill in. Measure A, B and C against the diagram above, tick '
+          + '&ldquo;Use my own values&rdquo; and enter them.<br>'
+          + 'Counterweight reach is left at 0, which is right if you run it bare. If you fit a bar, '
+          + 'ZWO advise the weight 20&ndash;30&nbsp;cm out \u2014 enter that as the reach.</span>'
         : m.partial
         ? '<br><span style="color:#d9a066;">Astro-Physics does not publish this mount\u2019s declination-axis '
           + 'height in a form a single reading can resolve, so the mount head height has been left exactly as '
@@ -3178,6 +3343,487 @@ function applyMountPreset(userChanged){
 }
 
 let three = null;
+/*
+ * harmonic-mount.js — strain-wave (harmonic drive) equatorial mount
+ * three.js r128. Same API as ror-mounts.js / l500-mount-v2.js, so it drops
+ * into createMountArray() or stands alone.
+ *
+ * WHY THIS IS ITS OWN TYPE, not a GEM with the weights hidden:
+ *
+ * 1. NO COUNTERWEIGHT SHAFT. Strain-wave gearing holds position against an
+ *    unbalanced load, so there is nothing extending back from the dec axis.
+ *    On a GEM the shaft is usually longer than the telescope and sets the
+ *    swept envelope; here the envelope is the OTA alone, so the same scope
+ *    needs roughly a third less clearance. envelopeFrom = 'ota'.
+ *
+ * 2. NO MERIDIAN FLIP by default. Nothing swings toward the pier, so most
+ *    of these track straight through the meridian. requiresFlip = false,
+ *    and update() ignores pierSide unless you set allowFlip:true — some
+ *    owners still flip to keep camera rotation sane.
+ *
+ * 3. PIER CLEARANCE IS NOT THE BINDING CONSTRAINT. With no shaft passing
+ *    the pier, the check that bites is the BACK of the tube swinging down
+ *    toward the pier top or the tripod legs at high declination. That is
+ *    what rearClearance() measures; pierClearance() is kept as an alias so
+ *    existing call sites do not break, but it reports the same thing.
+ *
+ * A counterweight is still supported (counterweight:true). Owners fit one
+ * for heavy loads — not to hold position, but because tracking settling
+ * time and guiding degrade with a badly unbalanced load. Turning it on
+ * grows the envelope accordingly, which is the honest result.
+ *
+ * UNITS: unit-agnostic; defaults are millimetres and roughly AM5 sized.
+ */
+
+function createHarmonicMount(THREE, options) {
+  var o = options || {};
+  var DEG = Math.PI / 180;
+  function num(v, d) { return (v === null || v === undefined || isNaN(v)) ? d : +v; }
+
+  var P = {
+    detail: o.detail === 'high' ? 'high' : 'low',
+    shading: o.shading === 'lit' ? 'lit' : 'flat',
+    support: o.support === 'tripod' ? 'tripod' : 'pier',
+
+    pierHeight: num(o.pierHeight, 1100),
+    pierDiameter: num(o.pierDiameter, 300),
+    tripodSpread: num(o.tripodSpread, 1080),   // foot circle diameter
+
+    mountHeadHeight: num(o.mountHeadHeight, 250), // support top to RA/Dec pivot
+    bodyWidth: num(o.bodyWidth, 124),
+    raHousingDiameter: num(o.raHousingDiameter, 116),
+    decHousingDiameter: num(o.decHousingDiameter, 120),
+    saddleOffset: num(o.saddleOffset, 134),    // dec axis to saddle face
+
+    otaLength: num(o.otaLength, 600),
+    otaAperture: num(o.otaAperture, 290),
+    otaBackFocus: num(o.otaBackFocus, 0.55),   // fraction of length behind the axis
+    otaStyle: o.otaStyle === 'truss' ? 'truss' : 'tube',
+
+    counterweight: !!o.counterweight,
+    counterweightShaft: num(o.counterweightShaft, 330),
+    allowFlip: !!o.allowFlip,
+
+    position: Object.assign({ east: 0, north: 0, height: null }, o.position || {}),
+    upAxis: o.upAxis || 'y',
+    northAxis: o.northAxis || '-z',
+    segments: o.segments || 22,
+    label: o.label || 'harmonic'
+  };
+
+  var C = Object.assign({
+    body: 0xb5342b, bodyDark: 0x8e2822, trim: 0x242422, trim2: 0x333331,
+    steel: 0xb9b8b2, support: 0x53524e, ota: 0xcfc49e, otaDark: 0x1f1f1e,
+    glass: 0x8fa0a8, axis: 0x7e8b99, optical: 0xffb020,
+    sweep: 0x4a90d9, clash: 0xd9534f
+  }, o.colors || {});
+
+  var H = P.mountHeadHeight, flangeZ = -H;
+  var raR = P.raHousingDiameter / 2, decR = P.decHousingDiameter / 2;
+  var otaR = P.otaAperture / 2;
+  var tubeCentre = P.saddleOffset + otaR;   // dec axis to optical axis
+
+  // ---- helpers ------------------------------------------------------------
+  var store = [], matCache = {};
+  function keep(x) { store.push(x); return x; }
+  function surf(color) {
+    var k = P.shading + ':' + color;
+    if (!matCache[k]) matCache[k] = keep(P.shading === 'lit'
+      ? new THREE.MeshStandardMaterial({ color: color, roughness: 0.6, metalness: 0.1 })
+      : new THREE.MeshBasicMaterial({ color: color }));
+    return matCache[k];
+  }
+  function lineMat(color, opacity) {
+    var k = 'L:' + color + ':' + opacity;
+    if (!matCache[k]) matCache[k] = keep(new THREE.LineBasicMaterial({
+      color: color, transparent: true, opacity: opacity }));
+    return matCache[k];
+  }
+  function solid(geom, color, opacity) {
+    var g = new THREE.Group(), m = surf(color);
+    if (opacity !== undefined && opacity < 1) {
+      m = m.clone(); m.transparent = true; m.opacity = opacity; keep(m);
+    }
+    g.add(new THREE.Mesh(keep(geom), m));
+    g.add(new THREE.LineSegments(keep(new THREE.EdgesGeometry(geom, 28)),
+      lineMat(0x000000, P.shading === 'lit' ? 0.15 : 0.26)));
+    return g;
+  }
+  function cylZ(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateX(Math.PI / 2); return solid(g, color, opacity);
+  }
+  function cylX(r, len, color, opacity, open) {
+    var g = new THREE.CylinderGeometry(r, r, len, P.segments, 1, !!open);
+    g.rotateZ(Math.PI / 2); return solid(g, color, opacity);
+  }
+  function boxAt(w, d, h, color) { return solid(new THREE.BoxGeometry(w, d, h), color); }
+  function strut(p0, p1, r, color) {
+    var d = new THREE.Vector3(p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]);
+    var len = d.length();
+    var g = new THREE.CylinderGeometry(r, r * 0.7, len, 10);
+    g.translate(0, len / 2, 0);
+    var m = solid(g, color);
+    m.position.set(p0[0], p0[1], p0[2]);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    return m;
+  }
+  function segment(a, b, color, opacity) {
+    var g = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3().fromArray(a), new THREE.Vector3().fromArray(b)]);
+    return new THREE.Line(keep(g), lineMat(color, opacity));
+  }
+
+  // ---- scene graph --------------------------------------------------------
+  var group = new THREE.Group();
+  group.name = 'mount:' + P.label;
+  var frame = new THREE.Group();
+  if (P.upAxis === 'y') frame.rotation.x = -Math.PI / 2;
+  group.add(frame);
+
+  function placeGroup() {
+    var e = P.position.east, n = P.position.north;
+    var h = P.position.height === null ? (P.pierHeight + H) : P.position.height;
+    if (P.upAxis === 'y') group.position.set(e, h, P.northAxis === '+z' ? n : -n);
+    else group.position.set(e, n, h);
+  }
+  placeGroup();
+
+  var lowBins = [], highBins = [];
+  function bins(node) {
+    var lo = new THREE.Group(), hi = new THREE.Group();
+    node.add(lo); node.add(hi);
+    lowBins.push(lo); highBins.push(hi);
+    return { lo: lo, hi: hi };
+  }
+  var bFrame = bins(frame);
+
+  // ---- support: pier or tripod -------------------------------------------
+  (function support() {
+    if (P.support === 'pier') {
+      var pr = P.pierDiameter / 2;
+      var lo = cylZ(pr, P.pierHeight, C.support, 0.9);
+      lo.position.z = flangeZ - P.pierHeight / 2; bFrame.lo.add(lo);
+      var hi = cylZ(pr, P.pierHeight * 0.94, C.support);
+      hi.position.z = flangeZ - H * 0.15 - P.pierHeight * 0.47; bFrame.hi.add(hi);
+      var foot = cylZ(pr * 1.7, P.pierHeight * 0.05, C.support);
+      foot.position.z = flangeZ - P.pierHeight + P.pierHeight * 0.025; bFrame.hi.add(foot);
+      var top = cylZ(pr * 0.7, H * 0.16, C.trim2);
+      top.position.z = flangeZ - H * 0.08; bFrame.hi.add(top);
+    } else {
+      var hub = flangeZ - P.pierHeight * 0.28;
+      var footR = P.tripodSpread / 2;
+      for (var i = 0; i < 3; i++) {
+        var a = (i * 120 + 90) * DEG;
+        var top = [Math.cos(a) * H * 0.32, Math.sin(a) * H * 0.32, hub];
+        var toe = [Math.cos(a) * footR, Math.sin(a) * footR, flangeZ - P.pierHeight];
+        bFrame.lo.add(strut(top, toe, H * 0.14, C.trim));
+        bFrame.hi.add(strut(top, toe, H * 0.14, C.trim));
+        var mid = flangeZ - P.pierHeight * 0.62;
+        bFrame.hi.add(strut(
+          [Math.cos(a) * H * 0.28, Math.sin(a) * H * 0.28, mid + H * 0.2],
+          [Math.cos(a) * footR * 0.42, Math.sin(a) * footR * 0.42, mid], H * 0.05, C.trim2));
+      }
+      var col = cylZ(H * 0.28, P.pierHeight * 0.30, C.trim);
+      col.position.z = hub + P.pierHeight * 0.14; bFrame.lo.add(col);
+      var col2 = cylZ(H * 0.28, P.pierHeight * 0.30, C.trim);
+      col2.position.z = hub + P.pierHeight * 0.14; bFrame.hi.add(col2);
+      var cap = cylZ(H * 0.42, H * 0.12, C.trim2);
+      cap.position.z = flangeZ - H * 0.06; bFrame.hi.add(cap);
+    }
+  })();
+
+  // Azimuth base block with its adjuster screws.
+  var azBlock = boxAt(P.bodyWidth * 1.1, P.bodyWidth * 1.1, H * 0.22, C.trim);
+  azBlock.position.z = flangeZ + H * 0.11;
+  frame.add(azBlock);
+  var bBase = bins(frame);
+  [-1, 1].forEach(function (s) {
+    var k = cylX(H * 0.05, H * 0.2, C.steel);
+    k.position.set(s * P.bodyWidth * 0.58, -P.bodyWidth * 0.32, flangeZ + H * 0.11);
+    bBase.hi.add(k);
+  });
+
+  // ---- head: latitude wedge ----------------------------------------------
+  var head = new THREE.Group();
+  head.position.set(0, P.bodyWidth * 0.47, flangeZ + H * 0.28);
+  frame.add(head);
+  var bHead = bins(head);
+
+  var pin = cylX(H * 0.055, P.bodyWidth * 1.15, C.steel);
+  pin.position.copy(head.position);
+  bFrame.hi.add(pin);
+
+  var bodyLo = boxAt(P.bodyWidth, P.bodyWidth, H * 0.30, C.body, 0.95);
+  bodyLo.position.set(0, -P.bodyWidth * 0.42, H * 0.28);
+  bHead.lo.add(bodyLo);
+
+  var bodyHi = boxAt(P.bodyWidth, P.bodyWidth, H * 0.30, C.body);
+  bodyHi.position.set(0, -P.bodyWidth * 0.42, H * 0.28);
+  bHead.hi.add(bodyHi);
+  var bodyCap = boxAt(P.bodyWidth * 0.9, P.bodyWidth * 0.9, H * 0.04, C.bodyDark);
+  bodyCap.position.set(0, -P.bodyWidth * 0.42, H * 0.60); bHead.hi.add(bodyCap);
+  var latScale = boxAt(P.bodyWidth * 0.7, H * 0.05, P.bodyWidth * 0.7, C.trim);
+  latScale.position.set(0, -P.bodyWidth * 0.95, H * 0.22); bHead.hi.add(latScale);
+
+  // ---- RA rotor -----------------------------------------------------------
+  var raOffsetY = -P.bodyWidth * 0.42;
+  var raRotor = new THREE.Group();
+  raRotor.position.set(0, raOffsetY, 0);
+  head.add(raRotor);
+  var bRa = bins(raRotor);
+
+  head.add(segment([0, raOffsetY, -H * 0.3], [0, raOffsetY, H * 2.4], C.axis, 0.7));
+
+  var raLo = cylZ(raR, H * 0.34, C.body, 0.95);
+  raLo.position.z = H * 0.77; bRa.lo.add(raLo);
+  var raHi = cylZ(raR, H * 0.34, C.body);
+  raHi.position.z = H * 0.77; bRa.hi.add(raHi);
+  var raCollar = cylZ(raR * 1.06, H * 0.06, C.bodyDark);
+  raCollar.position.z = H * 0.97; bRa.hi.add(raCollar);
+
+  // Dec assembly sits at the origin of the dec group: the axes intersection.
+  var decGroup = new THREE.Group();
+  decGroup.position.z = H;            // pivot to axes crossing
+  decGroup.rotation.y = Math.PI / 2;
+  raRotor.add(decGroup);
+  var bDec = bins(decGroup);
+
+  decGroup.add(segment([0, 0, -(P.counterweightShaft + decR * 2)],
+    [0, 0, tubeCentre * 1.6], C.axis, 0.7));
+
+  var decLo = cylZ(decR, H * 0.62, C.body, 0.95);
+  decLo.position.z = H * 0.03; bDec.lo.add(decLo);
+  var decHi = cylZ(decR, H * 0.62, C.body);
+  decHi.position.z = H * 0.03; bDec.hi.add(decHi);
+  [-1, 1].forEach(function (s) {
+    var cap = cylZ(decR * 1.06, H * 0.055, C.trim);
+    cap.position.z = H * 0.03 + s * H * 0.34; bDec.hi.add(cap);
+  });
+  var decMotor = boxAt(decR * 0.6, H * 0.06, H * 0.32, C.trim);
+  decMotor.position.set(0, decR * 1.05, H * 0.05); bDec.hi.add(decMotor);
+
+  // Optional counterweight — supported, not required.
+  var cwGroup = new THREE.Group();
+  decGroup.add(cwGroup);
+  (function () {
+    var shaft = cylZ(H * 0.065, P.counterweightShaft, C.steel);
+    shaft.position.z = -(decR + P.counterweightShaft / 2);
+    cwGroup.add(shaft);
+    var w = cylZ(H * 0.29, P.counterweightShaft * 0.18, C.trim);
+    w.position.z = -(decR + P.counterweightShaft * 0.78);
+    cwGroup.add(w);
+    var stop = cylZ(H * 0.09, H * 0.06, C.trim2);
+    stop.position.z = -(decR + P.counterweightShaft + H * 0.03);
+    cwGroup.add(stop);
+  })();
+  cwGroup.visible = P.counterweight;
+
+  // ---- dec rotor and optics ----------------------------------------------
+  var decRotor = new THREE.Group();
+  decGroup.add(decRotor);
+  var optics = new THREE.Group();
+  decRotor.add(optics);
+  var otas = [];
+
+  var saddle = boxAt(P.bodyWidth * 1.3, decR * 0.6, H * 0.06, C.trim);
+  saddle.position.set(0, 0, P.saddleOffset - H * 0.03);
+  decRotor.add(saddle);
+  var dovetail = boxAt(P.bodyWidth * 1.2, decR * 0.4, H * 0.04, C.bodyDark);
+  dovetail.position.set(0, 0, P.saddleOffset + H * 0.02);
+  decRotor.add(dovetail);
+
+  function buildOTA(detailed) {
+    var g = new THREE.Group();
+    var back = -P.otaLength * P.otaBackFocus;
+    var front = P.otaLength * (1 - P.otaBackFocus);
+    g.add(cylX(otaR, P.otaLength * 0.86, detailed ? C.ota : C.ota,
+      detailed ? 1 : 0.85, !detailed).translateX((back + front) * 0.5 * 0.1));
+    if (detailed) {
+      var frontCell = cylX(otaR * 1.03, P.otaLength * 0.09, C.otaDark);
+      frontCell.position.x = front * 0.86; g.add(frontCell);
+      var corrector = cylX(otaR * 0.97, P.otaLength * 0.015, C.glass);
+      corrector.position.x = front * 0.93; g.add(corrector);
+      var rearCell = cylX(otaR * 1.03, P.otaLength * 0.09, C.otaDark);
+      rearCell.position.x = back * 0.86; g.add(rearCell);
+      var back1 = cylX(otaR * 0.4, P.otaLength * 0.09, C.trim2);
+      back1.position.x = back * 1.02; g.add(back1);
+      var back2 = cylX(otaR * 0.32, P.otaLength * 0.12, C.otaDark);
+      back2.position.x = back * 1.18; g.add(back2);
+      var bar = boxAt(P.otaLength * 0.4, otaR * 0.16, otaR * 0.12, C.body);
+      bar.position.set(0, 0, -otaR * 1.02); g.add(bar);
+    }
+    var ring = new THREE.Mesh(
+      keep(new THREE.RingGeometry(otaR * 0.82, otaR, P.segments)),
+      keep(new THREE.MeshBasicMaterial({ color: C.optical, side: THREE.DoubleSide,
+        transparent: true, opacity: 0.9 })));
+    ring.rotation.y = Math.PI / 2;
+    ring.position.x = front * 0.97;
+    g.add(ring);
+    g.add(segment([front, 0, 0], [front + P.otaLength * 1.8, 0, 0], C.optical, 0.9));
+    g.position.z = tubeCentre;
+    return g;
+  }
+  function buildOptics() {
+    otas.forEach(function (t) { optics.remove(t); });
+    otas = [buildOTA(P.detail === 'high')];
+    optics.add(otas[0]);
+  }
+
+  // ---- envelope: OTA only, unless a counterweight is fitted ---------------
+  function computeEnvelope() {
+    var otaReach = Math.sqrt(
+      Math.pow(P.otaLength * Math.max(P.otaBackFocus, 1 - P.otaBackFocus), 2) +
+      Math.pow(tubeCentre + otaR, 2));
+    if (!P.counterweight) return otaReach;
+    return Math.max(otaReach, decR + P.counterweightShaft);
+  }
+  var swingRadius = num(o.swingRadius, computeEnvelope());
+  var envelopeFrom = P.counterweight ? 'ota+counterweight' : 'ota';
+
+  var sweep = new THREE.Mesh(
+    keep(new THREE.SphereGeometry(swingRadius, 32, 20)),
+    keep(new THREE.MeshBasicMaterial({ color: C.sweep, transparent: true,
+      opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
+  var sweepWire = new THREE.LineSegments(
+    keep(new THREE.WireframeGeometry(new THREE.SphereGeometry(swingRadius, 16, 10))),
+    lineMat(C.sweep, 0.18));
+  sweep.visible = false; sweepWire.visible = false;
+  decGroup.add(sweep); decGroup.add(sweepWire);
+
+  // ---- state --------------------------------------------------------------
+  var state = { latitude: 45, hourAngle: 0, dec: 90, pierSide: 'east' };
+
+  function update(s) {
+    if (s) Object.assign(state, s);
+    head.rotation.x = (state.latitude - 90) * DEG;
+    // No flip unless explicitly allowed: strain-wave mounts track through.
+    var flip = (P.allowFlip && state.pierSide === 'west') ? 180 : 0;
+    raRotor.rotation.z = (180 + state.hourAngle * 15 + flip) * DEG;
+    decRotor.rotation.z = (flip ? -1 : 1) * (90 + state.dec) * DEG;
+    cwGroup.visible = P.counterweight;
+    group.updateMatrixWorld(true);
+    return api;
+  }
+
+  function pointAt(altDeg, azDeg) {
+    var D = DEG, lat = state.latitude * D, al = altDeg * D, azr = azDeg * D;
+    var dec = Math.asin(Math.max(-1, Math.min(1,
+      Math.sin(al) * Math.sin(lat) + Math.cos(al) * Math.cos(lat) * Math.cos(azr))));
+    var ha = Math.atan2(-Math.cos(al) * Math.sin(azr),
+      Math.sin(al) * Math.cos(lat) - Math.cos(al) * Math.sin(lat) * Math.cos(azr));
+    return update({ hourAngle: (ha / D) / 15, dec: dec / D });
+  }
+
+  // ---- readouts -----------------------------------------------------------
+  function wallClearance(walls) {
+    if (!walls || !walls.length) return null;
+    var e = P.position.east, n = P.position.north, worst = null, which = -1;
+    for (var i = 0; i < walls.length; i++) {
+      var a = walls[i].azimuth * DEG;
+      var gap = walls[i].distance - (e * Math.sin(a) + n * Math.cos(a)) - swingRadius;
+      if (worst === null || gap < worst) { worst = gap; which = i; }
+    }
+    return { clearance: worst, wallIndex: which };
+  }
+  function ceilingClearance(ceilingHeight) {
+    var h = P.position.height === null ? (P.pierHeight + H) : P.position.height;
+    return ceilingHeight - (h + swingRadius);
+  }
+  function floorClearance() {
+    var h = P.position.height === null ? (P.pierHeight + H) : P.position.height;
+    return h - swingRadius;
+  }
+
+  // The binding constraint on this mount type: the rear of the tube swinging
+  // down toward the support at high declination. Sampled along the back half
+  // of the tube, in the frame's own coordinates.
+  var _p = new THREE.Vector3();
+  function rearClearance() {
+    group.updateMatrixWorld(true);
+    var supportR = (P.support === 'pier') ? P.pierDiameter / 2 : H * 0.42;
+    var back = -P.otaLength * P.otaBackFocus * 1.2;
+    var best = null;
+    for (var i = 0; i <= 24; i++) {
+      var x = back * (i / 24);
+      for (var s = -1; s <= 1; s += 2) {
+        _p.set(x, s * otaR, tubeCentre);
+        otas[0].parent.localToWorld(_p);
+        frame.worldToLocal(_p);
+        if (_p.z > flangeZ) {
+          var radial = Math.sqrt(_p.x * _p.x + _p.y * _p.y) - supportR;
+          var d = Math.max(radial, _p.z - flangeZ);
+          if (best === null || d < best) best = d;
+        } else {
+          var below = Math.sqrt(_p.x * _p.x + _p.y * _p.y) - supportR;
+          if (best === null || below < best) best = below;
+        }
+      }
+    }
+    return best;
+  }
+
+  function opticalAxis() {
+    group.updateMatrixWorld(true);
+    return {
+      origin: new THREE.Vector3(0, 0, 0).applyMatrix4(otas[0].matrixWorld),
+      direction: new THREE.Vector3(1, 0, 0).transformDirection(otas[0].matrixWorld).normalize()
+    };
+  }
+
+  function applyDetail() {
+    var hi = P.detail === 'high';
+    lowBins.forEach(function (b) { b.visible = !hi; });
+    highBins.forEach(function (b) { b.visible = hi; });
+    buildOptics();
+  }
+  function setDetail(level) {
+    P.detail = (level === 'high') ? 'high' : 'low'; applyDetail(); return update();
+  }
+  function setCounterweight(v) {
+    P.counterweight = !!v;
+    swingRadius = computeEnvelope();
+    envelopeFrom = P.counterweight ? 'ota+counterweight' : 'ota';
+    api.swingRadius = swingRadius; api.envelopeFrom = envelopeFrom;
+    return update();
+  }
+  function setPosition(pos) { Object.assign(P.position, pos || {}); placeGroup(); return api; }
+  function setOptics(next) {
+    Object.assign(P, next || {});
+    otaR = P.otaAperture / 2; tubeCentre = P.saddleOffset + otaR;
+    buildOptics(); return setCounterweight(P.counterweight);
+  }
+  function showSweptVolume(v) { sweep.visible = !!v; sweepWire.visible = !!v; return api; }
+  function markClash(v) {
+    sweep.material.color.setHex(v ? C.clash : C.sweep);
+    sweepWire.material.color.setHex(v ? C.clash : C.sweep);
+    return api;
+  }
+  function showOTA(v) { optics.visible = !!v; return api; }
+  function dispose() { store.forEach(function (r) { r.dispose && r.dispose(); }); }
+
+  var api = {
+    group: group, frame: frame, optics: optics, params: P,
+    mountType: 'harmonic',
+    requiresFlip: P.allowFlip,
+    envelopeFrom: envelopeFrom,
+    swingRadius: swingRadius,
+    footprintRadius: swingRadius,
+    update: update, pointAt: pointAt, setDetail: setDetail,
+    setCounterweight: setCounterweight, setPosition: setPosition, setOptics: setOptics,
+    wallClearance: wallClearance, ceilingClearance: ceilingClearance,
+    floorClearance: floorClearance, rearClearance: rearClearance,
+    pierClearance: rearClearance,
+    opticalAxis: opticalAxis, showSweptVolume: showSweptVolume,
+    showOTA: showOTA, markClash: markClash, dispose: dispose
+  };
+
+  applyDetail();
+  update();
+  return api;
+}
+
+let harmonicMount = null;
 let gemMount = null;
 let _lastGemInForce = 0;
 
@@ -3754,15 +4400,26 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // structural dimension needs a full rebuild, otherwise the pier mesh keeps
     // its old length while the group offset uses the new one (pier sinks/floats).
     const _dualOn = document.getElementById('hasDualSaddle').checked;
+    // A harmonic mount is a different machine, so it is a different model.
+    const _harm = isHarmonicMount();
     const _gemSig = [_pierDraw, numMmDome('pierDiameter'),
-                     _headDraw, _gemInForce].join('|');
+                     _headDraw, _gemInForce, cwReachMm(), _harm].join('|');
     if(gemMount && gemMount._sig !== _gemSig){
       if(gemMount.group.parent) gemMount.group.parent.remove(gemMount.group);
       if(gemMount.dispose) gemMount.dispose();
       gemMount = null;
     }
     if(!gemMount){
-      gemMount = createGEMMount(THREE, {
+      gemMount = (_harm ? createHarmonicMount : createGEMMount)(THREE, _harm ? {
+        detail: 'low', shading: 'lit', support: 'pier',
+        pierHeight: _pierDraw, pierDiameter: numMmDome('pierDiameter'),
+        mountHeadHeight: _headDraw,
+        saddleOffset: Math.abs(_gemInForce),
+        otaLength: num('otaLength'), otaAperture: num('otaAperture'),
+        // Dropped by request: no counterbalance bar on a strain-wave mount.
+        counterweight: false,
+        upAxis: 'y'
+      } : {
         detail: 'low', shading: 'lit',
         pierHeight: _pierDraw,
         pierDiameter: numMmDome('pierDiameter'),
@@ -3775,6 +4432,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
         dewShield: num('dewShield'),
         otaOffset: num('otaOffset'),
         otaOuterDia: domeTubeRadiusMm() * 2,
+        counterweightShaft: cwReachMm(),
         // Dual saddle: use the RAW physical separation, not computeSignedLateral()
         // (that one is the NINA tracking value and is 0 for "between").
         lateralAxis:  _dualOn ? computeRawLateral() : 0,
