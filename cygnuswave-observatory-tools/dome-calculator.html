@@ -223,7 +223,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.16.000</span>
+    flex-shrink:0;">v7.19.001</span>
 </div>
 <div class="wrap">
   <header>
@@ -536,6 +536,10 @@
         <div><label id="otaApertureLabel">OTA clear aperture</label></div>
         <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
       </div>
+        <div class="row">
+          <div><label>OTA outer diameter</label><span class="hint">tube body including rings and dovetail &mdash; 0 estimates it from the aperture</span></div>
+          <div class="field"><input type="number" id="otaOuterDia" value="0"><span class="unit">mm</span></div>
+        </div>
       <div class="row">
       <div><label>Dew shield length</label><span class="hint">adds to the tube length; drawn in a lighter tone</span></div>
       <div class="field"><input type="number" id="dewShield" value="0"><span class="unit">mm</span></div>
@@ -862,6 +866,15 @@ function num(id){ const v = parseFloat(document.getElementById(id).value); retur
 // Total tube length including the dew shield. The shield is part of what sweeps
 // and part of what can foul a shutter, so it counts toward length rather than
 // being decoration.
+
+// Half the tube's physical outer diameter, rings and dovetail included. Swing
+// and dome clearance are set by the widest thing on the tube, not by the light
+// path. Entering 0 estimates it at 1.3x the aperture, about right for a closed
+// tube in rings.
+function domeTubeRadiusMm(){
+  const entered = num('otaOuterDia');
+  return entered > 0 ? entered / 2 : num('otaAperture') / 2 * 1.3;
+}
 function otaTotalLength(){ return num('otaLength') + Math.max(0, num('dewShield')); }
 
 // ---- RA axis convention -------------------------------------------------
@@ -1723,8 +1736,18 @@ function createGEMMount(THREE, options) {
     lateralAxis: o.lateralAxis || 0,
     otaLength: num(o.otaLength, 800),
     otaAperture: num(o.otaAperture, 200),
+    // These three were relied on but never declared here. setOptics() copies
+    // whatever it is handed, so they appeared to work - until any structural
+    // rebuild reconstructed the mount and dropped them, taking the rings, the
+    // dew shield and the tube offset with them.
+    dewShield: num(o.dewShield, 0),
+    otaOffset: num(o.otaOffset, 0),
+    otaOuterDia: num(o.otaOuterDia, 0),
     ota2Length: o.ota2Length || 0,
     ota2Aperture: o.ota2Aperture || 0,
+    ota2DewShield: num(o.ota2DewShield, 0),
+    ota2Offset: num(o.ota2Offset, 0),
+    ota2OuterDia: num(o.ota2OuterDia, 0),
     counterweightShaft: o.counterweightShaft || null,
     detail: o.detail === 'high' ? 'high' : 'low',
     shading: o.shading === 'lit' ? 'lit' : 'flat',
@@ -1972,14 +1995,17 @@ function createGEMMount(THREE, options) {
 
   // ---- optics -------------------------------------------------------------
   var otas = [];
-  function buildOTA(len, aperture, lateral, detailed) {
+  // The per-tube figures are passed in rather than read from P, so a second
+  // telescope is drawn with its own dew shield, offset and ring diameter
+  // instead of inheriting the first tube's.
+  function buildOTA(len, aperture, lateral, detailed, dewLen, offMm, outerDia) {
     var g = new THREE.Group();
     var r = aperture * 0.5;
-    var dewLen = Math.max(0, P.dewShield || 0);
+    dewLen = Math.max(0, dewLen || 0);
     // How far the centre of the whole assembly (tube + shield) sits from the
     // declination axis, along the tube. Zero means perfectly balanced on the
     // axis; positive slides it toward the aperture.
-    var off = P.otaOffset || 0;
+    var off = offMm || 0;
     // The tube is drawn about the assembly centre, so the body sits back from
     // that centre by half the shield.
     var body = new THREE.Group();
@@ -1997,14 +2023,23 @@ function createGEMMount(THREE, options) {
       var cell = cylX(r * 1.02, len * 0.06, C.trim);
       cell.position.x = -len * 0.5;
       body.add(cell);
-      [-0.22, 0.16].forEach(function (fr) {
-        var ring = cylX(r * 1.14, len * 0.045, C.trim);
-        ring.position.x = len * fr;
-        body.add(ring);
-      });
       var foc = cylZ(r * 0.22, r * 1.1, C.trim);
       foc.position.set(-len * 0.42, 0, -r * 0.9);
       body.add(foc);
+    }
+
+    // Tube rings, drawn at the outer diameter that actually drives the
+    // clearance checks. Sized from the entered figure rather than a fraction of
+    // the tube, so a wide set of rings looks wide instead of the picture showing
+    // a slim tube while the numbers use a larger envelope. Drawn at both detail
+    // levels because they carry information, not decoration.
+    var ringR = (outerDia || 0) / 2;
+    if (ringR > r * 1.03) {
+      [-0.22, 0.16].forEach(function (fr) {
+        var ring = cylX(ringR, len * 0.055, C.trim);
+        ring.position.x = len * fr;
+        body.add(ring);
+      });
     }
     var ring = new THREE.Mesh(
       keep(new THREE.RingGeometry(aperture * 0.42, aperture * 0.5, P.segments)),
@@ -2024,9 +2059,11 @@ function createGEMMount(THREE, options) {
     otas.forEach(function (t) { optics.remove(t); });
     otas = [];
     var hi = P.detail === 'high';
-    otas.push(buildOTA(P.otaLength, P.otaAperture, P.lateralAxis ? -P.lateralAxis : 0, hi));
+    otas.push(buildOTA(P.otaLength, P.otaAperture, P.lateralAxis ? -P.lateralAxis : 0, hi,
+                       P.dewShield, P.otaOffset, P.otaOuterDia));
     if (P.ota2Length > 0 && P.lateralAxis) {
-      otas.push(buildOTA(P.ota2Length, P.ota2Aperture || P.otaAperture, P.lateralAxis, hi));
+      otas.push(buildOTA(P.ota2Length, P.ota2Aperture || P.otaAperture, P.lateralAxis, hi,
+                         P.ota2DewShield, P.ota2Offset, P.ota2OuterDia));
     }
     otas.forEach(function (t) { optics.add(t); });
     if (typeof refreshSweep === 'function') refreshSweep();
@@ -2227,6 +2264,7 @@ function createL500Mount(THREE, options) {
     otaAperture: num(o.otaAperture, 432),
     otaLength: num(o.otaLength, 1100),
     dewShield: num(o.dewShield, 0),
+    otaOuterDia: num(o.otaOuterDia, 0),
     otaOffset: num(o.otaOffset, 0),
     otaBackFocus: num(o.otaBackFocus, 0.44), // fraction of length behind the axis
 
@@ -2899,10 +2937,18 @@ function updatePierVerdict(){
   // Same definition the swing checks use: the dew shield is part of the tube,
   // and how far it reaches depends on where the assembly sits on the Dec axis.
   // The tube body runs wider than its clear aperture, so allow for that too.
-  const otaAp  = num('otaAperture');
-  const along  = otaTotalLength() / 2 + Math.abs(num('otaOffset'));
-  const across = Math.abs(gem) + (otaAp / 2) * 1.3;
-  const sweep  = Math.sqrt(along*along + across*across);
+  // Each tube is measured on its own figures and the larger governs, rather
+  // than assuming the first one is always the one that reaches furthest.
+  const reach = (lenTotal, offsetMm, tubeR) => {
+    const a = lenTotal / 2 + Math.abs(offsetMm);
+    const b = Math.abs(gem) + tubeR;
+    return Math.sqrt(a*a + b*b);
+  };
+  let sweep = reach(otaTotalLength(), num('otaOffset'), domeTubeRadiusMm());
+  if(document.getElementById('hasDualSaddle').checked){
+    const d2 = num('ota2OuterDia') > 0 ? num('ota2OuterDia')/2 : (num('ota2Aperture')/2) * 1.3;
+    sweep = Math.max(sweep, reach(num('ota2Length'), num('ota2Offset'), d2));
+  }
   const needNow   = Math.abs(offset) + sweep;
   const needIdeal = sweep;
 
@@ -2992,7 +3038,8 @@ function applyMountPreset(userChanged){
     info.innerHTML =
       'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
       'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ' +
-      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>' +
+      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>'
+      + ' <span style="color:#d9a066;">(saddle only \u2014 your rings raise the tube further, so measure C to the optical axis you actually image through)</span>' +
       (m.I ? ' &middot; counterweight shaft <b>' + m.I.toFixed(1) + '&Prime;</b>' : '') +
       '<br>At ' + lat.toFixed(1) + '&deg; latitude the Dec axis sits <b>' + headIn.toFixed(2) +
       '&Prime;</b> above the pier flange, so that is what the mount head height is set to. ' +
@@ -3615,20 +3662,27 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
         gemAxisLength: -_gemInForce,
         otaLength: num('otaLength'),
         otaAperture: num('otaAperture'),
+        dewShield: num('dewShield'),
+        otaOffset: num('otaOffset'),
+        otaOuterDia: domeTubeRadiusMm() * 2,
         // Dual saddle: use the RAW physical separation, not computeSignedLateral()
         // (that one is the NINA tracking value and is 0 for "between").
         lateralAxis:  _dualOn ? computeRawLateral() : 0,
         ota2Length:   _dualOn ? num('ota2Length')   : 0,
         ota2Aperture: _dualOn ? num('ota2Aperture') : 0,
+        ota2OuterDia: _dualOn ? (num('ota2OuterDia') > 0 ? num('ota2OuterDia') : num('ota2Aperture')*1.3) : 0,
+        ota2Offset:   _dualOn ? num('ota2Offset') : 0,
       });
       three.scene.add(gemMount.group);
       gemMount._sig = _gemSig;
     } else {
       gemMount.setOptics({
-        otaLength: num('otaLength'), otaAperture: num('otaAperture'), dewShield: num('dewShield'), otaOffset: num('otaOffset'),
+        otaLength: num('otaLength'), otaAperture: num('otaAperture'), dewShield: num('dewShield'), otaOffset: num('otaOffset'), otaOuterDia: domeTubeRadiusMm() * 2,
         lateralAxis:  _dualOn ? computeRawLateral() : 0,
         ota2Length:   _dualOn ? num('ota2Length')   : 0,
         ota2Aperture: _dualOn ? num('ota2Aperture') : 0,
+        ota2OuterDia: _dualOn ? (num('ota2OuterDia') > 0 ? num('ota2OuterDia') : num('ota2Aperture')*1.3) : 0,
+        ota2Offset:   _dualOn ? num('ota2Offset') : 0,
       });
     }
     gemMount.group.scale.setScalar(scale);
@@ -3670,7 +3724,7 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
           // to the model's own default when none is chosen.
           altAxisHeight: selectedAltAxisMm(820),
           pierHeight:_pierDraw, pierDiameter:_pd,
-          otaLength:num('otaLength'), otaAperture:num('otaAperture'), dewShield:num('dewShield'), otaOffset:num('otaOffset')
+          otaLength:num('otaLength'), otaAperture:num('otaAperture'), dewShield:num('dewShield'), otaOffset:num('otaOffset'), otaOuterDia:domeTubeRadiusMm() * 2
         });
         l500Mount.group.rotation.set(0, -Math.PI/2, 0);
         three.scene.add(l500Mount.group);
@@ -3885,9 +3939,9 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
 const SAVE_FIELD_IDS = [
   'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW',
   'domeDiameter','shutterWidth','rotatorRes','wallHeight',
-  'gemRaw','decHoriz','domeDiameter',
+  'gemRaw','decHoriz',
   'hasDualSaddle','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','lateralDir','centerScope',
-  'otaLength','otaAperture','dewShield','otaOffset','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
+  'otaLength','otaAperture','dewShield','otaOuterDia','otaOffset','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
   'directNS','directEW','directUD','gemDirect','lateralDirect','azTolDirect',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
   'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D'
@@ -3902,6 +3956,9 @@ function saveSetup(){
   });
   data._entryMode = entryMode;
   data._mountType = mountType;
+  // The chosen mount is part of the setup; without this a saved file
+  // reopened as Generic with the geometry of whatever was selected.
+  data._selectedMount = selectedMountId;
   data._pointingMode = pointingMode;
   data._horizonMode = horizonMode;
   data._meta = { tool: 'NINA Dome Geometry Workbench', savedAt: new Date().toISOString() };
@@ -3948,6 +4005,12 @@ function loadSetupFromFile(file){
       el.dispatchEvent(new Event('change'));
     });
 
+    if(data._selectedMount){
+      selectedMountId = data._selectedMount;
+      const sel = document.getElementById('mountPreset');
+      if(sel) sel.value = selectedMountId;
+      applyMountPreset(false);
+    }
     if(data._mountType) setMountType(data._mountType);
     if(data._entryMode) setEntryMode(data._entryMode);
     if(data._pointingMode) setPointingMode(data._pointingMode);

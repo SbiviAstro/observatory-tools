@@ -165,7 +165,43 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.16.000 — Current</div>
+<div class="card"><div class="eyebrow">v7.19.001 — Current</div>
+<p><strong>Fixed: with two telescopes, the second was drawn using the first one's dew shield, tube offset and ring diameter.</strong> The function that builds a tube read those three figures from the shared settings rather than being told which tube it was drawing, so both tubes got the first one's.</p>
+<p>On a smaller second instrument the effect was severe: a 200&nbsp;mm aperture with 400&nbsp;mm rings alongside an 80&nbsp;mm guide scope gave the guide scope rings of the same 400&nbsp;mm &mdash; five times the radius of the tube carrying them &mdash; plus a duplicate of the first tube's dew shield. Four oversized discs and two shields overlapping, which is what the cluster in the 3D view was.</p>
+<p>Each tube is now drawn from its own figures. Verified in a browser: a 200&nbsp;mm tube with 400&nbsp;mm rings and a 250&nbsp;mm shield now sits beside an 80&nbsp;mm tube with 120&nbsp;mm rings and no shield, exactly as entered.</p></div>
+
+<div class="card"><div class="eyebrow">v7.19.000</div>
+<p><strong>Bug sweep across both calculators.</strong> Every input was exercised in turn to see whether it changed anything, and the page structure checked for duplicate identifiers, references to elements that do not exist, and gaps between what the interface offers and what is saved. Four faults found and fixed.</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><strong>OTA 2's outer diameter and offset did nothing in the dome tool.</strong> Both were offered and stored, but the dome's swept-volume check only ever measured the first tube. It now measures each tube on its own figures and takes the larger &mdash; on a 1600&nbsp;mm second tube, entering a 600&nbsp;mm ring diameter and 300&nbsp;mm offset moves the required radius from 43.1&Prime; to 57.2&Prime;.</li>
+  <li><strong>The chosen mount was not saved.</strong> Saving a setup with an AP1600 selected and reopening it gave Generic, while the dimensions stayed at the AP1600's &mdash; a file that described a mount it did not name. Now saved and restored.</li>
+  <li><strong>Duplicate dome diameter entry</strong> in the dome's save list.</li>
+  <li><strong>Dead swing plan-view code</strong> in the roll-off-roof tool, drawing into an element removed some versions ago.</li>
+</ul>
+<p>Everything else flagged proved to be correct behaviour: fields belonging to modes that were switched off, and hour angle having no effect at declination 90&deg;, which is the pole and where it genuinely does not.</p></div>
+
+<div class="card"><div class="eyebrow">v7.18.002</div>
+<p><strong>Fixed, properly this time: the dome calculator never passed the dew shield, tube offset or ring diameter when constructing the mount.</strong> The previous release declared them inside the mount library but did not supply them at the point the dome builds it, so they arrived as zero &mdash; no rings, no shield, no offset, whatever was typed. The roll-off-roof tool was unaffected; its construction call already carried them.</p>
+<p>Verified in a real browser this time rather than a headless stand-in, with three.js served locally so the page runs as published. With a 440&nbsp;mm ring diameter, 250&nbsp;mm dew shield and 120&nbsp;mm offset entered, both tools now report those exact values in the model and draw two rings and a shield &mdash; before and after a structural rebuild.</p></div>
+
+<div class="card"><div class="eyebrow">v7.18.001</div>
+<p><strong>Fixed: the tube rings never appeared, and the dew shield and OTA offset were being dropped too.</strong> The mount library's parameter list declared neither <code>dewShield</code>, <code>otaOffset</code> nor <code>otaOuterDia</code>. All three were passed in and used, but only survived because the optics-only update path copies whatever it is given. Any structural change &mdash; pier height, pier diameter, mount head, declination axis &mdash; rebuilt the mount from the declared list and silently discarded them.</p>
+<p>The rings never showed at all, because they are sized purely from the outer diameter and so collapsed to zero on every build. The dew shield and offset were more insidious: they appeared, then vanished the moment an unrelated dimension was touched.</p>
+<p>All three are now declared. Verified through a first build, an optics-only update, and two structural rebuilds &mdash; rings, dew shield and offset present and correct at every stage.</p>
+<p>The earlier test missed this because it only ever changed optical fields, which is the one path where the bug does not bite.</p></div>
+
+<div class="card"><div class="eyebrow">v7.18.000</div>
+<p><strong>The 3D model now draws the tube rings at the diameter the clearance checks use.</strong> Previously the rings were decorative &mdash; a fixed 1.14&times; the tube radius, drawn only at high detail. Entering a 440&nbsp;mm outer diameter changed every clearance figure while the picture went on showing a slim tube.</p>
+<p>They are now sized from the figure actually in force, and drawn at both detail levels because they carry information rather than decoration. With the field left at 0 they are drawn at the estimated 1.3&times; aperture, so the picture still shows the envelope the numbers are using &mdash; and if that looks wrong for your tube, that is the prompt to measure it.</p>
+<p>Verified across four diameters: rings drawn at 130, 105, 150 and 220&nbsp;mm radius, matching the clearance maths in every case.</p></div>
+
+<div class="card"><div class="eyebrow">v7.17.000</div>
+<p><strong>Tube rings are now accounted for in both tools, and named as such.</strong> Clearance is set by the widest thing on the tube, which is usually the rings and dovetail rather than the tube itself.</p>
+<p><strong>Fixed: the dome had no outer-diameter field for the first telescope.</strong> It had gained one for OTA&nbsp;2 but not OTA&nbsp;1, and was using a fixed estimate of 1.3&times; the aperture instead &mdash; so a measured figure could not be entered for the main instrument. The field now exists and feeds the dome-fit and pier verdicts: on a 200&nbsp;mm aperture, entering a 400&nbsp;mm ring diameter takes clearance to the shell from 19&Prime; to 17&Prime;.</p>
+<p><strong>Preset declination-axis figures now say what they exclude.</strong> Dimension C in the mount library is the saddle-to-optical-axis distance for the bare mount. Your rings raise the tube above the saddle, adding to it. The card now says so, because a preset silently understating C would understate every clearance downstream.</p>
+<p>Also fixed a duplicated entry in the roll-off-roof save list.</p></div>
+
+<div class="card"><div class="eyebrow">v7.16.000</div>
 <p><strong>Rolled back the directory split and the Content-Security-Policy work.</strong> Every file sits in one folder again, and the calculators keep their versioned filenames. Removed: <code>_headers</code>, <code>build-csp-headers.py</code>, <code>bump-version.py</code>, and the <code>public/</code> and <code>build/</code> tree.</p>
 <p>The hash-based policy required regenerating a header file after every edit, and a stale hash meant a blank page. For a site maintained by hand that is a fair amount of ceremony for the protection it bought, given there is no login, no stored data and nothing to steal.</p>
 <p>Two changes from that work were kept, because they cost nothing to carry and reverting them would make the code worse: external links keep <code>rel="noopener noreferrer"</code>, and the ten former <code>onclick</code> attributes stay bound with <code>addEventListener</code>.</p></div>

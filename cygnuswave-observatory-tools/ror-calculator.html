@@ -220,7 +220,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.16.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.19.001</span>
 </div>
 <div class="wrap">
   <header>
@@ -1914,69 +1914,6 @@ function renderScopeCollisions(swing){
 // Plan view: building footprint to scale, each telescope at its own
 // independent position with its own swing circle — no longer offset
 // from a shared pivot, because each is on its own independent mount.
-function renderSwingPlanView(building, swing){
-  const svg = document.getElementById('swingPlanView');
-  if(!svg) return;
-  while(svg.firstChild) svg.removeChild(svg.firstChild);
-  const ns = 'http://www.w3.org/2000/svg';
-  const cx = 150, cy = 150;
-
-  let polyPts, buildingExtent;
-  if(building.customWalls){
-    polyPts = polygonVertices(building.walls);
-    buildingExtent = Math.max(...polyPts.map(p => Math.hypot(p.x, p.y)), 1);
-  } else {
-    const hw = building.width/2, hl = building.length/2;
-    polyPts = [{x:hw,y:hl},{x:hw,y:-hl},{x:-hw,y:-hl},{x:-hw,y:hl}];
-    buildingExtent = Math.hypot(hw, hl);
-  }
-  const maxReach = Math.max(...swing.results.map(r => Math.hypot(Math.abs(r.mx)+r.swingRadius, Math.abs(r.my)+r.swingRadius)), 1);
-  const worldExtent = Math.max(buildingExtent, maxReach) * 1.15;
-  const scale = 128 / worldExtent;
-
-  function toSvg(wx, wy){ return { x: cx + wx*scale, y: cy - wy*scale }; }
-
-  // Building outline
-  const poly = document.createElementNS(ns, 'polygon');
-  poly.setAttribute('points', polyPts.map(p => { const s=toSvg(p.x,p.y); return `${s.x.toFixed(1)},${s.y.toFixed(1)}`; }).join(' '));
-  poly.setAttribute('fill','none'); poly.setAttribute('stroke','#aab2c0'); poly.setAttribute('stroke-width','2');
-  svg.appendChild(poly);
-
-  // N label
-  const nLabel = document.createElementNS(ns,'text');
-  nLabel.setAttribute('x',cx); nLabel.setAttribute('y',12);
-  nLabel.setAttribute('text-anchor','middle'); nLabel.setAttribute('font-size','11');
-  nLabel.setAttribute('fill','#8b93a3'); nLabel.setAttribute('font-family','Courier New');
-  nLabel.textContent='N'; svg.appendChild(nLabel);
-
-  // Draw largest circles first
-  [...swing.results].sort((a,b) => b.swingRadius - a.swingRadius).forEach(r => {
-    const center = toSvg(r.mx, r.my);
-    const circ = document.createElementNS(ns,'circle');
-    circ.setAttribute('cx', center.x.toFixed(1)); circ.setAttribute('cy', center.y.toFixed(1));
-    circ.setAttribute('r', Math.max(r.swingRadius*scale, 1).toFixed(1));
-    circ.setAttribute('fill', r.clears ? 'rgba(127,216,143,0.08)' : 'rgba(224,104,92,0.14)');
-    circ.setAttribute('stroke', r.clears ? '#7fd88f' : '#e0685c');
-    circ.setAttribute('stroke-width','1.5');
-    svg.appendChild(circ);
-
-    // Label above the circle
-    const label = document.createElementNS(ns,'text');
-    label.setAttribute('x', center.x.toFixed(1));
-    label.setAttribute('y', (center.y - r.swingRadius*scale - 4).toFixed(1));
-    label.setAttribute('text-anchor','middle'); label.setAttribute('font-size','9');
-    label.setAttribute('fill', r.clears ? '#7fd88f' : '#e0685c');
-    label.setAttribute('font-family','Courier New');
-    label.textContent = r.name.replace('Telescope ','T');
-    svg.appendChild(label);
-
-    // Mount pivot dot for each telescope at its own position
-    const dot = document.createElementNS(ns,'circle');
-    dot.setAttribute('cx', center.x.toFixed(1)); dot.setAttribute('cy', center.y.toFixed(1));
-    dot.setAttribute('r','3'); dot.setAttribute('fill','#e7e2d6');
-    svg.appendChild(dot);
-  });
-}
 
 // ═══════════════════════════════════════════════════════════
 // INTERACTIVE FLOOR PLAN
@@ -2539,7 +2476,7 @@ document.getElementById('btnResetDefaults').addEventListener('click', function()
 const SAVE_FIELD_IDS = [
   'bWidth','bLength','wallHeight','mountHeight','distN','distS','distE','distW',
   'rollDir','roofTravel','roofHeight','eaveHeight','roofPitchRise','roofPitchRun',
-  'gemAxis','decHoriz','otaLength','otaAperture','dewShield','otaOffset','dewShield','otaOuterDia','hasDualSaddle','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
+  'gemAxis','decHoriz','otaLength','otaAperture','dewShield','otaOffset','otaOuterDia','hasDualSaddle','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
   'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
   'useCustomWalls','useExtraWalls','rollWallIndex','customRoofSpan',
@@ -2560,6 +2497,9 @@ function saveSetup(){
     data[id] = el.type === 'checkbox' ? el.checked : el.value;
   });
   data._mountType = mountType;
+  // The chosen mount is part of the setup; without this a saved file
+  // reopened as Generic with the geometry of whatever was selected.
+  data._selectedMount = selectedMountId;
   data._pointingMode = pointingMode;
   data._horizonMode = horizonMode;
   data._roofShape = document.getElementById('btnRoofPeak').classList.contains('active') ? 'peak'
@@ -2590,6 +2530,12 @@ function loadSetupFromFile(file){
       el.dispatchEvent(new Event('input'));
       el.dispatchEvent(new Event('change'));
     });
+    if(data._selectedMount){
+      selectedMountId = data._selectedMount;
+      const sel = document.getElementById('mountPreset');
+      if(sel) sel.value = selectedMountId;
+      applyMountPreset(false);
+    }
     if(data._mountType) setMountType(data._mountType);
     if(data._pointingMode) setPointingMode(data._pointingMode);
     if(data._horizonMode) setHorizonMode(data._horizonMode);
@@ -2881,8 +2827,18 @@ function createGEMMount(THREE, options) {
     lateralAxis: o.lateralAxis || 0,
     otaLength: num(o.otaLength, 800),
     otaAperture: num(o.otaAperture, 200),
+    // These three were relied on but never declared here. setOptics() copies
+    // whatever it is handed, so they appeared to work - until any structural
+    // rebuild reconstructed the mount and dropped them, taking the rings, the
+    // dew shield and the tube offset with them.
+    dewShield: num(o.dewShield, 0),
+    otaOffset: num(o.otaOffset, 0),
+    otaOuterDia: num(o.otaOuterDia, 0),
     ota2Length: o.ota2Length || 0,
     ota2Aperture: o.ota2Aperture || 0,
+    ota2DewShield: num(o.ota2DewShield, 0),
+    ota2Offset: num(o.ota2Offset, 0),
+    ota2OuterDia: num(o.ota2OuterDia, 0),
     counterweightShaft: o.counterweightShaft || null,
     detail: o.detail === 'high' ? 'high' : 'low',
     shading: o.shading === 'lit' ? 'lit' : 'flat',
@@ -3126,14 +3082,17 @@ function createGEMMount(THREE, options) {
 
   // ---- optics -------------------------------------------------------------
   var otas = [];
-  function buildOTA(len, aperture, lateral, detailed) {
+  // The per-tube figures are passed in rather than read from P, so a second
+  // telescope is drawn with its own dew shield, offset and ring diameter
+  // instead of inheriting the first tube's.
+  function buildOTA(len, aperture, lateral, detailed, dewLen, offMm, outerDia) {
     var g = new THREE.Group();
     var r = aperture * 0.5;
-    var dewLen = Math.max(0, P.dewShield || 0);
+    dewLen = Math.max(0, dewLen || 0);
     // How far the centre of the whole assembly (tube + shield) sits from the
     // declination axis, along the tube. Zero means perfectly balanced on the
     // axis; positive slides it toward the aperture.
-    var off = P.otaOffset || 0;
+    var off = offMm || 0;
     // The tube is drawn about the assembly centre, so the body sits back from
     // that centre by half the shield.
     var body = new THREE.Group();
@@ -3151,14 +3110,23 @@ function createGEMMount(THREE, options) {
       var cell = cylX(r * 1.02, len * 0.06, C.trim);
       cell.position.x = -len * 0.5;
       body.add(cell);
-      [-0.22, 0.16].forEach(function (fr) {
-        var ring = cylX(r * 1.14, len * 0.045, C.trim);
-        ring.position.x = len * fr;
-        body.add(ring);
-      });
       var foc = cylZ(r * 0.22, r * 1.1, C.trim);
       foc.position.set(-len * 0.42, 0, -r * 0.9);
       body.add(foc);
+    }
+
+    // Tube rings, drawn at the outer diameter that actually drives the
+    // clearance checks. Sized from the entered figure rather than a fraction of
+    // the tube, so a wide set of rings looks wide instead of the picture showing
+    // a slim tube while the numbers use a larger envelope. Drawn at both detail
+    // levels because they carry information, not decoration.
+    var ringR = (outerDia || 0) / 2;
+    if (ringR > r * 1.03) {
+      [-0.22, 0.16].forEach(function (fr) {
+        var ring = cylX(ringR, len * 0.055, C.trim);
+        ring.position.x = len * fr;
+        body.add(ring);
+      });
     }
     var ring = new THREE.Mesh(
       keep(new THREE.RingGeometry(aperture * 0.42, aperture * 0.5, P.segments)),
@@ -3178,9 +3146,11 @@ function createGEMMount(THREE, options) {
     otas.forEach(function (t) { optics.remove(t); });
     otas = [];
     var hi = P.detail === 'high';
-    otas.push(buildOTA(P.otaLength, P.otaAperture, P.lateralAxis ? -P.lateralAxis : 0, hi));
+    otas.push(buildOTA(P.otaLength, P.otaAperture, P.lateralAxis ? -P.lateralAxis : 0, hi,
+                       P.dewShield, P.otaOffset, P.otaOuterDia));
     if (P.ota2Length > 0 && P.lateralAxis) {
-      otas.push(buildOTA(P.ota2Length, P.ota2Aperture || P.otaAperture, P.lateralAxis, hi));
+      otas.push(buildOTA(P.ota2Length, P.ota2Aperture || P.otaAperture, P.lateralAxis, hi,
+                         P.ota2DewShield, P.ota2Offset, P.ota2OuterDia));
     }
     otas.forEach(function (t) { optics.add(t); });
     if (typeof refreshSweep === 'function') refreshSweep();
@@ -3381,6 +3351,7 @@ function createL500Mount(THREE, options) {
     otaAperture: num(o.otaAperture, 432),
     otaLength: num(o.otaLength, 1100),
     dewShield: num(o.dewShield, 0),
+    otaOuterDia: num(o.otaOuterDia, 0),
     otaOffset: num(o.otaOffset, 0),
     otaBackFocus: num(o.otaBackFocus, 0.44), // fraction of length behind the axis
 
@@ -3982,7 +3953,8 @@ function applyMountPreset(userChanged){
     info.innerHTML =
       'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
       'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ' +
-      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>' +
+      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>'
+      + ' <span style="color:#d9a066;">(saddle only \u2014 your rings raise the tube further, so measure C to the optical axis you actually image through)</span>' +
       (m.I ? ' &middot; counterweight shaft <b>' + m.I.toFixed(1) + '&Prime;</b>' : '') +
       '<br>At ' + lat.toFixed(1) + '&deg; latitude the Dec axis sits <b>' + headIn.toFixed(2) +
       '&Prime;</b> above the pier flange, so that is what the mount head height is set to. ' +
@@ -4531,10 +4503,12 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
           detail: 'low', shading: 'lit',
           pierHeight: _pierMm, pierDiameter: _pierDmm,
           mountHeadHeight: _mountMm, gemAxisLength: _gemMm,
-          otaLength: _otaLmm, otaAperture: _otaAmm, dewShield: num('dewShield'), otaOffset: num('otaOffset'),
+          otaLength: _otaLmm, otaAperture: _otaAmm, dewShield: num('dewShield'), otaOffset: num('otaOffset'), otaOuterDia: rorTubeRadiusMm() * 2,
           lateralAxis:  rorLateral(),
           ota2Length:   rorDualOn() ? num('ota2Length')   : 0,
           ota2Aperture: rorDualOn() ? num('ota2Aperture') : 0,
+          ota2OuterDia: rorDualOn() ? (num('ota2OuterDia') > 0 ? num('ota2OuterDia') : num('ota2Aperture')*1.3) : 0,
+          ota2Offset:   rorDualOn() ? num('ota2Offset') : 0,
         });
         // Both scenes have north at +X; -π/2 about Y aims the mount north
         // (verified against the cardinal N marker), same as the dome tool.
@@ -4543,10 +4517,12 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
         gemMount._sig = _gemSig;
       } else {
         gemMount.setOptics({
-          otaLength: _otaLmm, otaAperture: _otaAmm, dewShield: num('dewShield'), otaOffset: num('otaOffset'),
+          otaLength: _otaLmm, otaAperture: _otaAmm, dewShield: num('dewShield'), otaOffset: num('otaOffset'), otaOuterDia: rorTubeRadiusMm() * 2,
           lateralAxis:  rorLateral(),
           ota2Length:   rorDualOn() ? num('ota2Length')   : 0,
           ota2Aperture: rorDualOn() ? num('ota2Aperture') : 0,
+          ota2OuterDia: rorDualOn() ? (num('ota2OuterDia') > 0 ? num('ota2OuterDia') : num('ota2Aperture')*1.3) : 0,
+          ota2Offset:   rorDualOn() ? num('ota2Offset') : 0,
         });
       }
       // Scale and lift so pier base sits at floor (Y=0)
@@ -4581,7 +4557,7 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
             // to the model's own default when none is chosen.
             altAxisHeight: selectedAltAxisMm(820),
             pierHeight:_pierMm, pierDiameter:_pierDmm,
-            otaLength:_otaLmm, otaAperture:_otaAmm, dewShield:num('dewShield'), otaOffset:num('otaOffset')
+            otaLength:_otaLmm, otaAperture:_otaAmm, dewShield:num('dewShield'), otaOffset:num('otaOffset'), otaOuterDia:rorTubeRadiusMm() * 2
           });
           l500Mount.group.rotation.set(0, -Math.PI/2, 0);
           three.rorPierGroup.add(l500Mount.group);
@@ -4907,7 +4883,6 @@ function compute(){
   updateSwingSpheres(swing, sceneScale, otaOrient.direction, pointingScope);
 
   renderScopeCollisions(swing);
-  renderSwingPlanView(building, swing);
 
   updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing);
   if(skyCoverageExpanded) computeSkyCoverage();
