@@ -45,6 +45,10 @@ nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700
 h1{ font-size:clamp(22px,5vw,28px); margin:0 0 10px; font-weight:700; }
 h2{ font-size:18px; margin:34px 0 12px; color:var(--amber); }
 h3{ font-size:15px; margin:20px 0 8px; color:var(--text); }
+  .note{ background:var(--panel-2); border-left:3px solid var(--amber);
+    padding:11px 15px; border-radius:0 6px 6px 0; margin:14px 0;
+    font-size:13.5px; color:var(--text-dim); line-height:1.6; }
+
 p, li{ font-size:14.5px; line-height:1.7; color:var(--text-dim); }
 @media(max-width:480px){
   h2{ font-size:16px; margin:24px 0 10px; }
@@ -135,7 +139,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.19.001</span>
+  <span class="nav-version">v7.24.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -159,6 +163,97 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Relationship to NINA</h2>
 <p>The dome calculator's core azimuth math is ported from <a href="https://nighttime-imaging.eu" target="_blank" rel="noopener noreferrer">NINA's</a> <code>DomeSynchronization.cs</code>, using the same matrix conventions. Both tools are licensed under the <a href="license.html">Mozilla Public License 2.0</a> — the same license NINA uses — in recognition of that shared foundation.</p>
 <p>These tools are not affiliated with, endorsed by, or supported by the NINA project or its developers.</p>
+
+<h2>Sources for the mount library</h2>
+<p>The Mount System card carries dimensions for a number of mounts. Where those figures
+came from matters, because they are not all equally solid &mdash; some are taken from a
+manufacturer's own published drawings, others are community measurements that have been
+circulating in amateur observatory spreadsheets for years. Each is listed below so you can
+check the original rather than take our word for it.</p>
+
+<p class="note">Dimension <strong>C</strong> throughout is measured to the <em>mounting
+surface</em>, not to the optical axis. Your rings raise the tube above the saddle, so C
+should be increased by that amount for your own setup.</p>
+
+<h3>Astro-Physics</h3>
+<p><a href="https://www.astro-physics.com/" target="_blank" rel="noopener noreferrer">astro-physics.com</a>
+&middot; <a href="https://astro-physics.info/tech_support/tech_support.htm" target="_blank" rel="noopener noreferrer">Technical Support</a></p>
+<ul>
+  <li><a href="https://astro-physics.info/tech_support/mounts/latitude-dimension-calc.xls" target="_blank" rel="noopener noreferrer">Latitude Dimension Calculator</a>
+      (Excel, dated 22 October 2012) &mdash; the source for the AP1100, AP1600, AP3600,
+      AP1200, 900GTO and Mach1GTO. Its dimension <em>O</em>, "centre of RA axis to Dec
+      mounting surface", is our dimension C; its dimension <em>P</em> is the counterweight
+      shaft. Cross-checked against the sheet's own centimetre column.</li>
+  <li><a href="https://astro-physics.info/tech_support/mounts/1150gto/1150GTO_Manual_2025_11_revD_wCover_print.pdf" target="_blank" rel="noopener noreferrer">1150GTO Manual</a>
+      (November 2025) &mdash; consulted, but it carries no dimensioned drawing. The 1150GTO
+      is not in the library for that reason.</li>
+</ul>
+<p><strong>Status:</strong> C and the counterweight shafts are manufacturer-published.
+A and B are <em>not</em> &mdash; they do not reproduce Astro-Physics' own declination-axis
+heights under any single latitude, so they remain community estimates.</p>
+
+<h3>Software Bisque</h3>
+<p><a href="https://www.bisque.com/" target="_blank" rel="noopener noreferrer">bisque.com</a>
+&middot; <a href="https://www.bisque.com/downloads-page/" target="_blank" rel="noopener noreferrer">Downloads</a>
+(dimension drawings require a customer login)</p>
+<ul>
+  <li>Paramount MX, ME&nbsp;II and MYT dimension drawings &mdash; each publishes the
+      declination-axis height at every latitude. A and B for those three are fitted to
+      those tables and reproduce every published point to within 0.2&Prime;.</li>
+  <li><a href="https://www.bisque.com/wp-content/uploads/2023/03/Paramount-Series-6-Specifications.pdf" target="_blank" rel="noopener noreferrer">Paramount Series 6 Specifications</a>
+      &mdash; counterweight shaft lengths.</li>
+  <li><a href="https://www.bisque.com/wp-content/uploads/2024/01/Paramount-Series-6-User-Guide.pdf" target="_blank" rel="noopener noreferrer">Paramount Series 6 User Guide</a>
+      &mdash; Appendix A references the technical drawings.</li>
+</ul>
+<p><strong>Status:</strong> A and B are manufacturer-derived. C is confirmed for the MX,
+flagged for confirmation on the ME&nbsp;II, and not published for the MYT. The drawings do
+not state which generation they describe, so their applicability to the MX+ and Series 6
+models is unconfirmed.</p>
+
+<h3>10 Micron</h3>
+<p><a href="https://www.10micron.com/" target="_blank" rel="noopener noreferrer">10micron.com</a></p>
+<p>The published GM&nbsp;HPS dimensions sheet draws every mount at a single latitude of
+45&deg;. That gives one equation for two unknowns, so the declination-axis height cannot be
+separated into the constants this tool normally uses.</p>
+<p>The GM2000, GM3000 and GM4000 are therefore included as <strong>fixed-latitude
+entries</strong>: they carry 10 Micron's published 45&deg; figure and do <em>not</em> follow
+your site latitude. The card says so whenever one is selected, and estimates the error if
+your site is more than a few degrees from 45&deg; &mdash; around 1.3&Prime; at 33&deg; or
+60&deg;. The GM1000 is absent because the sheet does not carry that dimension for it, and
+the declination-axis to saddle distance is not identifiable for any of them, so none of
+these presets touch the optical-axis offset.</p>
+<p>Selecting one of these also <strong>holds the site latitude at 45&deg;</strong> and locks the
+field, so the sky figures and the mount geometry describe the same site rather than quietly
+disagreeing. The page says so while the lock is active, and choosing any other mount restores
+your own latitude.</p>
+<p><strong>Status:</strong> published by the manufacturer, but for one latitude only. If you
+own one of these mounts, two measurements would upgrade it to a full entry.</p>
+
+<h3>PlaneWave</h3>
+<p><a href="https://planewave.com/" target="_blank" rel="noopener noreferrer">planewave.com</a></p>
+<p>The L-350, L-500 and L-600 altitude-axis heights come from the community spreadsheet
+below, not from PlaneWave. The L-500 figure in particular has two conflicting values in that
+source and carries an on-screen caution.</p>
+
+<h3>Community measurements</h3>
+<p>The Astro-Physics A200, the Paramount ME, the PlaneWave figures, and the A and B values
+for the Astro-Physics mounts come from a <em>Pier-Height / Dome Calculator</em> workbook
+(dated 8 October 2020) that circulates among amateur observatory builders. It is careful
+work and much of it has held up against manufacturer sources &mdash; but one of its own
+entries is annotated "guestimate", and its Paramount figures were found to be measuring the
+wrong quantity entirely, which is why those were replaced.</p>
+
+<h3>Also consulted</h3>
+<ul>
+  <li><a href="https://telescopepiers.com/ror-pier-calculator/" target="_blank" rel="noopener noreferrer">telescopepiers.com roll-off-roof calculator</a>
+      &mdash; compared against our model for the horizon-angle maths. No mount data taken from it.</li>
+</ul>
+
+<p class="note">No manufacturer listed here is affiliated with, endorses, or has reviewed
+these tools. Product names are used only to identify which mount a set of dimensions
+describes. Every figure a preset fills remains editable, and anyone building to tight
+clearances should measure their own mount.</p>
+
 <h2>Open source</h2>
 <p>Both calculators are fully client-side HTML — no server, no database, no data collection. The source is the page itself. Released under the <a href="license.html">MPL 2.0</a>; contributions and forks welcome under those terms.</p>
 

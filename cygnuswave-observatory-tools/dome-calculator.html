@@ -223,7 +223,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.19.001</span>
+    flex-shrink:0;">v7.24.000</span>
 </div>
 <div class="wrap">
   <header>
@@ -739,6 +739,8 @@
           <div><label>Site latitude</label></div>
           <div class="field"><input type="number" id="lat" value="40.2" step="0.1"><span class="unit">°</span></div>
         </div>
+      <div id="latLockNote" style="display:none; font-size:11.5px; color:#e0685c;
+        margin:4px 0 8px; line-height:1.55;"></div>
 
         <div class="mount-type-toggle">
           <button id="btnHADec" class="active">Hour Angle + Dec</button>
@@ -2675,7 +2677,22 @@ let l500Mount = null;
 //   Alt/Az (fork / direct drive)
 //     H  pier flange -> altitude axis
 //
-// PROVENANCE: these figures are community-measured values circulated in
+// PROVENANCE, per dimension:
+//   C  Verified against Astro-Physics' own Latitude Dimension Calculator, where
+//      it appears as dimension O, "centre of RA axis to Dec mounting surface".
+//      AP1100 6.75, AP1600 9.3125 and AP3600 11.3125 all match exactly. Note
+//      this is to the MOUNTING SURFACE - your rings raise the optical axis above
+//      it, so C should be increased by that amount.
+//   I  Counterweight shaft, from the same sheet (its dimension P, including the
+//      safety stop).
+//   A, B  NOT manufacturer-verified. These come from community measurements and
+//      do not reproduce AP's published Dec-axis heights under any single
+//      latitude, so they follow a different reference. Treat them as estimates.
+//      To derive them properly for any mount in AP's sheet: enter two latitudes,
+//      read dimension G (baseplate to Dec-axis centreline) at each, then
+//         B = (G1 - G2) / (sin lat1 - sin lat2),  A = G1 - B sin lat1.
+//
+// The remaining figures are community-measured values circulated in
 // amateur observatory planning spreadsheets, not manufacturer-published
 // specifications. They are a starting point - every field they fill stays
 // editable, and anyone building to tight clearances should measure their own
@@ -2694,19 +2711,51 @@ const MOUNT_LIBRARY = [
   { id:'a200',      name:'Astro-Physics A200',        type:'GEM',
     A:11.45, B:8.0,  C:10.5,   I:30.5, verify:true },
   { id:'ap1100',    name:'Astro-Physics AP1100',      type:'GEM',
-    A:5.3,   B:10.6, C:6.75,   I:0 },
+    A:5.3,   B:10.6, C:6.75,   I:13.5625 },
   { id:'ap1600',    name:'Astro-Physics AP1600',      type:'GEM',
-    A:5.804, B:14.9, C:9.3125, I:0 },
+    A:5.804, B:14.9, C:9.3125, I:19.125 },
   { id:'ap3600',    name:'Astro-Physics AP3600',      type:'GEM',
-    A:12.5,  B:13.2, C:11.3125,I:0 },
+    A:12.5,  B:13.2, C:11.3125,I:31.0 },
+  // From Astro-Physics' own Latitude Dimension Calculator. C and I are theirs
+  // (their dimensions O and P). A and B are not recoverable from a single
+  // reading of that sheet, so they are null and the preset leaves the mount
+  // head height alone rather than inventing one.
+  { id:'ap1200',    name:'Astro-Physics AP1200',      type:'GEM',
+    A:null,  B:null, C:8.5,    I:19.125, partial:true },
+  { id:'ap900',     name:'Astro-Physics 900GTO',      type:'GEM',
+    A:null,  B:null, C:7.0,    I:13.625, partial:true },
+  { id:'mach1',     name:'Astro-Physics Mach1GTO',    type:'GEM',
+    A:null,  B:null, C:6.75,   I:14.625, partial:true },
   { id:'pmme',      name:'Paramount ME',              type:'GEM',
     A:3.25,  B:13.4, C:9.0,    I:0 },
+  // Fitted the same way; reproduces all ten published points to within 0.20".
+  // C is left at the previously carried figure - the drawing's analogous
+  // dimension reads 14.1", so this one is worth confirming against the mount.
   { id:'pmmeii',    name:'Paramount MEII',            type:'GEM',
-    A:4.8,   B:14.5, C:11.5,   I:0 },
+    A:8.707, B:10.618, C:11.5, I:18.5, verify:true },
+  // A and B fitted to Software Bisque's own published declination-axis heights
+  // across their full latitude table; reproduces every point to within 0.19".
+  // Fitted across twenty published points to within 0.22". Software Bisque does
+  // not mark the declination-axis to saddle distance on this drawing, so C is
+  // null and the preset leaves the optical-axis offset alone.
+  { id:'pmmyt',     name:'Paramount MYT',             type:'GEM',
+    A:8.238, B:7.261, C:null,  I:13.0 },
   { id:'pmmx',      name:'Paramount MX',              type:'GEM',
-    A:4.825, B:12.5, C:9.5,    I:0 },
+    A:7.637, B:8.716, C:9.5,   I:16.0 },
 
   // ---- Alt/Az direct drive ----------------------------------------------
+  // ---- 10 Micron -----------------------------------------------------------
+  // 10 Micron's published dimension sheet draws every mount at 45 degrees only,
+  // so the declination-axis height cannot be split into A and B. These entries
+  // carry the 45-degree figure as a fixed height and do NOT follow latitude.
+  // The card warns about that, and warns harder the further your site is from
+  // 45 degrees. The GM1000 is absent because that dimension is not on the sheet.
+  { id:'gm2000',    name:'10 Micron GM2000 HPS',      type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, fixedLat:45, fixedHead:13.858 },
+  { id:'gm3000',    name:'10 Micron GM3000 HPS',      type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, fixedLat:45, fixedHead:16.693 },
+  { id:'gm4000',    name:'10 Micron GM4000 HPS',      type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, fixedLat:45, fixedHead:18.976 },
   { id:'l350',      name:'PlaneWave L-350',           type:'AltAz', H:33.538 },
   { id:'l500',      name:'PlaneWave L-500',           type:'AltAz', H:42.706, verify:true },
   { id:'l600',      name:'PlaneWave L-600',           type:'AltAz', H:52.7 },
@@ -3013,8 +3062,44 @@ function initMountPresets(){
 
 // Push the preset's geometry into the input fields. Called again whenever the
 // latitude changes, because a GEM's Dec-axis height depends on it.
+// A fixed-latitude mount is only described at one latitude, so selecting one
+// sets the site latitude to match and locks it. The whole calculation then
+// describes a site at that latitude - which is the point, but it is a real
+// change to every sky figure on the page, so it is announced and reversed on
+// the way out.
+let _latBeforeLock = null;
+function applyLatitudeLock(m){
+  const el = document.getElementById('lat');
+  const note = document.getElementById('latLockNote');
+  if(!el) return;
+  if(m && m.fixedLat){
+    if(_latBeforeLock === null) _latBeforeLock = el.value;
+    el.value = m.fixedLat;
+    el.readOnly = true;
+    el.style.opacity = '0.72';
+    el.style.cursor = 'not-allowed';
+    if(note){
+      note.style.display = 'block';
+      note.innerHTML = 'Latitude is held at ' + m.fixedLat + '&deg; because '
+        + m.name + ' is only dimensioned at that latitude. Every sky figure on this page '
+        + 'now describes a ' + m.fixedLat + '&deg; site'
+        + (_latBeforeLock !== null && Math.abs(parseFloat(_latBeforeLock) - m.fixedLat) > 0.05
+            ? ', not your ' + parseFloat(_latBeforeLock).toFixed(1) + '&deg; one'
+            : '')
+        + '. Choose another mount to restore it.';
+    }
+  } else {
+    if(_latBeforeLock !== null){ el.value = _latBeforeLock; _latBeforeLock = null; }
+    el.readOnly = false;
+    el.style.opacity = '1';
+    el.style.cursor = 'auto';
+    if(note) note.style.display = 'none';
+  }
+}
+
 function applyMountPreset(userChanged){
   const m = mountById(selectedMountId);
+  applyLatitudeLock(m);
   const info = document.getElementById('mountPresetInfo');
   const warn = document.getElementById('mountPresetVerify');
   if(!info) return;
@@ -3030,20 +3115,45 @@ function applyMountPreset(userChanged){
   const lat = num('lat');
   if(m.type === 'GEM'){
     if(userChanged && typeof setMountType === 'function') setMountType('GEM');
-    const setDim = (id,v) => { if(userChanged || !mountCustomOn()){ const e=document.getElementById(id); if(e) e.value = v.toFixed(2); } };
+    const setDim = (id,v) => { if(v === null || v === undefined) return;
+      if(userChanged || !mountCustomOn()){ const e=document.getElementById(id); if(e) e.value = v.toFixed(2); } };
     setDim('genA', m.A); setDim('genB', m.B); setDim('genC', m.C); setDim('genI', m.I || 0);
-    const headIn = gemHeadHeightIn(m, lat);
-    MOUNT_FIELD_SET.head(headIn);
-    MOUNT_FIELD_SET.gem(m.C);
+    // A partial entry has no usable declination-axis height, so the mount head
+    // height is left exactly as it was. The offset to the optical axis is known
+    // and is still applied.
+    // A fixed-latitude entry sets the height its manufacturer published, and
+    // does not track latitude because the data to do so does not exist.
+    const headIn = m.fixedHead ? m.fixedHead : (m.partial ? null : gemHeadHeightIn(m, lat));
+    if(headIn !== null) MOUNT_FIELD_SET.head(headIn);
+    if(m.C !== null && m.C !== undefined) MOUNT_FIELD_SET.gem(m.C);
     info.innerHTML =
-      'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
-      'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ' +
-      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>'
+      (m.partial ? '' :
+        'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
+        'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ') +
+      (m.C === null || m.C === undefined
+        ? '<span style="color:#d9a066;">Declination-axis to optical-axis offset not published for this mount \u2014 measure it and enter it below.</span>'
+        : 'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>')
       + ' <span style="color:#d9a066;">(saddle only \u2014 your rings raise the tube further, so measure C to the optical axis you actually image through)</span>' +
       (m.I ? ' &middot; counterweight shaft <b>' + m.I.toFixed(1) + '&Prime;</b>' : '') +
-      '<br>At ' + lat.toFixed(1) + '&deg; latitude the Dec axis sits <b>' + headIn.toFixed(2) +
-      '&Prime;</b> above the pier flange, so that is what the mount head height is set to. ' +
-      'It follows the latitude because dimension B lies along the polar axis.';
+      (m.fixedLat
+        ? '<br>Declination-axis height <b>' + m.fixedHead.toFixed(2) + '&Prime;</b>, as published for '
+          + m.fixedLat + '&deg; latitude.'
+          + '<br><span style="color:' + (Math.abs(lat - m.fixedLat) > 8 ? '#e0685c' : '#d9a066') + ';">'
+          + '10 Micron publish this mount at ' + m.fixedLat + '&deg; only, so this height does <b>not</b> follow latitude. '
+          + (Math.abs(lat - m.fixedLat) <= 3
+              ? 'Your site is close to ' + m.fixedLat + '&deg;, so the figure should be about right.'
+              : 'Your site is ' + Math.abs(lat - m.fixedLat).toFixed(0) + '&deg; from that, where the true height differs by roughly '
+                + (Math.abs(Math.sin(lat*Math.PI/180) - Math.sin(m.fixedLat*Math.PI/180)) * 200 / 25.4).toFixed(1)
+                + '&Prime;. Measure your mount and enter it instead.')
+          + '</span>'
+        : m.partial
+        ? '<br><span style="color:#d9a066;">Astro-Physics does not publish this mount\u2019s declination-axis '
+          + 'height in a form a single reading can resolve, so the mount head height has been left exactly as '
+          + 'it was rather than set to something invented. Measure it, or read dimension G from their sheet at '
+          + 'two latitudes and solve for A and B.</span>'
+        : '<br>At ' + lat.toFixed(1) + '&deg; latitude the Dec axis sits <b>' + headIn.toFixed(2) +
+          '&Prime;</b> above the pier flange, so that is what the mount head height is set to. ' +
+          'It follows the latitude because dimension B lies along the polar axis.');
   } else {
     if(userChanged && typeof setMountType === 'function') setMountType('AltAz');
     const setDimH = (id,v) => { if(userChanged || !mountCustomOn()){ const e=document.getElementById(id); if(e) e.value = v.toFixed(2); } };

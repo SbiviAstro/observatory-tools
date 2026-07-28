@@ -165,7 +165,43 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.19.001 — Current</div>
+<div class="card"><div class="eyebrow">v7.24.000 — Current</div>
+<p><strong>Selecting a 10 Micron mount now holds the site latitude at 45&deg;</strong> and locks the field. Those mounts are only dimensioned at 45&deg;, so this makes the sky figures and the mount geometry describe the same site instead of quietly disagreeing &mdash; a 45&deg; mount paired with a 52&deg; sky was the more misleading of the two states.</p>
+<p>Because this changes every sky figure on the page, it is announced rather than done silently: the notice under the latitude field names the mount, states that the whole page now describes a 45&deg; site, and &mdash; if your own latitude differs &mdash; says what it was.</p>
+<p><strong>It is fully reversible.</strong> Your latitude is remembered when the lock goes on and restored the moment you choose any other mount. Verified across both tools: 52.3&deg; in, locked to 45&deg;, back to 52.3&deg; on switching away, and correct again after a second 10 Micron selection.</p></div>
+
+<div class="card"><div class="eyebrow">v7.23.000</div>
+<p><strong>10 Micron GM2000, GM3000 and GM4000 added as fixed-latitude entries.</strong> 10 Micron publish their dimensions at 45&deg; only, so these carry that figure and do not follow your site latitude &mdash; 13.86&Prime;, 16.69&Prime; and 18.98&Prime; respectively.</p>
+<p>Because that is a real limitation rather than a footnote, the card says so every time one is selected, and works out what it costs you: within three degrees of 45&deg; it reports the figure should be about right; beyond eight degrees the warning turns red and states the likely error &mdash; roughly 1.3&Prime; at 33&deg; or 60&deg;.</p>
+<p>Two things these presets deliberately do not do. They leave the optical-axis offset alone, because the declination-axis to saddle distance is not identifiable on 10 Micron's sheet. And the GM1000 is not included at all: the sheet does not carry that dimension for it, so there would be nothing to publish.</p>
+<p>The About page's sources section records all of this.</p></div>
+
+<div class="card"><div class="eyebrow">v7.22.001</div>
+<p><strong>Sources for the mount library are now documented on the About page</strong>, with links to the original manufacturer documents so anyone can check a figure rather than take our word for it.</p>
+<p>Each maker is listed with what was taken from them and how solid it is: Astro-Physics' Latitude Dimension Calculator and 1150GTO manual, Software Bisque's dimension drawings and Series 6 documents, and the community workbook that supplied the rest. Where a figure is not manufacturer-published, it says so.</p>
+<p>It also records the two mounts we could <em>not</em> add and why &mdash; the Astro-Physics 1150GTO, whose manual carries no dimensioned drawing, and the 10 Micron GM range, whose published sheet draws every mount at a single 45&deg; latitude and so cannot give the two constants the tool needs.</p>
+<p>Closes with the note that no manufacturer is affiliated with or has reviewed these tools, and that product names identify only which mount a set of dimensions describes.</p></div>
+
+<div class="card"><div class="eyebrow">v7.22.000</div>
+<p><strong>Corrected: the Paramount declination-axis heights were wrong by up to 2.75&Prime;.</strong> Software Bisque's dimension drawings publish the declination-axis height at every latitude, and our figures did not reproduce them &mdash; the Paramount MX was out by 2.0&Prime; at low latitude, the MEII by 2.75&Prime;.</p>
+<p>The cause: the values we carried took <em>A</em> from the drawing's "bottom of base to shoulder bolt". That is where the polar axis <em>pivots</em>, not a term in the declination-axis height. The whole pair was measuring the wrong thing.</p>
+<p>Both are now fitted to Software Bisque's published tables across their full latitude range. Every point is reproduced to within <strong>0.2&Prime;</strong> &mdash; sixteen points for the MEII and MX together, twenty more for the MYT.</p>
+<p><strong>Paramount MYT added</strong>, fitted the same way over twenty published points. Counterweight shafts filled in for all three from the Series 6 specifications.</p>
+<p><strong>One figure worth confirming.</strong> The MEII's declination-axis to optical-axis offset is still the previously carried 11.5&Prime;, but the drawing's analogous dimension &mdash; the one that matches exactly on the MX &mdash; reads 14.1&Prime;. Rather than change a clearance-critical number on a reading of a drawing, the entry is flagged for confirmation against the actual mount.</p></div>
+
+<div class="card"><div class="eyebrow">v7.21.000</div>
+<p><strong>Every mount in Astro-Physics' dimension sheet is now in the library.</strong> Added the AP1200, 900GTO and Mach1GTO, joining the AP1100, AP1600 and AP3600 already present. Fifteen entries in total.</p>
+<p>Their declination-axis offsets and counterweight shafts come straight from Astro-Physics: <b>AP1200</b> 8.5&Prime; / 19.125&Prime;, <b>900GTO</b> 7.0&Prime; / 13.625&Prime;, <b>Mach1GTO</b> 6.75&Prime; / 14.625&Prime;. Every figure was cross-checked against the sheet's own centimetre column, which is what confirms the columns were read in the right order.</p>
+<p><strong>These three are partial entries, and say so.</strong> Astro-Physics publishes their declination-axis height only as a latitude-dependent figure, which a single reading cannot separate into the two constants this tool needs. Rather than invent a value, selecting one of these mounts fills in what is known and <em>leaves the mount head height exactly as it was</em>, with a note explaining why and how to obtain it &mdash; read dimension G at two latitudes and solve for A and B.</p>
+<p>A preset that quietly supplied a made-up declination-axis height would be worse than one that admits the gap, since every clearance figure downstream depends on it.</p></div>
+
+<div class="card"><div class="eyebrow">v7.20.000</div>
+<p><strong>Mount library figures checked against Astro-Physics' own dimension calculator.</strong> Their spreadsheet publishes dimension O, "centre of RA axis to Dec mounting surface", which is exactly our dimension C. All three Astro-Physics entries match to the last decimal: AP1100 6.75&Prime;, AP1600 9.3125&Prime;, AP3600 11.3125&Prime;. That is the first independent confirmation the library has had.</p>
+<p><strong>Counterweight shaft lengths added</strong> from the same source &mdash; 13.5625&Prime;, 19.125&Prime; and 31&Prime; respectively, previously blank.</p>
+<p><strong>Provenance is now recorded per dimension rather than per entry</strong>, because it differs. C and I are manufacturer-verified. A and B are not: they do not reproduce Astro-Physics' published declination-axis heights under any single latitude, so they follow some other reference and should be treated as estimates. The file records how to derive them properly &mdash; read dimension G at two latitudes and solve the pair of equations.</p>
+<p>One caveat carried into the notes: C is measured to the <em>mounting surface</em>, so rings raise the optical axis above it and C should be increased accordingly.</p></div>
+
+<div class="card"><div class="eyebrow">v7.19.001</div>
 <p><strong>Fixed: with two telescopes, the second was drawn using the first one's dew shield, tube offset and ring diameter.</strong> The function that builds a tube read those three figures from the shared settings rather than being told which tube it was drawing, so both tubes got the first one's.</p>
 <p>On a smaller second instrument the effect was severe: a 200&nbsp;mm aperture with 400&nbsp;mm rings alongside an 80&nbsp;mm guide scope gave the guide scope rings of the same 400&nbsp;mm &mdash; five times the radius of the tube carrying them &mdash; plus a duplicate of the first tube's dew shield. Four oversized discs and two shields overlapping, which is what the cluster in the 3D view was.</p>
 <p>Each tube is now drawn from its own figures. Verified in a browser: a 200&nbsp;mm tube with 400&nbsp;mm rings and a 250&nbsp;mm shield now sits beside an 80&nbsp;mm tube with 120&nbsp;mm rings and no shield, exactly as entered.</p></div>
