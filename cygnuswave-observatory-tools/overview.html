@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CygnusWave Observatory Tools — Dome &amp; Roll-Off-Roof Geometry Calculators</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CygnusWave Observatory Tools &mdash; Product Overview</title>
 <style>
   :root{
     --bg:#0a0d12; --panel:#12161d; --panel-2:#171c25; --line:#262d38;
@@ -114,11 +114,51 @@
 
   @media(prefers-reduced-motion:reduce){#starCanvas{display:none;}}
 </style>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  .mwrap{max-width:1000px; margin:0 auto; padding:36px 24px 72px;}
+  .eyebrow{font-family:"Courier New",monospace; font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--amber); margin-bottom:10px;}
+  h1{font-size:34px; line-height:1.2; margin-bottom:14px;}
+  h2{font-size:22px; margin:40px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--line);}
+  h3{font-size:16px; margin:22px 0 8px; color:var(--text);}
+  p{line-height:1.65; margin-bottom:12px; color:var(--text);}
+  .lede{font-size:17px; color:var(--text-dim); line-height:1.6; max-width:70ch;}
+  ul{margin:0 0 14px 20px; line-height:1.75;}
+  li{margin-bottom:5px;}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:18px 0;}
+  @media(max-width:760px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px 22px;}
+  .card h3{margin-top:0;}
+  .shot{border:1px dashed var(--amber-dim); border-radius:8px; background:var(--panel-2);
+    padding:18px 20px; margin:14px 0 22px;}
+  .shot .tag{font-family:"Courier New",monospace; font-size:10.5px; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--amber); display:block; margin-bottom:8px;}
+  .shot .cap{font-size:13.5px; color:var(--text); margin-bottom:8px;}
+  .shot .how{font-family:"Courier New",monospace; font-size:12px; color:var(--text-dim); line-height:1.6;}
+  table{width:100%; border-collapse:collapse; margin:14px 0 20px; font-size:14px;}
+  th,td{text-align:left; padding:9px 12px; border-bottom:1px solid var(--line);}
+  th{color:var(--amber); font-weight:600; font-size:12px; letter-spacing:.06em; text-transform:uppercase;}
+  td.num{font-family:"Courier New",monospace; color:var(--text-dim);}
+  .pill{display:inline-block; font-family:"Courier New",monospace; font-size:11px;
+    border:1px solid var(--line); border-radius:999px; padding:3px 10px; color:var(--text-dim); margin:0 6px 6px 0;}
+  .biglink{font-family:"Courier New",monospace; font-size:14px;}
+  .note{background:var(--panel-2); border-left:3px solid var(--amber); padding:12px 16px;
+    border-radius:0 6px 6px 0; margin:16px 0; font-size:14px; color:var(--text-dim); line-height:1.6;}
+  footer{border-top:1px solid var(--line); margin-top:48px; padding-top:20px;
+    font-size:12.5px; color:var(--text-dim);}
+  @media print{
+    .pdflink{display:none;}
+
+    nav,.nav-version{display:none;}
+    body{background:#fff; color:#111;}
+    .card,.shot,.note{border-color:#ccc; background:#fafafa;}
+    h2{border-color:#ccc;}
+    a{color:#111; text-decoration:underline;}
+    .biglink{font-family:"Courier New",monospace; font-size:13px;}
+  }
+</style>
 </head>
 <body>
-
 <nav>
   <a href="index.html" class="nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
 <rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
@@ -161,157 +201,154 @@
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.15.000</span>
+  <span class="nav-version">v7.16.000</span>
 </nav>
+<div class="mwrap">
 
-<section class="hero">
-  <canvas id="starCanvas"></canvas>
-  <div class="dome-wrap">
-    <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg">
-      <line x1="0" y1="210" x2="800" y2="210" stroke="#262d38" stroke-width="1"/>
-      <rect x="190" y="175" width="420" height="35" fill="#12161d" stroke="#262d38" stroke-width="1"/>
-      <path d="M190,210 Q400,-5 610,210" fill="#0d1018" stroke="#3a4550" stroke-width="1.5"/>
-      <path d="M220,210 Q400,30 580,210" fill="none" stroke="#262d38" stroke-width="0.75" stroke-dasharray="4,6"/>
-      <path d="M260,210 Q400,68 540,210" fill="none" stroke="#262d38" stroke-width="0.75" stroke-dasharray="4,6"/>
-      <path d="M375,52 Q400,40 425,52 L425,210 L375,210 Z" fill="#0a0d12" stroke="#c8623f" stroke-width="1.5" opacity="0.9"/>
-      <line x1="400" y1="200" x2="400" y2="86" stroke="#c8623f" stroke-width="2" opacity="0.85"/>
-      <ellipse cx="400" cy="86" rx="14" ry="4" fill="none" stroke="#c8623f" stroke-width="1.5" opacity="0.85"/>
-      <circle cx="400" cy="200" r="4" fill="#e7e2d6" opacity="0.9"/>
-      <text x="180" y="205" font-family="Courier New,monospace" font-size="10" fill="#4a5568" text-anchor="end">W</text>
-      <text x="620" y="205" font-family="Courier New,monospace" font-size="10" fill="#4a5568">E</text>
-      <text x="400" y="20" font-family="Courier New,monospace" font-size="10" fill="#4a5568" text-anchor="middle">Zenith</text>
-    </svg>
-  </div>
-  <div class="hero-content">
-    <div class="hero-eyebrow">CygnusWave Observatory Tools</div>
-    <h1 class="hero-title">Plan your observatory<br>before you <em>build</em> it</h1>
-    <p class="hero-sub">Two free geometry calculators for astrophotographers — work out the exact numbers your mount, dome, or roll-off roof needs, and verify them in 3D before anything gets bolted down.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary" href="dome-calculator.html">Dome Calculator</a>
-      <a class="btn btn-primary" href="ror-calculator.html">Roll-Off-Roof</a>
-      <a class="btn btn-secondary" href="help.html">Documentation</a>
-    </div>
-  </div>
-</section>
+<div class="eyebrow">Product Overview</div>
+<h1>CygnusWave Observatory Tools</h1>
+<p class="lede">Two browser-based calculators that turn tape-measure numbers into the settings and
+clearances an observatory actually needs &mdash; a dome geometry tool that produces NINA dome-sync
+values, and a roll-off-roof planner that shows exactly which parts of the sky your building blocks.
+No install, no account, no data leaves the browser.</p>
 
-<div class="section">
-  <div class="section-eyebrow">The tools</div>
-  <h2 class="section-title">Two different problems. Two calculators.</h2>
-  <p class="section-sub">A dome and a roll-off roof are fundamentally different geometry problems — they need separate tools, not one generic calculator bolted into a different shape.</p>
-  <div class="calc-grid">
-    <div class="calc-card">
-      <svg class="calc-card-icon" viewBox="0 0 44 44" fill="none">
-        <path d="M8 38 Q22 6 36 38" stroke="#c8623f" stroke-width="1.5" fill="#12161d"/>
-        <path d="M15 38 Q22 14 29 38" stroke="#3a4550" stroke-width="1" fill="none" stroke-dasharray="3,4"/>
-        <line x1="22" y1="36" x2="22" y2="18" stroke="#c8623f" stroke-width="1.5"/>
-        <circle cx="22" cy="36" r="2.5" fill="#e7e2d6"/>
-        <rect x="8" y="36" width="28" height="6" fill="#171c25" stroke="#3a4550" stroke-width="1"/>
-      </svg>
-      <div class="calc-card-eyebrow">Dome Observatories</div>
-      <h2>Dome &amp; Mount Geometry</h2>
-      <p>Converts physical measurements into the exact signed fields NINA's dome-sync tab expects. Live 3D preview shows whether the shutter actually clears the OTA at every pointing. Full-sky coverage sweep, pier-side comparison, local horizon modeling, one-click NINA settings export.</p>
-      <div class="card-cta">
-        <a href="dome-calculator.html">Open calculator →</a>
-        <a href="dome-manual.html" style="color:var(--text-dim);">Read manual →</a>
-      </div>
-    </div>
-    <div class="calc-card">
-      <svg class="calc-card-icon" viewBox="0 0 44 44" fill="none">
-        <rect x="6" y="24" width="32" height="14" fill="#12161d" stroke="#3a4550" stroke-width="1"/>
-        <rect x="6" y="8" width="32" height="16" fill="#0a0d12" stroke="#c8623f" stroke-width="1.5" rx="1"/>
-        <line x1="22" y1="30" x2="22" y2="20" stroke="#c8623f" stroke-width="1.5"/>
-        <circle cx="22" cy="30" r="2" fill="#e7e2d6"/>
-        <path d="M30 8 L44 8 L44 24 L38 24" stroke="#c8623f" stroke-width="1" stroke-dasharray="3,3" fill="none" opacity="0.6"/>
-      </svg>
-      <div class="calc-card-eyebrow">Roll-Off-Roof Observatories</div>
-      <h2>Roll-Off-Roof Geometry</h2>
-      <p>Real wall, roof, and floor/ceiling obstructions — including the parked roof itself. Up to 4 telescopes on one mount, with swing-radius clearance checked against walls and against each other. Custom building shapes, flat/peaked/wedge roof profiles, exportable horizon file for NINA or Stellarium.</p>
-      <div class="card-cta">
-        <a href="ror-calculator.html">Open calculator →</a>
-        <a href="ror-manual.html" style="color:var(--text-dim);">Read manual →</a>
-      </div>
-    </div>
+<p class="pdflink" style="margin:18px 0 6px;"><a href="cygnuswave-overview.pdf">Download this overview as a PDF &rarr;</a></p>
+<div>
+  <span class="pill">Runs entirely in the browser</span>
+  <span class="pill">No install</span>
+  <span class="pill">Open source &mdash; MPL 2.0</span>
+  <span class="pill">Imperial &amp; metric</span>
+  <span class="pill">Save / load setups</span>
+  <span class="pill">Light &amp; dark</span>
+</div>
+
+<h2>Why these exist</h2>
+<p>Observatory geometry is unforgiving. A pier a few inches off centre, a mount whose declination
+axis sits above the dome springline, or a wall two courses too high, and you lose sky you paid for
+&mdash; usually discovering it after the concrete has cured. Both tools let you settle that on screen
+first, with the numbers and the picture driven from the same maths.</p>
+
+<div class="shot"><span class="tag">Screenshot 1 &mdash; Hero</span><div class="cap">Both calculators side by side, 3D preview visible, dark theme.</div><div class="how">Open each tool at default settings. Capture the full window at 1600&times;1000. Dome: leave RA 0 / Dec 90 so the mount sits parked. ROR: same.</div></div>
+
+<h2>Dome &amp; Mount Geometry Calculator</h2>
+<p>Produces the four values NINA needs under <em>Options &rarr; Dome</em>, from measurements you can
+take with a tape and a plumb bob. The dome-sync maths is ported directly from NINA's own
+<code>DomeSynchronization.cs</code>, so the numbers match what the software will do.</p>
+
+<div class="grid">
+  <div class="card">
+    <h3>Measure, don't guess</h3>
+    <p>Measure from each wall to the point below your mount's pivot &mdash; north, south, east, west.
+    The signed offsets are derived for you and shown live. If you already have your NINA values,
+    switch to direct entry instead.</p>
+  </div>
+  <div class="card">
+    <h3>Shutter clearance, not just azimuth</h3>
+    <p>Projects your actual aperture onto the dome surface as a ghost circle, so you can see whether
+    the light path clears the shutter opening &mdash; not merely whether the dome is pointed roughly
+    the right way.</p>
+  </div>
+  <div class="card">
+    <h3>Full-sky coverage sweep</h3>
+    <p>Sweeps the whole sky and plots what the shutter can and cannot reach, on both sides of the
+    meridian for an equatorial. Alt/Az collapses to a single plot, since there is no flip.</p>
+  </div>
+  <div class="card">
+    <h3>Dual saddle and guide scopes</h3>
+    <p>Side-by-side OTAs with a lateral axis offset, and a guide-scope correction that shifts the
+    tracked optical axis. Clearance is checked for each tube independently.</p>
   </div>
 </div>
 
-<div class="features">
-  <div class="features-inner">
-    <div class="feature">
-      <div class="feature-label">3D Preview</div>
-      <h3>See it before you build it</h3>
-      <p>Both tools include an interactive 3D model of your observatory — drag to orbit, scroll to zoom. The shutter or walls turn red the moment a clearance problem appears, at whatever pointing you're testing.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-label">Physics, not approximations</div>
-      <h3>Same math as NINA</h3>
-      <p>The dome calculator's azimuth math is ported from NINA's own <code style="font-size:12px;background:#0d0b09;padding:1px 5px;border-radius:3px;">DomeSynchronization.cs</code> — what you see here is what NINA actually computes, not a simplified stand-in.</p>
-    </div>
-    <div class="feature">
-      <div class="feature-label">Runs in your browser</div>
-      <h3>No account. No data sent.</h3>
-      <p>Both tools are fully client-side HTML. Nothing you enter leaves your device. Save and load your setup as a local JSON file whenever you need to pick up where you left off.</p>
-    </div>
+<div class="shot"><span class="tag">Screenshot 2 &mdash; Dome, measurement workflow</span><div class="cap">Step 1 open, showing the four wall measurements and the derived orange N/S and E/W readout.</div><div class="how">Dome tool &rarr; Mount Position card. Set North 30, South 48, East 39, West 39 so the derived offset reads a non-zero value. Capture the left column.</div></div><div class="shot"><span class="tag">Screenshot 3 &mdash; Dome, 3D preview with ghost aperture</span><div class="cap">3D dome with the mount, the pointing ray and the ghosted aperture circle on the dome surface.</div><div class="how">Dome tool &rarr; set RA 20, Dec 60. Orbit so the shutter and the ghost circle are both visible. Capture the 3D panel only.</div></div><div class="shot"><span class="tag">Screenshot 4 &mdash; Dome, sky coverage</span><div class="cap">The full-width Sky Coverage row, both pier-east and pier-west plots.</div><div class="how">Dome tool &rarr; expand Sky Coverage with mount type Equatorial. Capture the full row.</div></div>
+
+<h2>Roll-Off-Roof Observatory Planner</h2>
+<p>Answers the question a roll-off roof actually poses: with these walls, this roof and the mount
+here, how much sky do I lose? Every wall, the roof in its parked position and your local terrain
+horizon are combined into one obstruction model.</p>
+
+<div class="grid">
+  <div class="card">
+    <h3>Three roof shapes</h3>
+    <p>Flat, peaked and wedge. The peaked roof takes a pitch ratio rather than a ridge height &mdash;
+    enter 1:6 and the ridge is computed from the building span, then shown back to you.</p>
+  </div>
+  <div class="card">
+    <h3>Buildings that aren't rectangles</h3>
+    <p>Up to six walls at arbitrary angles and distances, so an L-shaped or clipped-corner building
+    can be modelled properly instead of approximated by a box.</p>
+  </div>
+  <div class="card">
+    <h3>Swing clearance that knows the mount</h3>
+    <p>An equatorial sweeps a counterweight; an alt/az does not. Each is measured on its own terms,
+    so a fork mount is not told it needs an equatorial's swept volume.</p>
+  </div>
+  <div class="card">
+    <h3>Exportable horizon</h3>
+    <p>Walls, roof and terrain combine into a horizon profile you can export as a <code>.hrz</code>
+    file for your planning software.</p>
   </div>
 </div>
 
-<div class="openness">
-  <div class="openness-text">
-    <h2>Open source, MPL 2.0</h2>
-    <p>Both calculators are released under the Mozilla Public License 2.0 — the same license NINA uses. The source is the HTML file itself; view source in your browser to read it. Contributions and forks welcome under those terms.</p>
-  </div>
-  <div class="openness-links">
-    <a href="license.html">→ Full license text</a>
-    <a href="about.html">→ About this project</a>
-    <a href="changelog.html">→ Version history</a>
-    <a href="contact.html">→ Report a bug</a>
-  </div>
+<div class="shot"><span class="tag">Screenshot 5 &mdash; ROR, blocked pointing</span><div class="cap">3D view with the pointing ray red where the wall blocks it, status line showing the reason.</div><div class="how">ROR tool &rarr; set Dec to about 20 and RA to &minus;60 until the status reads blocked. Capture the 3D panel plus the status line above it.</div></div><div class="shot"><span class="tag">Screenshot 6 &mdash; ROR, roof shapes</span><div class="cap">Three captures of the same building with flat, peaked and wedge roofs.</div><div class="how">ROR tool &rarr; Building &amp; Roof card. Capture the 3D panel once per roof shape at the same camera angle, then place them in a row.</div></div>
+
+<h2>Two mount models, both to scale</h2>
+<p>Switching mount type changes the model and the maths together, not just a label.</p>
+
+<table>
+  <tr><th>&nbsp;</th><th>Equatorial (GEM)</th><th>Alt/Az or Fork</th></tr>
+  <tr><td>3D model</td><td>Latitude-tilted RA axis, RA and Dec rotors, counterweight shaft</td>
+      <td>PlaneWave L-500 direct drive &mdash; base drum, offset arm, altitude drive drum</td></tr>
+  <tr><td>Meridian flip</td><td>Pier side inverts the mount, aim unchanged</td><td>Not applicable &mdash; control hidden</td></tr>
+  <tr><td>Swing radius, 600&nbsp;mm OTA</td><td class="num">979&nbsp;mm</td><td class="num">651&nbsp;mm</td></tr>
+  <tr><td>Swing radius, 2000&nbsp;mm OTA</td><td class="num">2379&nbsp;mm</td><td class="num">1220&nbsp;mm</td></tr>
+  <tr><td>Sky coverage</td><td>Both sides of the meridian</td><td>Single plot</td></tr>
+</table>
+
+<div class="shot"><span class="tag">Screenshot 7 &mdash; Mount comparison</span><div class="cap">The same tool, same pointing, captured once as Equatorial and once as Alt/Az.</div><div class="how">Either tool &rarr; set RA 30, Dec 60. Capture the 3D panel. Switch mount type to Alt/Az and capture again without moving the camera. Place side by side.</div></div>
+
+<h2>Built to be checked</h2>
+<p>The 3D view is not a decoration drawn alongside the numbers &mdash; it is driven from the same
+calculation. Across 36 pointing combinations per tool, spanning latitudes +60&deg; to &minus;33&deg;,
+the rendered telescope matches each tool's own computed sky position to <strong>0.0000&deg;</strong>
+in both altitude and azimuth. If the picture and the numbers ever disagreed, that would be a bug,
+and it is tested as one.</p>
+
+<div class="note">
+Pointing is validated against textbook hour-angle to altitude/azimuth conversion, not against
+itself. The mount geometry rebuilds whenever a structural dimension changes, so the pier always
+meets the floor and the swept volume always reflects the current optics.
 </div>
+
+<h2>Everything else</h2>
+<ul>
+  <li><strong>Imperial and metric</strong> throughout, with fractional inches to 1/16&Prime; shown beside every field</li>
+  <li><strong>Local horizon</strong> &mdash; per-azimuth terrain profile layered on top of the building geometry</li>
+  <li><strong>Save and load</strong> complete setups as JSON; reset to defaults at any time</li>
+  <li><strong>Light and dark themes</strong></li>
+  <li><strong>Three-column layout</strong> &mdash; inputs left, live controls centre, 3D right</li>
+  <li><strong>Nothing leaves your browser</strong> &mdash; no accounts, no telemetry, no server</li>
+</ul>
+
+<h2>Licence</h2>
+<p>Both tools are open source under the Mozilla Public License 2.0. The source is the HTML file
+itself &mdash; view source and read it.</p>
+
+<h2>About the project</h2>
+<p>CygnusWave builds observatory planning tools for amateur astronomers. The story behind the
+project, the people who helped shape it and how to get in touch are on the about page:</p>
+<p><a class="biglink" href="https://cygnuswave.io/about.html">cygnuswave.io/about.html &rarr;</a></p>
 
 <footer>
-  <span>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">MPL 2.0</a>.</span>
-  <span>
-    <a href="disclaimer.html">Disclaimer</a> &nbsp;·&nbsp;
-    <a href="privacy.html">Privacy</a> &nbsp;·&nbsp;
-    <a href="contact.html">Contact</a>
-  </span>
+  <p>&copy; 2026 CygnusWave &middot;
+  <a href="https://cygnuswave.io">cygnuswave.io</a> &middot;
+  <a href="https://cygnuswave.io/about.html">About</a> &middot;
+  Licensed under the MPL 2.0.
+  Figures quoted above are produced by the tools' own test suite and are reproducible from the
+  settings given in each capture note.</p>
 </footer>
 
-<script>
-document.getElementById('navToggle').addEventListener('click',function(){
-  var links=document.getElementById('navLinks');
-  var open=links.classList.toggle('open');
-  this.setAttribute('aria-expanded',open);
-  this.textContent=open?'✕':'☰';
-});
-const canvas=document.getElementById('starCanvas');
-const ctx=canvas.getContext('2d');
-let stars=[],W,H;
-function init(){
-  W=canvas.width=canvas.offsetWidth;
-  H=canvas.height=canvas.offsetHeight;
-  stars=[];
-  for(let i=0;i<200;i++) stars.push({
-    x:Math.random()*W, y:Math.random()*H,
-    r:Math.random()*1.2+0.2,
-    speed:Math.random()*0.06+0.01,
-    opacity:Math.random()*0.7+0.15,
-    layer:Math.random()<0.4?1:0
-  });
-}
-function draw(t){
-  ctx.clearRect(0,0,W,H);
-  const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#04060d'); g.addColorStop(1,'#0a0d12');
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-  for(const s of stars){
-    const oy=(s.y+(s.layer===1?t*s.speed*0.4:t*s.speed*0.15))%H;
-    ctx.beginPath(); ctx.arc(s.x,oy,s.r,0,Math.PI*2);
-    ctx.fillStyle=`rgba(210,220,235,${s.opacity})`; ctx.fill();
-  }
-  requestAnimationFrame(draw);
-}
-window.addEventListener('resize',init);
-init(); requestAnimationFrame(draw);
-</script>
+</div>
+
 </body>
 </html>

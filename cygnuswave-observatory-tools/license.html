@@ -1,144 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Drawing a local horizon file &mdash; CygnusWave</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>License — CygnusWave Observatory Tools</title>
 <style>
-  :root{
-    --bg:#0a0d12; --panel:#12161d; --panel-2:#171c25; --line:#262d38;
-    --text:#e7e2d6; --text-dim:#8b93a3; --amber:#c8623f; --amber-dim:#7a3d29;
-    --green:#7fa373; --readout-bg:#0d0b09;
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{background:var(--bg); color:var(--text);
-    font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;}
-  a{color:var(--amber); text-decoration:none;}
-  a:hover{text-decoration:underline;}
+:root{
+  --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
+  --text: #e7e2d6; --text-dim: #8b93a3; --amber: #c8623f; --amber-dim: #7a3d29;
+  --green: #7fa373; --readout-bg: #0d0b09;
+}
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; background:var(--bg); color:var(--text);
+  font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }
 
-  /* Nav */
-  nav{display:flex; align-items:center; flex-wrap:wrap;
-    border-bottom:1px solid var(--line); background:var(--panel); position:relative; z-index:100;}
-  .nav-brand{font-family:"Courier New",monospace; font-size:13px; font-weight:700;
-    color:var(--text); letter-spacing:.04em; padding:14px 20px; flex:1;}
-  .nav-toggle{display:none; background:none; border:none; color:var(--text-dim);
-    font-size:22px; padding:10px 16px; cursor:pointer;}
+/* ── Nav with hamburger ── */
+nav{ display:flex; align-items:center; gap:0; flex-wrap:wrap;
+  padding:0; border-bottom:1px solid var(--line); background:var(--panel);
+  position:relative; z-index:100; }
+nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700;
+  color:var(--text); letter-spacing:0.04em; padding:14px 20px; flex:1; }
+.nav-toggle{ display:none; background:none; border:none; color:var(--text-dim);
+  font-size:22px; padding:10px 16px; cursor:pointer; line-height:1; }
+.nav-links{ display:flex; flex-wrap:wrap; gap:0; padding:0 12px 0 0; }
+.nav-links a{ color:var(--text-dim); font-size:12.5px; padding:14px 8px;
+  white-space:nowrap; }
+.nav-links a:hover{ color:var(--amber); text-decoration:none; }
+
+@media(max-width:680px){
+  .nav-toggle{ display:block; }
   .nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
     opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;}
   @media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
-  .nav-links{display:flex; flex-wrap:wrap; padding-right:12px;}
-  .nav-links a{color:var(--text-dim); font-size:12.5px; padding:14px 8px; white-space:nowrap;}
-  .nav-links a:hover{color:var(--amber); text-decoration:none;}
-  @media(max-width:680px){
-    .nav-toggle{display:block;}
-    .nav-links{display:none; flex-direction:column; width:100%;
-      padding:0; border-top:1px solid var(--line);}
-    .nav-links.open{display:flex;}
-    .nav-links a{padding:12px 20px; border-bottom:1px solid var(--line); font-size:14px;}
-  }
+  .nav-links{ display:none; flex-direction:column; width:100%;
+    padding:0; border-top:1px solid var(--line); }
+  .nav-links.open{ display:flex; }
+  .nav-links a{ padding:12px 20px; border-bottom:1px solid var(--line); font-size:14px; }
+}
 
-  /* Hero */
-  .hero{position:relative; overflow:hidden; min-height:440px;
-    display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
-    padding-bottom:48px; text-align:center;}
-  @media(max-width:480px){.hero{min-height:320px; padding-bottom:32px;}}
-  #starCanvas{position:absolute; inset:0; width:100%; height:100%;}
-  .dome-wrap{position:relative; z-index:2; margin-bottom:-1px; width:100%;}
-  .dome-wrap svg{display:block; margin:0 auto; width:min(800px,100vw);}
-  .hero-content{position:relative; z-index:2; max-width:640px; padding:0 20px;}
-  .hero-eyebrow{font-family:"Courier New",monospace; font-size:11px; color:var(--amber);
-    text-transform:uppercase; letter-spacing:.14em; margin-bottom:14px;}
-  .hero-title{font-size:clamp(24px,5vw,44px); font-weight:700; line-height:1.15;
-    color:var(--text); margin-bottom:14px;}
-  .hero-title em{font-style:normal; color:var(--amber);}
-  .hero-sub{font-size:clamp(14px,2vw,16px); color:var(--text-dim); line-height:1.65;
-    max-width:500px; margin:0 auto 28px;}
-  .hero-ctas{display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
-  .btn{display:inline-block; font-weight:700; padding:12px 22px; border-radius:6px;
-    text-decoration:none; font-size:14px; min-height:44px; line-height:20px;}
-  .btn:hover{opacity:.88; text-decoration:none;}
-  .btn-primary{background:var(--amber); color:#1a0f0a;}
-  .btn-secondary{background:transparent; color:var(--text-dim);
-    border:1px solid var(--line);}
-  .btn-secondary:hover{border-color:var(--amber); color:var(--text);}
+/* ── Layout ── */
+.wrap{ max-width:880px; margin:0 auto; padding:0 24px 64px; }
+@media(max-width:480px){ .wrap{ padding:0 16px 48px; } }
 
-  /* Sections */
-  .section{max-width:1020px; margin:0 auto; padding:48px 24px;}
-  @media(max-width:480px){.section{padding:36px 16px;}}
-  .section-eyebrow{font-family:"Courier New",monospace; font-size:11px;
-    color:var(--amber); text-transform:uppercase; letter-spacing:.12em; margin-bottom:10px;}
-  .section-title{font-size:clamp(20px,3vw,24px); font-weight:700; margin-bottom:8px;}
-  .section-sub{font-size:14.5px; color:var(--text-dim); line-height:1.65; max-width:540px;}
+h1{ font-size:clamp(22px,5vw,28px); margin:0 0 10px; font-weight:700; }
+h2{ font-size:18px; margin:34px 0 12px; color:var(--amber); }
+h3{ font-size:15px; margin:20px 0 8px; color:var(--text); }
+p, li{ font-size:14.5px; line-height:1.7; color:var(--text-dim); }
+@media(max-width:480px){
+  h2{ font-size:16px; margin:24px 0 10px; }
+  p, li{ font-size:14px; }
+}
 
-  .calc-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:32px;}
-  @media(max-width:640px){.calc-grid{grid-template-columns:1fr;}}
-  .calc-card{background:var(--panel); border:1px solid var(--line); border-radius:10px;
-    padding:clamp(18px,3vw,28px); display:flex; flex-direction:column; transition:border-color .2s;}
-  .calc-card:hover{border-color:var(--amber);}
-  .calc-card-icon{width:42px; height:42px; margin-bottom:16px;}
-  .calc-card-eyebrow{font-family:"Courier New",monospace; font-size:10px; color:var(--amber);
-    text-transform:uppercase; letter-spacing:.1em; margin-bottom:8px;}
-  .calc-card h2{font-size:17px; font-weight:700; margin-bottom:10px; color:var(--text);}
-  .calc-card p{font-size:13.5px; color:var(--text-dim); line-height:1.65; flex:1;}
-  .calc-card .card-cta{margin-top:20px; display:flex; gap:12px; flex-wrap:wrap;}
-  .calc-card .card-cta a{font-family:"Courier New",monospace; font-size:12px;
-    color:var(--amber); font-weight:700; letter-spacing:.04em;}
+a{ color:var(--amber); text-decoration:none; }
+a:hover{ text-decoration:underline; }
 
-  /* Feature strip */
-  .features{background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
-  .features-inner{max-width:1020px; margin:0 auto; padding:44px 24px;
-    display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
-  @media(max-width:680px){.features-inner{grid-template-columns:1fr; padding:32px 16px;}}
-  .feature-label{font-family:"Courier New",monospace; font-size:10px; color:var(--amber);
-    text-transform:uppercase; letter-spacing:.12em; margin-bottom:8px;}
-  .feature h3{font-size:15px; font-weight:700; margin-bottom:8px; color:var(--text);}
-  .feature p{font-size:13px; color:var(--text-dim); line-height:1.6;}
+.card{ background:var(--panel); border:1px solid var(--line); border-radius:8px;
+  padding:24px 28px; margin-bottom:20px; }
+@media(max-width:480px){ .card{ padding:18px 16px; } }
 
-  /* Openness */
-  .openness{max-width:1020px; margin:0 auto; padding:44px 24px;
-    display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;}
-  @media(max-width:480px){.openness{padding:32px 16px;}}
-  .openness-text{flex:1; min-width:240px;}
-  .openness-text h2{font-size:20px; font-weight:700; margin-bottom:8px;}
-  .openness-text p{font-size:13.5px; color:var(--text-dim); line-height:1.65;}
-  .openness-links{display:flex; flex-direction:column; gap:10px; flex-shrink:0;}
-  .openness-links a{font-size:13.5px; color:var(--text-dim); padding:2px 0;}
-  .openness-links a:hover{color:var(--amber);}
+.eyebrow{ font-size:11px; color:var(--text-dim); text-transform:uppercase;
+  letter-spacing:0.08em; margin-bottom:6px; }
 
-  /* Footer */
-  footer{border-top:1px solid var(--line); padding:20px 24px;
-    font-size:12px; color:var(--text-dim);
-    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;}
-  footer a{color:var(--text-dim);}
-  footer a:hover{color:var(--amber);}
+footer{ margin-top:48px; padding-top:20px; border-top:1px solid var(--line);
+  font-size:12px; color:var(--text-dim); }
 
-  @media(prefers-reduced-motion:reduce){#starCanvas{display:none;}}
+.btn{ display:inline-block; background:var(--amber); color:#1a0f0a; font-weight:700;
+  padding:12px 22px; border-radius:6px; text-decoration:none;
+  margin:6px 10px 6px 0; font-size:14px; min-height:44px; line-height:20px; }
+.btn:hover{ opacity:0.9; text-decoration:none; }
+.btn-secondary{ background:var(--panel-2); color:var(--text); border:1px solid var(--line); }
+
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:640px){ .grid-2{ grid-template-columns:1fr; } }
+
+code{ background:var(--readout-bg); padding:2px 6px; border-radius:3px;
+  font-family:"Courier New",monospace; font-size:13px; }
+
+pre{ background:var(--readout-bg); border:1px solid var(--line); border-radius:6px;
+  padding:16px; overflow-x:auto; font-size:12px; line-height:1.6;
+  color:var(--text-dim); white-space:pre; -webkit-overflow-scrolling:touch; }
+
+.table-wrap{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:16px 0; }
+table{ width:100%; border-collapse:collapse; min-width:360px; font-size:13px; }
+table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+
+.status-chip{ display:inline-block; background:rgba(127,216,143,0.12);
+  border:1px solid #3d5c42; color:#9fe0ac; padding:4px 10px;
+  border-radius:5px; font-size:12px; margin-bottom:20px; }
+
 </style>
-<style>
-  .hwrap{max-width:900px;margin:0 auto;padding:34px 24px 70px;}
-  h1{font-size:30px;margin-bottom:10px;}
-  h2{font-size:20px;margin:34px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--line);}
-  h3{font-size:15px;margin:20px 0 6px;}
-  p{line-height:1.65;margin-bottom:12px;}
-  ul,ol{margin:0 0 14px 20px;line-height:1.75;}
-  li{margin-bottom:6px;}
-  .lede{font-size:16.5px;color:var(--text-dim);max-width:70ch;}
-  pre{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:14px 16px;
-      overflow-x:auto;font-family:"Courier New",monospace;font-size:12.5px;line-height:1.6;color:var(--text);}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:18px 20px;margin:16px 0;}
-  .note{background:var(--panel-2);border-left:3px solid var(--amber);padding:12px 16px;
-        border-radius:0 6px 6px 0;margin:16px 0;font-size:14px;color:var(--text-dim);line-height:1.6;}
-  table{width:100%;border-collapse:collapse;margin:12px 0 18px;font-size:14px;}
-  th,td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--line);}
-  th{color:var(--amber);font-size:12px;letter-spacing:.05em;text-transform:uppercase;}
-  .dl{display:inline-block;background:var(--amber);color:#1b1b1b;font-weight:600;
-      padding:9px 16px;border-radius:6px;text-decoration:none;font-size:14px;margin:4px 0;}
-  .dl:hover{opacity:.9;}
-</style>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 <body>
 <nav>
-  <a href="index.html" class="nav-brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
+  <a href="index.html" class="brand" style="display:flex;align-items:center;gap:10px;text-decoration:none;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
 <rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
 <g transform="translate(170,140) scale(1.7) rotate(-45)">
 <g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
@@ -164,7 +120,7 @@
 <path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
 </g>
 </svg>
-<span>CYGNUSWAVE</span></a>
+<span style="color:var(--text);">CYGNUSWAVE</span></a>
   <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">☰</button>
   <div class="nav-links" id="navLinks">
     <a href="index.html">Home</a>
@@ -179,109 +135,177 @@
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.15.000</span>
+  <span class="nav-version">v7.16.000</span>
 </nav>
-<div class="hwrap">
-<h1>Drawing a local horizon file</h1>
-<p class="lede">A horizon file records how high the ground, trees and buildings rise around your
-site, so the calculators can tell you when something is blocked by terrain rather than by your
-own observatory. It is a plain text file you can write in any editor.</p>
+<script>
+document.getElementById('navToggle').addEventListener('click',function(){
+  var links=document.getElementById('navLinks');
+  var open=links.classList.toggle('open');
+  this.setAttribute('aria-expanded',open);
+  this.textContent=open?'✕':'☰';
+});
+</script>
 
-<h2>The format</h2>
-<p>One line per point, two numbers separated by a space: <b>azimuth</b> then <b>altitude</b>, both
-in degrees. Azimuth runs clockwise from due north &mdash; 0&deg; north, 90&deg; east, 180&deg;
-south, 270&deg; west. Altitude is how far above level the obstruction rises at that bearing.</p>
-<pre># CygnusWave sample horizon profile
-# azimuth(deg) altitude(deg) - one pair per line, 0 = due north, increasing eastward
-0 12.2
-22 17.6
-37 32
-62 39.6
-84 24.8
-88 22.9
-94 19.8
-104 15.8
-126 15.5
-138 16.5
-150 17.5
-165 16.5
-&hellip;</pre>
-<p>Points do not need even spacing. Put them where the skyline changes &mdash; a few across a flat
-field, many across a ragged treeline. Anything between two points is interpolated in a straight
-line, so a sharp edge needs a point on each side of it.</p>
+<div class="wrap">
 
-<table>
-  <tr><th>Rule</th><th>Detail</th></tr>
-  <tr><td>Azimuth range</td><td>0 to 360. 0 and 360 are the same bearing</td></tr>
-  <tr><td>Order</td><td>Increasing azimuth. Sort before saving if you measured out of order</td></tr>
-  <tr><td>Altitude</td><td>Degrees above level. 0 is a clear flat horizon</td></tr>
-  <tr><td>Separator</td><td>A space. Commas and tabs also read correctly</td></tr>
-  <tr><td>Comments</td><td>Lines beginning <code>#</code> are ignored</td></tr>
-  <tr><td>Extension</td><td><code>.hrz</code> by convention, but any text file works</td></tr>
-</table>
+<div class="eyebrow" style="margin-top:32px;">Open Source License</div>
+<h1>License</h1>
+<p>Both calculators are released under the <strong>Mozilla Public License 2.0 (MPL-2.0)</strong> — the same license used by <a href="https://nighttime-imaging.eu" target="_blank" rel="noopener noreferrer">NINA</a>, whose dome-sync algorithm is ported and used here.</p>
+<p>The MPL is a file-level copyleft license. If you modify and redistribute the calculator files themselves, you must release those specific files under the MPL too. You're free to use, study, and build on this software, and you can combine it with other code under different licenses without those files being affected.</p>
+<div class="card" style="border-color:#3d5c42;">
+  <div class="eyebrow">Summary</div>
+  <p><strong style="color:#7fd88f;">✓ You can</strong> use both tools freely, for any purpose.<br>
+  <strong style="color:#7fd88f;">✓ You can</strong> copy, modify, and redistribute them.<br>
+  <strong style="color:#7fd88f;">✓ You can</strong> use them as part of a larger project under a different license.<br>
+  <strong style="color:#e0685c;">✗ You cannot</strong> release a modified version of these specific files under a different license.<br>
+  <strong style="color:#e0685c;">✗ You cannot</strong> remove or alter this license notice.</p>
+</div>
+<h2>Third-party dependencies</h2>
+<p>Both calculators load <strong>Three.js r128</strong> from the Cloudflare CDN, licensed under the MIT License &copy; mrdoob and Three.js contributors. The SRI hash embedded in the script tag verifies the file's integrity at load time.</p>
+<h2>Mozilla Public License 2.0 — Full Text</h2>
+<div class="card">
+<pre>Mozilla Public License Version 2.0
 
-<h2>Measuring your horizon</h2>
-<ol>
-  <li><b>Find north.</b> Use the polar-alignment mark on your pier if you have one, or a compass
-      corrected for local magnetic declination.</li>
-  <li><b>Stand where the telescope will be</b>, at roughly the height of the optical axis. A horizon
-      measured from ground level will read too high.</li>
-  <li><b>Work round in steps</b> &mdash; every 10&deg; or 15&deg; is enough for open ground. Add
-      extra points either side of anything with a sharp edge: a roofline, a mast, the corner of a
-      building.</li>
-  <li><b>Measure the altitude</b> of the skyline at each bearing. A phone clinometer app is
-      accurate enough; a smartphone level app held against a straight edge also works.</li>
-  <li><b>Record the highest point</b> at each bearing, not the average. It is what actually blocks
-      you.</li>
-</ol>
+1. Definitions
+--------------
+1.1. "Contributor" means each individual or legal entity that creates,
+     contributes to the creation of, or owns Covered Software.
+1.2. "Contributor Version" means the combination of the Contributions of
+     others (if any) used by a Contributor and that particular
+     Contributor's Contribution.
+1.3. "Contribution" means Covered Software of a particular Contributor.
+1.4. "Covered Software" means Source Code Form to which the initial
+     Contributor has attached the notice in Exhibit A, the Executable
+     Form of such Source Code Form, and Modifications of such Source
+     Code Form, in each case including portions thereof.
+1.5. "Incompatible With Secondary Licenses" means (a) that the initial
+     Contributor has attached the notice described in Exhibit B to the
+     Covered Software; or (b) that the Covered Software was made
+     available under the terms of version 1.1 or earlier of the
+     License, but not also under the terms of a secondary license.
+1.6. "Executable Form" means any form of the work other than Source
+     Code Form.
+1.7. "Larger Work" means a work that combines Covered Software with
+     other material, in a separate file or files, that is not Covered
+     Software.
+1.8. "License" means this document.
+1.9. "Licensable" means having the right to grant, to the maximum extent
+     possible, whether at the time of the initial grant or subsequently,
+     any and all of the rights conveyed by this License.
+1.10. "Modifications" means any of the following: (a) any file in Source
+      Code Form that results from an addition to, deletion from, or
+      modification of the contents of Covered Software; or (b) any new
+      file in Source Code Form that contains any Covered Software.
+1.11. "Patent Claims" of a Contributor means any patent claim(s),
+      including without limitation, method, process, and apparatus
+      claims, in any patent Licensable by such Contributor that would be
+      infringed, but for the grant of the License, by the making, using,
+      selling, offering for sale, having made, importing, or transferring
+      either its Contributions or its Contributor Version.
+1.12. "Secondary License" means either the GNU General Public License,
+      Version 2.0, the GNU Lesser General Public License, Version 2.1,
+      the GNU Affero General Public License, Version 3.0, or any later
+      versions of those licenses.
+1.13. "Source Code Form" means the form of the work preferred for making
+      modifications.
+1.14. "You" (or "Your") means an individual or a legal entity exercising
+      rights under this License.
 
-<div class="note">
-Trees grow and lose leaves. A profile measured against bare winter branches will not describe the
-same sky in July, so it is worth re-measuring a tall treeline every few seasons.
+2. License Grants and Conditions
+---------------------------------
+2.1. Grants — Each Contributor hereby grants You a world-wide,
+     royalty-free, non-exclusive license: (a) under intellectual
+     property rights Licensable by such Contributor to use, reproduce,
+     make available, prepare derivative works of, display, run, copy,
+     sell, distribute, and otherwise transfer either such Contributions
+     or the Contributor Version; and (b) under Patent Claims of such
+     Contributor to make, use, sell, offer for sale, have made, import,
+     and otherwise transfer either such Contributions or the Contributor
+     Version.
+2.2. Effective Date — The licenses granted in Section 2.1 become
+     effective on the date the Contributor first distributes such
+     Contribution.
+2.3. Limitations on Grant Scope — The licenses granted in this Section 2
+     are the only rights granted under this License. No additional
+     rights or licenses will be implied from the distribution or
+     licensing of Covered Software under this License.
+
+3. Responsibilities
+-------------------
+3.1. Distribution of Source Form — All distribution of Covered Software
+     in Source Code Form must be under the terms of this License.
+3.2. Distribution of Executable Form — If You distribute Covered
+     Software in Executable Form, you must also make it available in
+     Source Code Form.
+3.3. Distribution of a Larger Work — You may create and distribute a
+     Larger Work under terms of Your choice, provided that You also
+     comply with the requirements of this License for the Covered
+     Software.
+3.4. Notices — You may not remove or alter the substance of any license
+     notices contained within the Source Code Form of the Covered
+     Software.
+
+4. Inability to Comply Due to Statute or Regulation
+----------------------------------------------------
+If it is impossible for You to comply with any of the terms of this
+License due to statute, judicial order, or regulation, You must comply
+to the maximum extent possible and describe the limitations.
+
+5. Termination
+--------------
+5.1. The rights granted under this License will terminate automatically
+     if You fail to comply with any of its terms.
+5.2. If You initiate patent infringement litigation against any entity
+     asserting a patent infringement claim, the rights granted to You
+     by all Contributors shall terminate.
+
+6. Disclaimer of Warranty
+--------------------------
+Covered Software is provided under this License on an "as is" basis,
+WITHOUT WARRANTY OF ANY KIND. The entire risk as to quality and
+performance is with You.
+
+7. Limitation of Liability
+---------------------------
+Under no circumstances shall any Contributor be liable to You for any
+direct, indirect, special, incidental, or consequential damages.
+
+8. Litigation
+-------------
+Any litigation relating to this License may be brought only in the
+courts of a jurisdiction where the defendant maintains its principal
+place of business.
+
+9. Miscellaneous
+----------------
+This License represents the complete agreement concerning the subject
+matter hereof. If any provision is held unenforceable, it shall be
+reformed only to the extent necessary to make it enforceable.
+
+10. Versions of the License
+----------------------------
+10.1. Mozilla Foundation is the license steward.
+10.2. You may distribute the Covered Software under the terms of the
+      version under which You originally received the Covered Software,
+      or under any subsequent version published by the license steward.
+
+Exhibit A - Source Code Form License Notice
+-------------------------------------------
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+Exhibit B - "Incompatible With Secondary Licenses" Notice
+---------------------------------------------------------
+  This Source Code Form is "Incompatible With Secondary Licenses", as
+  defined by the Mozilla Public License, v. 2.0.</pre>
 </div>
 
-<h2>A worked example</h2>
-<p>This is the sample profile plotted the way the calculators read it. The shaded area is sky you
-cannot reach; the dots are the measured points, joined by straight interpolation.</p>
-<div class="card"><svg viewBox="0 0 700 240" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sample horizon profile">
-<rect x="34" y="28" width="632" height="178" fill="#11141a"/>
-<line x1="34" y1="28" x2="34" y2="206" stroke="#3a3f47" stroke-width="1"/><text x="34" y="222" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">N</text><line x1="192" y1="28" x2="192" y2="206" stroke="#3a3f47" stroke-width="1"/><text x="192" y="222" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">E</text><line x1="350" y1="28" x2="350" y2="206" stroke="#3a3f47" stroke-width="1"/><text x="350" y="222" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">S</text><line x1="508" y1="28" x2="508" y2="206" stroke="#3a3f47" stroke-width="1"/><text x="508" y="222" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">W</text><line x1="666" y1="28" x2="666" y2="206" stroke="#3a3f47" stroke-width="1"/><text x="666" y="222" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">N</text><line x1="34" y1="206" x2="666" y2="206" stroke="#3a3f47" stroke-width="1" opacity="0.7"/><text x="28" y="210" font-size="11" fill="#9aa2ad" text-anchor="end" font-family="Arial">0&#176;</text><line x1="34" y1="149" x2="666" y2="149" stroke="#3a3f47" stroke-width="1" opacity="0.7"/><text x="28" y="153" font-size="11" fill="#9aa2ad" text-anchor="end" font-family="Arial">20&#176;</text><line x1="34" y1="91" x2="666" y2="91" stroke="#3a3f47" stroke-width="1" opacity="0.7"/><text x="28" y="95" font-size="11" fill="#9aa2ad" text-anchor="end" font-family="Arial">40&#176;</text><line x1="34" y1="34" x2="666" y2="34" stroke="#3a3f47" stroke-width="1" opacity="0.7"/><text x="28" y="38" font-size="11" fill="#9aa2ad" text-anchor="end" font-family="Arial">60&#176;</text>
-<path d="M 34.0,206.0 L 34.0,171.0 L 72.6,155.5 L 99.0,114.3 L 142.8,92.5 L 181.5,134.9 L 188.5,140.4 L 199.0,149.2 L 216.6,160.7 L 255.2,161.6 L 276.3,158.7 L 297.3,155.8 L 323.7,158.7 L 344.7,63.0 L 355.3,107.7 L 369.3,139.5 L 385.1,176.2 L 407.9,124.0 L 429.0,121.1 L 455.3,133.2 L 462.4,175.0 L 476.4,161.3 L 492.2,112.0 L 529.1,167.9 L 548.4,167.3 L 550.1,57.2 L 578.2,53.5 L 627.4,148.1 L 643.2,91.3 L 644.9,176.5 L 644.9,206.0 Z" fill="#8a5a3c" opacity="0.45"/>
-<path d="M 34.0,171.0 L 72.6,155.5 L 99.0,114.3 L 142.8,92.5 L 181.5,134.9 L 188.5,140.4 L 199.0,149.2 L 216.6,160.7 L 255.2,161.6 L 276.3,158.7 L 297.3,155.8 L 323.7,158.7 L 344.7,63.0 L 355.3,107.7 L 369.3,139.5 L 385.1,176.2 L 407.9,124.0 L 429.0,121.1 L 455.3,133.2 L 462.4,175.0 L 476.4,161.3 L 492.2,112.0 L 529.1,167.9 L 548.4,167.3 L 550.1,57.2 L 578.2,53.5 L 627.4,148.1 L 643.2,91.3 L 644.9,176.5" fill="none" stroke="#e07a4f" stroke-width="2"/>
-<circle cx="34.0" cy="171.0" r="2.6" fill="#e07a4f"/><circle cx="72.6" cy="155.5" r="2.6" fill="#e07a4f"/><circle cx="99.0" cy="114.3" r="2.6" fill="#e07a4f"/><circle cx="142.8" cy="92.5" r="2.6" fill="#e07a4f"/><circle cx="181.5" cy="134.9" r="2.6" fill="#e07a4f"/><circle cx="188.5" cy="140.4" r="2.6" fill="#e07a4f"/><circle cx="199.0" cy="149.2" r="2.6" fill="#e07a4f"/><circle cx="216.6" cy="160.7" r="2.6" fill="#e07a4f"/><circle cx="255.2" cy="161.6" r="2.6" fill="#e07a4f"/><circle cx="276.3" cy="158.7" r="2.6" fill="#e07a4f"/><circle cx="297.3" cy="155.8" r="2.6" fill="#e07a4f"/><circle cx="323.7" cy="158.7" r="2.6" fill="#e07a4f"/><circle cx="344.7" cy="63.0" r="2.6" fill="#e07a4f"/><circle cx="355.3" cy="107.7" r="2.6" fill="#e07a4f"/><circle cx="369.3" cy="139.5" r="2.6" fill="#e07a4f"/><circle cx="385.1" cy="176.2" r="2.6" fill="#e07a4f"/><circle cx="407.9" cy="124.0" r="2.6" fill="#e07a4f"/><circle cx="429.0" cy="121.1" r="2.6" fill="#e07a4f"/><circle cx="455.3" cy="133.2" r="2.6" fill="#e07a4f"/><circle cx="462.4" cy="175.0" r="2.6" fill="#e07a4f"/><circle cx="476.4" cy="161.3" r="2.6" fill="#e07a4f"/><circle cx="492.2" cy="112.0" r="2.6" fill="#e07a4f"/><circle cx="529.1" cy="167.9" r="2.6" fill="#e07a4f"/><circle cx="548.4" cy="167.3" r="2.6" fill="#e07a4f"/><circle cx="550.1" cy="57.2" r="2.6" fill="#e07a4f"/><circle cx="578.2" cy="53.5" r="2.6" fill="#e07a4f"/><circle cx="627.4" cy="148.1" r="2.6" fill="#e07a4f"/><circle cx="643.2" cy="91.3" r="2.6" fill="#e07a4f"/><circle cx="644.9" cy="176.5" r="2.6" fill="#e07a4f"/>
-<text x="350" y="234" font-size="11" fill="#9aa2ad" text-anchor="middle" font-family="Arial">azimuth</text>
-</svg>
-<p style="font-size:13px;color:var(--text-dim);margin:10px 0 0;">
-29 points. The ridge near 310&deg; rises to 53.2&deg; &mdash; over half the sky lost to the
-north-west &mdash; while the eastern side stays near 15&deg;.</p>
+<footer>
+  <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
+  See the <a href="disclaimer.html">Disclaimer</a> and <a href="privacy.html">Privacy Policy</a>.</p>
+</footer>
+
 </div>
-<p><a class="dl" href="assets/sample-horizon.hrz" download>Download the sample file</a></p>
-
-<h2>Using it</h2>
-<p>In either calculator, open <b>Local Horizon</b>, switch from <em>Flat</em> to <em>Custom</em>,
-and paste the contents into the box. The profile is combined with your walls and roof: whichever
-is higher at a given bearing is what blocks you, and the tool names which one it was.</p>
-<p>You can also go the other way. Once your building is described, the roll-off-roof tool will
-export the combined limit &mdash; walls, parked roof and terrain together &mdash; as a horizon
-file for your planning software.</p>
-
-<div class="note">
-A pointing below your horizon is reported, not corrected. The tool tells you it is blocked and
-leaves your figures alone, so you can see how far below the skyline a target sits.
-</div>
-
-<h2>Common mistakes</h2>
-<ul>
-  <li><b>Magnetic north instead of true north.</b> Declination reaches 20&deg; in parts of the
-      world, which rotates the whole profile.</li>
-  <li><b>Measuring from the ground.</b> Stand at the height of the optical axis.</li>
-  <li><b>Too few points across a sharp edge.</b> Straight-line interpolation will cut a corner off
-      a building and quietly hand you sky you do not have.</li>
-  <li><b>Counting your own walls twice.</b> The horizon file is for terrain and neighbouring
-      structures. Your own walls and roof are described in the building card and added
-      separately.</li>
-</ul>
-</div>
-
 </body>
 </html>

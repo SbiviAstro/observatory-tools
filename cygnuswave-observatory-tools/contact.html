@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>About — CygnusWave Observatory Tools</title>
+<title>Contact — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.15.000</span>
+  <span class="nav-version">v7.16.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -148,32 +148,132 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="wrap">
 
-<div class="eyebrow" style="margin-top:32px;">About</div>
-<h1>About CygnusWave Observatory Tools</h1>
-<div class="card">
-  <p style="font-size:15px; color:var(--text);">Two free, open-source geometry calculators for astrophotographers planning or building an observatory — designed to give you real answers about whether your setup will physically work before anything gets bolted down or cut.</p>
-</div>
-<h2>Why these tools exist</h2>
-<p>Setting up dome-sync in NINA requires knowing four signed numbers with the right sign conventions. Getting them wrong is easy and the feedback loop is slow — configure, run NINA, watch the dome miss, tweak, repeat, on a cold night with dew forming. The dome calculator grew out of that frustration.</p>
-<p>The roll-off-roof calculator came from the same question in a different form. A roll-off roof is a genuinely different geometric problem from a dome, and the astrophotography software ecosystem has good dome-sync support but comparatively little for the equally real problem of whether your ROR's walls, parked roof, and floor let your assembly swing freely.</p>
-<h2>Relationship to NINA</h2>
-<p>The dome calculator's core azimuth math is ported from <a href="https://nighttime-imaging.eu" target="_blank" rel="noopener noreferrer">NINA's</a> <code>DomeSynchronization.cs</code>, using the same matrix conventions. Both tools are licensed under the <a href="license.html">Mozilla Public License 2.0</a> — the same license NINA uses — in recognition of that shared foundation.</p>
-<p>These tools are not affiliated with, endorsed by, or supported by the NINA project or its developers.</p>
-<h2>Open source</h2>
-<p>Both calculators are fully client-side HTML — no server, no database, no data collection. The source is the page itself. Released under the <a href="license.html">MPL 2.0</a>; contributions and forks welcome under those terms.</p>
+<div class="eyebrow" style="margin-top:32px;">Contact</div>
+<h1>Contact &amp; Feedback</h1>
+<p>Bug reports, feature requests, and general questions are all welcome. Fill in the form below and we'll get back to you.</p>
 
-<h2>About the Author</h2>
-<div class="card" style="border-color:#3a4550;">
-  <p style="font-size:15px; color:var(--text); margin-bottom:12px;">Astronomy fanatic. Hooked since childhood.</p>
-  <p>I can still remember the first time I saw Saturn's rings through a telescope. That was it — done. Space had me completely. As an adult I've been lucky enough to build my own observatory, and the hobby has given me so much over the years that I wanted to find a way to give something back. If these tools help even one person spend less time fighting their setup and more time under the stars, that's exactly what they were built for.</p>
-  <p>My astrophotography work — still very much a work in progress — lives here: <a href="https://app.astrobin.com/u/M51_MyDestination" target="_blank" rel="noopener noreferrer">M51_MyDestination on AstroBin →</a></p>
+<div class="grid-2" style="margin-top:24px; align-items:start;">
+
+  <div>
+    <div class="card" style="padding:28px 30px;">
+      <h2 style="margin-top:0; margin-bottom:20px;">Send a message</h2>
+
+      <div id="formSuccess" style="display:none; background:var(--panel-2); border:1px solid var(--green); border-radius:6px; padding:18px 20px; margin-bottom:20px;">
+        <p style="margin:0; color:var(--green); font-size:14.5px;">✓ Message sent — we'll get back to you soon.</p>
+      </div>
+      <div id="formError" style="display:none; background:var(--panel-2); border:1px solid #e0685c; border-radius:6px; padding:18px 20px; margin-bottom:20px;">
+        <p style="margin:0; color:#e0685c; font-size:14.5px;">Something went wrong. Please try again or email us directly at <a href="mailto:help@cygnuswave.io">help@cygnuswave.io</a>.</p>
+      </div>
+
+      <form id="contactForm">
+        <!-- Web3Forms access key — replace with your key from https://web3forms.com -->
+        <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_KEY_HERE">
+        <input type="hidden" name="subject" value="CygnusWave Observatory Tools — Contact Form">
+        <input type="hidden" name="from_name" value="CygnusWave Contact Form">
+        <input type="checkbox" name="botcheck" style="display:none;">
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Your name</label>
+          <input type="text" name="name" required placeholder="e.g. Jane Smith"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Email address</label>
+          <input type="email" name="email" required placeholder="you@example.com"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Subject</label>
+          <select name="subject_type"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+            <option value="Bug report">Bug report</option>
+            <option value="Feature request">Feature request</option>
+            <option value="General question">General question</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Which calculator?</label>
+          <select name="calculator"
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none;">
+            <option value="Not applicable">Not applicable</option>
+            <option value="Dome Calculator">Dome Calculator</option>
+            <option value="Roll-Off-Roof Calculator">Roll-Off-Roof Calculator</option>
+            <option value="Both">Both</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:22px;">
+          <label style="display:block; font-size:13px; color:var(--text-dim); margin-bottom:6px;">Message</label>
+          <textarea name="message" required rows="6" placeholder="Describe your bug, question, or idea..."
+            style="width:100%; background:var(--readout-bg); border:1px solid var(--line); color:var(--text); border-radius:5px; padding:10px 12px; font-size:14px; outline:none; resize:vertical; font-family:inherit;"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn"
+          style="background:var(--amber); color:#1a0f0a; font-weight:700; padding:12px 26px; border:none; border-radius:6px; font-size:14px; cursor:pointer; min-height:44px;">
+          Send message →
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <div class="card">
+      <h2 style="margin-top:0;">Useful to include</h2>
+      <p style="margin-top:0;">For bug reports, the more detail the better:</p>
+      <ul style="margin:0; padding-left:20px;">
+        <li>Which calculator and version number (shown in the page title)</li>
+        <li>What values you entered for the relevant fields</li>
+        <li>What result you expected and what you actually saw</li>
+        <li>Your browser and OS if the issue seems visual</li>
+      </ul>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <h2 style="margin-top:0;">Direct email</h2>
+      <p style="margin-top:0;">Prefer to email directly? <a href="mailto:help@cygnuswave.io">help@cygnuswave.io</a></p>
+    </div>
+    <div class="card" style="margin-top:0;">
+      <h2 style="margin-top:0;">Contributing</h2>
+      <p style="margin-top:0;">Both calculators are open source under the <a href="license.html">MPL 2.0</a>. The source code is the HTML file itself. If you make improvements and want to share them, get in touch or open a pull request on <a href="https://github.com/SbiviAstro/observatory-tools" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+    </div>
+  </div>
+
 </div>
 
-<h2>Special Thanks</h2>
-<div class="card" style="border-color:#3a4550;">
-  <p style="color:var(--text); margin-bottom:6px;"><strong>Travellingbears</strong> &amp; <strong>AndrewBares</strong> <span style="color:var(--text-dim); font-size:12px;">@ Cloudy Nights</span></p>
-  <p style="margin:0;">For their inspiration, feedback, and generosity with their time. These tools are sharper, more useful, and more honest about what they're actually solving because of their input. Thank you.</p>
-</div>
+<script>
+document.getElementById('contactForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const btn = document.getElementById('submitBtn');
+  const successEl = document.getElementById('formSuccess');
+  const errorEl = document.getElementById('formError');
+  btn.textContent = 'Sending…';
+  btn.disabled = true;
+  successEl.style.display = 'none';
+  errorEl.style.display = 'none';
+  try {
+    const data = Object.fromEntries(new FormData(this));
+    const res = await fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    if(json.success){
+      successEl.style.display = 'block';
+      this.reset();
+    } else {
+      errorEl.style.display = 'block';
+    }
+  } catch(err){
+    errorEl.style.display = 'block';
+  }
+  btn.textContent = 'Send message →';
+  btn.disabled = false;
+});
+</script>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
@@ -181,5 +281,6 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </footer>
 
 </div>
+
 </body>
 </html>
