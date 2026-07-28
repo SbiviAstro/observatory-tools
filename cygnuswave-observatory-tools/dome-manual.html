@@ -127,6 +127,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="dome-calculator.html">Dome Calculator</a>
     <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
     <a href="overview.html">Overview</a>
+    <a href="horizon-guide.html">Horizon Guide</a>
     <a href="help.html">Help</a>
     <a href="changelog.html">Changelog</a>
     <a href="license.html">License</a>
@@ -134,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.00.021</span>
+  <span class="nav-version">v7.02.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -202,6 +203,15 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <tr><td style="color:#8b93a3;">⚪ Grey</td><td>Mount geometry invalid there</td></tr>
 </table>
 </div>
+
+<h2>Mount System</h2>
+<p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>
+<p>An equatorial's declination axis sits at <em>A + B &times; sin(latitude)</em> above the pier flange, since dimension B runs along the polar axis. Presets re-apply when you change latitude so the figure stays right for your site.</p>
+<p class="note">Preset dimensions are community measurements, not manufacturer specifications, and every field they fill remains editable. Where sources disagree the card says so. Measure your own mount before building to tight clearances.</p>
+
+<h2>Measuring your own mount</h2>
+<p>Select <strong>Measure my own</strong> and the card lets you type into the dimension boxes beside the labelled diagram. <strong>Generic equatorial</strong> is a plausible mid-size mount for getting started; picking any library mount fills the same boxes read-only so you can read its geometry against the diagram. Measure <b>A</b> vertically from the pier flange to the RA pivot, <b>B</b> from that pivot to the declination axis <em>along the polar axis</em>, and <b>C</b> from the declination axis across to the optical axis. <b>I</b>, the counterweight shaft, is optional. For an alt/az mount there is a single measurement, <b>H</b>, from the pier flange to the altitude axis.</p>
+<p>Because B runs along the polar axis, the declination axis sits at <em>A + B &times; sin(latitude)</em> above the flange, so the figure follows your site. Any box left at 0 leaves the corresponding value alone.</p>
 
 <h2>Mount Types</h2>
 <p class="note">Selecting Alt/Az sets the pier height to 6&Prime;. The L-500 carries its altitude axis 32.3&Prime; above the pier flange, so a 6&Prime; pier puts that axis level with the 38&Prime; dome springline &mdash; the swing sphere then sits concentric with the hemisphere, which needs the smallest dome. Your equatorial pier height is restored if you switch back.</p>

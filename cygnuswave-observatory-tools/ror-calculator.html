@@ -215,7 +215,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.00.021</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.02.000</span>
 </div>
 <div class="wrap">
   <header>
@@ -491,6 +491,10 @@
           <div><label>OTA clear aperture</label></div>
           <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
         </div>
+        <div class="row">
+          <div><label>OTA outer diameter</label><span class="hint">tube body including rings &mdash; 0 estimates it from the aperture</span></div>
+          <div class="field"><input type="number" id="otaOuterDia" value="0"><span class="unit">mm</span></div>
+        </div>
         <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
 
         <div class="card" style="display:none; background:var(--panel-2); border-color:var(--line); padding:14px 16px; margin-bottom:14px;"><!-- multi-scope hidden -->
@@ -710,9 +714,128 @@
     </div>
     </div>
   </details>
+
+  <details class="section-card" id="sec-mount-system">
+    <summary class="section-header"><span class="section-title">Mount System</span></summary>
+    <div class="section-body">
+      <p class="step-note">Pick your mount to fill in its geometry, or leave it on Generic and enter your own.</p>
+      <div class="row">
+        <div><label>Mount model</label></div>
+        <div class="field" style="min-width:230px;">
+          <select id="mountPreset" style="width:100%;"></select>
+        </div>
+      </div>
+      <div id="mountPresetInfo" style="background:var(--panel-2); border:1px solid var(--line);
+        border-radius:6px; padding:10px 14px; margin-top:8px; font-size:12px; line-height:1.6;
+        color:var(--text-dim);"></div>
+      <div id="mountPresetVerify" style="display:none; font-size:11px; color:#d9a066;
+        margin-top:8px; line-height:1.5;"></div>
+
+      <!-- ---------- how the measurements are taken ---------- -->
+      <div id="mountDiagramWrap" style="margin-top:10px; background:var(--panel-2);
+        border:1px solid var(--line); border-radius:6px; padding:12px 10px 6px;">
+
+        <div id="mountDiagramGEM" style="position:relative; width:100%; max-width:400px; margin:0 auto;">
+          <img alt="German equatorial mount, showing where each dimension is measured"
+               style="width:100%; display:block;"
+               src="data:image/png;base64,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">
+          <svg viewBox="0 0 465 433" style="position:absolute; inset:0; width:100%; height:100%;"
+               xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <marker id="mdArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#e07a4f"/>
+              </marker>
+            </defs>
+            <circle cx="105" cy="290" r="5" fill="#e07a4f"/>
+            <circle cx="181" cy="243" r="5" fill="#e07a4f"/>
+            <line x1="52" y1="384" x2="52" y2="290" stroke="#e07a4f" stroke-width="2"
+                  marker-start="url(#mdArr)" marker-end="url(#mdArr)"/>
+            <line x1="46" y1="384" x2="86" y2="384" stroke="#e07a4f" stroke-width="1" opacity="0.55"/>
+            <line x1="46" y1="290" x2="108" y2="290" stroke="#e07a4f" stroke-width="1" opacity="0.55"/>
+            <text x="44" y="343" font-size="19" font-weight="bold" fill="#e07a4f" text-anchor="end" font-family="Arial">A</text>
+            <line x1="115" y1="284" x2="171" y2="249" stroke="#e07a4f" stroke-width="2"
+                  marker-start="url(#mdArr)" marker-end="url(#mdArr)"/>
+            <text x="138" y="285" font-size="19" font-weight="bold" fill="#e07a4f" font-family="Arial">B</text>
+            <line x1="174" y1="233" x2="126" y2="174" stroke="#e07a4f" stroke-width="2"
+                  marker-start="url(#mdArr)" marker-end="url(#mdArr)"/>
+            <text x="160" y="200" font-size="19" font-weight="bold" fill="#e07a4f" font-family="Arial">C</text>
+            <line x1="191" y1="253" x2="264" y2="347" stroke="#e07a4f" stroke-width="2"
+                  marker-start="url(#mdArr)" marker-end="url(#mdArr)"/>
+            <text x="217" y="298" font-size="19" font-weight="bold" fill="#e07a4f" font-family="Arial">I</text>
+          </svg>
+        </div>
+
+        <svg id="mountDiagramAltAz" viewBox="0 0 440 290" width="100%" style="max-height:300px; display:none;"
+             xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Alt/Az mount measurements">
+          <line x1="25" y1="272" x2="415" y2="272" stroke="#6b7280" stroke-width="2"/>
+          <path d="M25 278 L415 278" stroke="#6b7280" stroke-width="1" stroke-dasharray="4 5" opacity="0.6"/>
+          <rect x="205" y="170" width="40" height="102" fill="#8d8377" opacity="0.55" stroke="#6b7280"/>
+          <rect x="193" y="162" width="64" height="9" rx="2" fill="#5d6570" stroke="#6b7280"/>
+          <text x="225" y="266" font-size="11" fill="#9aa2ad" text-anchor="middle">pier</text>
+
+          <!-- base drum + arm -->
+          <rect x="186" y="128" width="78" height="35" rx="5" fill="#5d6570" stroke="#6b7280"/>
+          <rect x="232" y="86"  width="26" height="46" fill="#5d6570" stroke="#6b7280"/>
+          <circle cx="245" cy="86" r="19" fill="#5d6570" stroke="#6b7280"/>
+          <text x="196" y="152" font-size="11" fill="#9aa2ad">base</text>
+
+          <!-- altitude axis + OTA -->
+          <line x1="150" y1="86" x2="340" y2="86" stroke="#7fb4d8" stroke-width="1.4" stroke-dasharray="6 4"/>
+          <text x="290" y="78" font-size="10.5" fill="#7fb4d8">altitude axis</text>
+          <rect x="196" y="52" width="100" height="30" rx="7" fill="#b9b6ac" opacity="0.85" stroke="#6b7280"/>
+          <circle cx="296" cy="67" r="13" fill="none" stroke="#c8623f" stroke-width="2"/>
+          <text x="318" y="60" font-size="11" fill="#9aa2ad">OTA</text>
+          <circle cx="245" cy="86" r="4.5" fill="#c8623f"/>
+
+          <!-- H : flange to altitude axis -->
+          <line x1="160" y1="166" x2="160" y2="86" stroke="#c8623f" stroke-width="1.4"
+                marker-start="url(#mdArr)" marker-end="url(#mdArr)"/>
+          <line x1="154" y1="166" x2="200" y2="166" stroke="#c8623f" stroke-width="0.8" opacity="0.6"/>
+          <line x1="154" y1="86"  x2="248" y2="86"  stroke="#c8623f" stroke-width="0.8" opacity="0.6"/>
+          <text x="150" y="130" font-size="14" font-weight="bold" fill="#c8623f" text-anchor="end">H</text>
+        </svg>
+      </div>
+
+      <!-- ---------- measure-my-own inputs ---------- -->
+      <div id="mountGenericFields" style="display:none; margin-top:10px;">
+        <div id="mountGenericGEM">
+          <div class="row">
+            <div><label>A &mdash; pier flange to RA pivot</label><span class="hint">vertical</span></div>
+            <div class="field"><input type="number" id="genA" value="0" step="0.01"><span class="unit">in</span></div>
+          </div>
+          <div class="row">
+            <div><label>B &mdash; RA pivot to Dec axis</label><span class="hint">measured along the polar axis</span></div>
+            <div class="field"><input type="number" id="genB" value="0" step="0.01"><span class="unit">in</span></div>
+          </div>
+          <div class="row">
+            <div><label>C &mdash; Dec axis to optical axis</label><span class="hint">the GEM axis length</span></div>
+            <div class="field"><input type="number" id="genC" value="0" step="0.01"><span class="unit">in</span></div>
+          </div>
+          <div class="row">
+            <div><label>I &mdash; counterweight shaft</label><span class="hint">optional, 0 if unknown</span></div>
+            <div class="field"><input type="number" id="genI" value="0" step="0.01"><span class="unit">in</span></div>
+          </div>
+        </div>
+        <div id="mountGenericAltAz" style="display:none;">
+          <div class="row">
+            <div><label>H &mdash; pier flange to altitude axis</label></div>
+            <div class="field"><input type="number" id="genH" value="0" step="0.01"><span class="unit">in</span></div>
+          </div>
+        </div>
+        <div id="mountDimNote" style="font-size:11px; color:var(--text-dim); margin-top:6px; line-height:1.55;"></div>
+        <div style="display:none;">
+          Leave a box at 0 to keep whatever is already entered further down. Because B runs along
+          the polar axis, the Dec-axis height is computed as A + B &times; sin(latitude), so it
+          follows your site.
+        </div>
+      </div>
+    </div>
+  </details>
+
   <details class="section-card" id="sec-horizon">
     <summary class="section-header"><span class="section-title">Local Horizon</span></summary>
     <div class="section-body">
+      <p class="step-note" style="margin-top:2px;"><a href="horizon-guide.html" target="_blank" style="color:var(--amber);">How to measure and write a horizon file &rarr;</a> &middot; <a href="sample-horizon.hrz" download style="color:var(--amber);">sample file</a></p>
 <h2>Local Horizon</h2>
         <p class="step-note">Terrain beyond the building — trees, other structures. Layered on top of the wall/roof obstruction; whichever blocks more at a given azimuth wins.</p>
         <div class="mount-type-toggle">
@@ -1021,14 +1144,33 @@ const L500_SWING_THROUGH = 650.748;
 function rorSwingRadius(axisMm){
   const len = Math.max(num('otaLength'), rorDualOn() ? num('ota2Length') : 0);
   const ap  = Math.max(num('otaAperture'), rorDualOn() ? num('ota2Aperture') : 0);
-  if(mountType === 'GEM'){
-    return axisMm + rorLateral() + len + ap / 2;
-  }
-  // Any offset between the altitude axis and the optical axis adds to the reach.
+  // The tube pivots about the Dec (or altitude) axis near its balance point, so
+  // the reach splits into two perpendicular parts: how far the tube runs ALONG
+  // the optical axis, and how far the far corner sits ACROSS it. The swept
+  // radius is the hypotenuse. Summing them linearly, as this did before,
+  // overstates the swept volume by 10-19% and fails buildings that would work.
   const backFocus = 0.44;                       // matches the L-500 OTA model
-  const longerHalf = len * Math.max(backFocus, 1 - backFocus);
-  return Math.max(L500_SWING_THROUGH,
-                  Math.abs(axisMm) + longerHalf + ap / 2 + rorLateral());
+  const along = len * Math.max(backFocus, 1 - backFocus);
+  const across = Math.abs(axisMm) + rorLateral() + rorTubeRadiusMm();
+  const r = Math.sqrt(along * along + across * across);
+  // A direct drive can never sweep less than the mount's own rated clearance.
+  return (mountType === 'GEM') ? r : Math.max(L500_SWING_THROUGH, r);
+}
+
+// Half the widest aperture in use - the beam has width, so the edge of the
+// light cone reaches a wall top before the optical axis does.
+function rorApertureRadiusMm(){
+  return Math.max(num('otaAperture'), rorDualOn() ? num('ota2Aperture') : 0) / 2;
+}
+
+// Half the tube's physical outer diameter. Swing clearance is set by the tube
+// body, not the light path - a CDK's tube runs roughly 1.3x its aperture once
+// rings and the dovetail are included, so the aperture alone understates the
+// swept volume. Entering 0 falls back to that 1.3x estimate.
+function rorTubeRadiusMm(){
+  const entered = num('otaOuterDia');
+  if(entered > 0) return entered / 2;
+  return rorApertureRadiusMm() * 1.3;
 }
 function rorLateral(){ return rorDualOn() ? Math.abs(num('lateralDist')) : 0; }
 
@@ -1255,7 +1397,9 @@ function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
     } else {
       structureHeight = building.wallHeight;
     }
-    const heightAboveMount = structureHeight - mountHeightMm;
+    // Clear the whole beam, not just the centre ray: the bottom edge of the
+    // light cone is what the wall top clips first.
+    const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
     const altRad = Math.atan2(heightAboveMount, dist);
     return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist,
       blockedBy: isRoofWall ? 'Parked roof' : ('Wall ' + (wallIndex+1)) };
@@ -1290,7 +1434,8 @@ function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
   } else {
     structureHeight = building.wallHeight;
   }
-  const heightAboveMount = structureHeight - mountHeightMm;
+  // Clear the whole beam, not just the centre ray.
+  const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
   const altRad = Math.atan2(heightAboveMount, dist);
   return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist, blockedBy: (side === building.rollDir) ? 'Parked roof' : (side + ' wall') };
 }
@@ -1413,7 +1558,11 @@ function getPointingScope(){
   if(n === 1){
     return {
       mx: getRorNsEwFromWalls().ew, my: getRorNsEwFromWalls().ns,
-      mountH: numCm('scope1MountH'),
+      // The visible "Mount RA/Dec intersection height above floor" field is the
+      // source of truth. It was not read at all - the height came from the
+      // hidden multi-telescope card and stayed at its default, so every horizon
+      // angle ignored the value the user actually typed.
+      mountH: numCm('mountHeight'),
       mtype: mountType,
       axis: mountType === 'GEM' ? numGemAxis() : numAltAzAxis(),
       otaLen: num('otaLength'), otaAp: num('otaAperture')
@@ -1443,6 +1592,7 @@ document.getElementById('btnAltAz').addEventListener('click', () => setMountType
 function setMountType(t){
   const prev = mountType;
   mountType = t;
+  if(typeof syncMountDiagram === 'function') syncMountDiagram();
   // The L-500 ships on piers in 12" steps starting at 12", so an Alt/Az defaults
   // to the shortest. Remember the equatorial pier so switching back restores it.
   if(t !== prev){
@@ -1644,7 +1794,7 @@ function getScopeList(){
     name: 'Telescope 1',
     mx: getRorNsEwFromWalls().ew,
     my: getRorNsEwFromWalls().ns,
-    mountH: numCm('scope1MountH'),
+    mountH: numCm('mountHeight'),
     // Dual saddle puts the outer tube `lateral` off-axis, so the swept reach
     // grows. Take the larger tube and add the offset, keeping the same
     // conservative linear form already used for the single-OTA case.
@@ -2366,7 +2516,7 @@ document.getElementById('btnResetDefaults').addEventListener('click', function()
 const SAVE_FIELD_IDS = [
   'bWidth','bLength','wallHeight','mountHeight','distN','distS','distE','distW',
   'rollDir','roofTravel','roofHeight','eaveHeight','roofPitchRise','roofPitchRun',
-  'gemAxis','decHoriz','otaLength','otaAperture','guideDist','hasDualSaddle','lateralDist','ota2Length','ota2Aperture',
+  'gemAxis','decHoriz','otaLength','otaAperture','otaOuterDia','guideDist','hasDualSaddle','lateralDist','ota2Length','ota2Aperture',
   'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
   'useCustomWalls','useExtraWalls','rollWallIndex','customRoofSpan',
@@ -3470,6 +3620,220 @@ if (typeof module !== 'undefined' && module.exports) {
 }
 
 let l500Mount = null;
+// ===========================================================================
+// Mount library
+// ---------------------------------------------------------------------------
+// Dimensions are stored in INCHES, in the mount's own frame:
+//
+//   GEM (equatorial)
+//     A  pier flange  -> RA axis pivot            (vertical)
+//     B  RA pivot     -> Dec axis, ALONG the polar axis
+//     C  Dec axis     -> optical axis             (the GEM axis length)
+//     I  counterweight shaft length, 0 if not published
+//
+//   Because B lies along the polar axis, the Dec axis height above the pier
+//   depends on latitude:   headHeight = A + B * sin(latitude)
+//   That is why selecting a preset re-applies itself when latitude changes.
+//
+//   Alt/Az (fork / direct drive)
+//     H  pier flange -> altitude axis
+//
+// PROVENANCE: these figures are community-measured values circulated in
+// amateur observatory planning spreadsheets, not manufacturer-published
+// specifications. They are a starting point - every field they fill stays
+// editable, and anyone building to tight clearances should measure their own
+// mount or confirm against the maker's drawings. Marked entries are flagged
+// in the UI. No manufacturer endorses or is affiliated with this tool.
+// ===========================================================================
+const MOUNT_LIBRARY = [
+  // A plausible mid-size equatorial, so the tool has sensible geometry out of
+  // the box without claiming to be any particular manufacturer's mount.
+  { id:'generic',   name:'Generic equatorial',       type:'GEM',
+    A:5.5, B:11.0, C:8.0, I:20.0, generic:true },
+  { id:'custom',    name:'Measure my own',           type:null,
+    note:'Enter your own dimensions below. Anything left at 0 is not changed.' },
+
+  // ---- German equatorial -------------------------------------------------
+  { id:'a200',      name:'Astro-Physics A200',        type:'GEM',
+    A:11.45, B:8.0,  C:10.5,   I:30.5, verify:true },
+  { id:'ap1100',    name:'Astro-Physics AP1100',      type:'GEM',
+    A:5.3,   B:10.6, C:6.75,   I:0 },
+  { id:'ap1600',    name:'Astro-Physics AP1600',      type:'GEM',
+    A:5.804, B:14.9, C:9.3125, I:0 },
+  { id:'ap3600',    name:'Astro-Physics AP3600',      type:'GEM',
+    A:12.5,  B:13.2, C:11.3125,I:0 },
+  { id:'pmme',      name:'Paramount ME',              type:'GEM',
+    A:3.25,  B:13.4, C:9.0,    I:0 },
+  { id:'pmmeii',    name:'Paramount MEII',            type:'GEM',
+    A:4.8,   B:14.5, C:11.5,   I:0 },
+  { id:'pmmx',      name:'Paramount MX',              type:'GEM',
+    A:4.825, B:12.5, C:9.5,    I:0 },
+
+  // ---- Alt/Az direct drive ----------------------------------------------
+  { id:'l350',      name:'PlaneWave L-350',           type:'AltAz', H:33.538 },
+  { id:'l500',      name:'PlaneWave L-500',           type:'AltAz', H:42.706, verify:true },
+  { id:'l600',      name:'PlaneWave L-600',           type:'AltAz', H:52.7 },
+];
+
+function mountById(id){
+  for(let i = 0; i < MOUNT_LIBRARY.length; i++){
+    if(MOUNT_LIBRARY[i].id === id) return MOUNT_LIBRARY[i];
+  }
+  return MOUNT_LIBRARY[0];
+}
+
+// Dec-axis height above the pier flange for a GEM, at this latitude.
+function gemHeadHeightIn(m, latDeg){
+  return m.A + m.B * Math.sin(Math.max(-89.9, Math.min(89.9, latDeg)) * Math.PI / 180);
+}
+
+// Altitude-axis height for the selected Alt/Az mount, in mm.
+// Falls back to the model's own default when no preset is active.
+function selectedAltAxisMm(defaultMm){
+  const m = mountById(typeof selectedMountId !== 'undefined' ? selectedMountId : 'generic');
+  return (m.type === 'AltAz' && m.H) ? m.H * 25.4 : defaultMm;
+}
+
+const MOUNT_FIELD_SET = {
+  head: inches => { const e=document.getElementById('rorMountHead');
+                    if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
+  gem:  inches => { const e=document.getElementById('gemAxis');
+                    if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
+};
+
+
+// A GEM preset's Dec-axis height depends on latitude, so re-apply it when the
+// site latitude changes - otherwise the mount head height silently goes stale.
+(function(){
+  const el = document.getElementById('lat');
+  if(el) el.addEventListener('input', function(){
+    if(typeof selectedMountId !== 'undefined' && selectedMountId !== 'generic'){
+      applyMountPreset(false);
+    }
+  });
+})();
+
+// Generic ("measure my own") inputs feed the same model the presets use, so a
+// measured mount and a library mount are treated identically downstream.
+function genericDims(){
+  const g = id => { const e = document.getElementById(id); return e ? num(id) : 0; };
+  return { A:g('genA'), B:g('genB'), C:g('genC'), I:g('genI'), H:g('genH') };
+}
+function applyGenericDims(){
+  if(selectedMountId !== 'custom') return;
+  const d = genericDims();
+  const lat = num('lat');
+  if(mountType === 'GEM'){
+    if(d.A > 0 || d.B > 0) MOUNT_FIELD_SET.head(d.A + d.B * Math.sin(lat * Math.PI / 180));
+    if(d.C > 0) MOUNT_FIELD_SET.gem(d.C);
+  } else {
+    if(d.H > 0) MOUNT_FIELD_SET.head(d.H);
+  }
+  compute();
+}
+function syncMountDiagram(){
+  const isGem = (mountType === 'GEM');
+  const g = document.getElementById('mountDiagramGEM');
+  const a = document.getElementById('mountDiagramAltAz');
+  if(g) g.style.display = isGem ? 'block' : 'none';
+  if(a) a.style.display = isGem ? 'none' : 'block';
+  // The dimension boxes are always visible so they can be read against the
+  // diagram; they only become editable when you are measuring your own mount.
+  const gf = document.getElementById('mountGenericFields');
+  if(gf) gf.style.display = 'block';
+  const editable = (selectedMountId === 'custom');
+  ['genA','genB','genC','genI','genH'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.readOnly = !editable;
+    el.style.opacity = editable ? '1' : '0.72';
+    el.style.cursor  = editable ? 'auto' : 'not-allowed';
+  });
+  const note = document.getElementById('mountDimNote');
+  if(note) note.textContent = editable
+    ? 'Measure against the diagram above. Anything left at 0 is not changed.'
+    : 'Shown for reference. Choose "Measure my own" to enter your own figures.';
+  const gg = document.getElementById('mountGenericGEM');
+  const ga = document.getElementById('mountGenericAltAz');
+  if(gg) gg.style.display = isGem ? 'block' : 'none';
+  if(ga) ga.style.display = isGem ? 'none' : 'block';
+}
+['genA','genB','genC','genI','genH'].forEach(function(id){
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('input', applyGenericDims);
+});
+
+// ---- Mount System card ----------------------------------------------------
+let selectedMountId = 'generic';
+
+function initMountPresets(){
+  const sel = document.getElementById('mountPreset');
+  if(!sel) return;
+  sel.innerHTML = '';
+  MOUNT_LIBRARY.forEach(m => {
+    const o = document.createElement('option');
+    o.value = m.id;
+    o.textContent = m.name + (m.type === 'GEM' ? '  (equatorial)' : m.type === 'AltAz' ? '  (alt/az)' : '');
+    sel.appendChild(o);
+  });
+  sel.value = selectedMountId;
+  sel.addEventListener('change', () => { selectedMountId = sel.value; applyMountPreset(true); });
+  applyMountPreset(false);
+}
+
+// Push the preset's geometry into the input fields. Called again whenever the
+// latitude changes, because a GEM's Dec-axis height depends on it.
+function applyMountPreset(userChanged){
+  const m = mountById(selectedMountId);
+  const info = document.getElementById('mountPresetInfo');
+  const warn = document.getElementById('mountPresetVerify');
+  if(!info) return;
+
+  if(m.type === null){
+    info.innerHTML = m.note;
+    warn.style.display = 'none';
+    syncMountDiagram();
+    applyGenericDims();
+    return;
+  }
+
+  const lat = num('lat');
+  if(m.type === 'GEM'){
+    if(userChanged && typeof setMountType === 'function') setMountType('GEM');
+    const setDim = (id,v) => { const e=document.getElementById(id); if(e) e.value = v.toFixed(2); };
+    setDim('genA', m.A); setDim('genB', m.B); setDim('genC', m.C); setDim('genI', m.I || 0);
+    const headIn = gemHeadHeightIn(m, lat);
+    MOUNT_FIELD_SET.head(headIn);
+    MOUNT_FIELD_SET.gem(m.C);
+    info.innerHTML =
+      'Pier flange to RA pivot <b>' + m.A.toFixed(2) + '&Prime;</b> &middot; ' +
+      'RA pivot to Dec axis along the polar axis <b>' + m.B.toFixed(2) + '&Prime;</b> &middot; ' +
+      'Dec axis to optical axis <b>' + m.C.toFixed(3) + '&Prime;</b>' +
+      (m.I ? ' &middot; counterweight shaft <b>' + m.I.toFixed(1) + '&Prime;</b>' : '') +
+      '<br>At ' + lat.toFixed(1) + '&deg; latitude the Dec axis sits <b>' + headIn.toFixed(2) +
+      '&Prime;</b> above the pier flange, so that is what the mount head height is set to. ' +
+      'It follows the latitude because dimension B lies along the polar axis.';
+  } else {
+    if(userChanged && typeof setMountType === 'function') setMountType('AltAz');
+    const setDimH = (id,v) => { const e=document.getElementById(id); if(e) e.value = v.toFixed(2); };
+    setDimH('genH', m.H);
+    MOUNT_FIELD_SET.head(m.H);
+    info.innerHTML =
+      'Pier flange to altitude axis <b>' + m.H.toFixed(3) + '&Prime;</b> (' +
+      (m.H * 25.4).toFixed(0) + '&nbsp;mm). Direct drive, so there is no counterweight and no ' +
+      'declination-axis offset.';
+  }
+
+  syncMountDiagram();
+  warn.style.display = m.verify ? 'block' : 'none';
+  if(m.verify){
+    warn.textContent = '\u26a0 This entry comes from community measurements rather than a ' +
+      'published specification, and sources for it disagree. Measure your own mount before ' +
+      'building to tight clearances.';
+  }
+  if(userChanged) compute();
+}
+
 let three = null;
 let gemMount = null;
 function toThree(v, scale){ return new THREE.Vector3(v[0]*scale, v[2]*scale, -v[1]*scale); }
@@ -4038,6 +4402,9 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
         if(!l500Mount){
           l500Mount = createL500Mount(THREE, {
             mode:'altaz', detail:'low', shading:'lit', upAxis:'y',
+            // Altitude-axis height from the selected mount preset, falling back
+            // to the model's own default when none is chosen.
+            altAxisHeight: selectedAltAxisMm(820),
             pierHeight:_pierMm, pierDiameter:_pierDmm,
             otaLength:_otaLmm, otaAperture:_otaAmm
           });
@@ -4418,6 +4785,7 @@ function syncOpticalSubFields(){
 syncOpticalSubFields();
 document.getElementById('roofPitchRise').addEventListener('input', compute);
 document.getElementById('roofPitchRun').addEventListener('input', compute);
+initMountPresets();
 compute();
 // Apply initial imperial unit labels
 refreshUnitLabels();

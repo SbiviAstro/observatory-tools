@@ -127,6 +127,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="dome-calculator.html">Dome Calculator</a>
     <a href="ror-calculator.html">Roll-Off-Roof Calculator</a>
     <a href="overview.html">Overview</a>
+    <a href="horizon-guide.html">Horizon Guide</a>
     <a href="help.html">Help</a>
     <a href="changelog.html">Changelog</a>
     <a href="license.html">License</a>
@@ -134,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.00.021</span>
+  <span class="nav-version">v7.02.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -207,6 +208,19 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dual Saddle (side-by-side OTAs)</h2>
 <p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
 <p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
+
+<h2>Swing Clearance</h2>
+<p>Swing clearance is driven by the tube body, so the Optical System card asks for the OTA's <strong>outer diameter</strong> as well as its clear aperture. Left at 0 it is estimated at 1.3&times; the aperture, roughly right for a CDK once rings and dovetail are included &mdash; but if you are building to tight clearance, measure across your own tube and saddle and enter it.</p>
+<p>The swept radius is the hypotenuse of how far the tube reaches along the optical axis and how far its far corner sits across it. Wall and roof limits include the aperture radius, so the whole light cone clears rather than just the centre ray.</p>
+
+<h2>Mount System</h2>
+<p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>
+<p>An equatorial's declination axis sits at <em>A + B &times; sin(latitude)</em> above the pier flange, since dimension B runs along the polar axis. Presets re-apply when you change latitude so the figure stays right for your site.</p>
+<p class="note">Preset dimensions are community measurements, not manufacturer specifications, and every field they fill remains editable. Where sources disagree the card says so. Measure your own mount before building to tight clearances.</p>
+
+<h2>Measuring your own mount</h2>
+<p>Select <strong>Measure my own</strong> and the card lets you type into the dimension boxes beside the labelled diagram. <strong>Generic equatorial</strong> is a plausible mid-size mount for getting started; picking any library mount fills the same boxes read-only so you can read its geometry against the diagram. Measure <b>A</b> vertically from the pier flange to the RA pivot, <b>B</b> from that pivot to the declination axis <em>along the polar axis</em>, and <b>C</b> from the declination axis across to the optical axis. <b>I</b>, the counterweight shaft, is optional. For an alt/az mount there is a single measurement, <b>H</b>, from the pier flange to the altitude axis.</p>
+<p>Because B runs along the polar axis, the declination axis sits at <em>A + B &times; sin(latitude)</em> above the flange, so the figure follows your site. Any box left at 0 leaves the corresponding value alone.</p>
 
 <h2>Mount Types</h2>
 <p class="note">Selecting Alt/Az sets the pier height to 12&Prime;, the shortest PlaneWave offers for the L-500 (piers come in 12&Prime; steps up to 48&Prime;). Your equatorial pier height is restored if you switch back.</p>
