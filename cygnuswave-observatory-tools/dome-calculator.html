@@ -223,7 +223,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.29.000</span>
+    flex-shrink:0;">v7.29.001</span>
 </div>
 <div class="wrap">
   <header>
@@ -927,6 +927,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
+
+// A local timestamp for filenames: 2026-07-28_1432. Local rather than UTC so
+// the name matches the clock the person was looking at when they saved, and
+// ordered largest unit first so files sort chronologically by name.
+function fileStamp(){
+  const d = new Date(), p = n => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate())
+       + '_' + p(d.getHours()) + p(d.getMinutes());
+}
 
 // Total tube length including the dew shield. The shield is part of what sweeps
 // and part of what can foul a shutter, so it counts toward length rather than
@@ -4735,7 +4744,7 @@ function saveSetup(){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'dome-geometry-setup.json';
+  a.download = 'dome-geometry-setup_' + fileStamp() + '.json';
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);

@@ -165,7 +165,16 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.29.000 — Current</div>
+<div class="card"><div class="eyebrow">v7.29.001 — Current</div>
+<p><strong>Saved files now carry the date and time they were saved.</strong> Every save used the same filename, so a second one landed as <code>&hellip;setup(1).json</code> and a folder of them told you nothing about which was which.</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><code>dome-geometry-setup_2026-07-28_1909.json</code></li>
+  <li><code>ror-observatory-setup_2026-07-28_1909.json</code></li>
+  <li><code>ror-horizon-profile_2026-07-28_1909.hrz</code></li>
+</ul>
+<p>Year first and the local clock rather than UTC: year-first so a folder sorts into chronological order by name, local so the stamp matches the time you were looking at when you saved.</p></div>
+
+<div class="card"><div class="eyebrow">v7.29.000</div>
 <p><strong>Sky-Watcher HEQ5 Pro, EQ6-R Pro, AZ-EQ6-GT, EQ8-R Pro and CQ350 Pro added</strong> &mdash; named and recognised, but with no geometry. Sky-Watcher publish capacities, saddle types and shaft diameters, not axis dimensions. Selecting one changes nothing, and the card says so and tells you what to measure.</p>
 <p><strong>The mount list is now grouped by how much is actually known</strong>, because it had to be. With 27 entries, more mounts are named than dimensioned, and a flat list made a placeholder look identical to a fully specified mount:</p>
 <ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
