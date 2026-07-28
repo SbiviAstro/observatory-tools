@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Privacy Policy — CygnusWave Observatory Tools</title>
+<title>License — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.02.000</span>
+  <span class="nav-version">v7.15.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -148,20 +148,158 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="wrap">
 
-<div class="eyebrow" style="margin-top:32px;">Privacy</div>
-<h1>Privacy Policy</h1>
-<div class="status-chip">✓ These tools collect no data about you</div>
-<h2>What we collect</h2>
-<p><strong>Nothing.</strong> Both calculators run entirely in your browser. No measurements, settings, or values you enter are sent to any server. There are no accounts, no login, no analytics, no tracking scripts, no cookies set by these pages.</p>
-<h2>What stays in your browser</h2>
-<p>When you use Save Setup, the resulting JSON file is created within your browser and downloaded directly to your device — nothing touches a server at any point. When you load a setup file, it is read locally by your browser.</p>
-<h2>Third-party content</h2>
-<p>Both calculators load <strong>Three.js</strong> from the Cloudflare CDN (<code>cdnjs.cloudflare.com</code>). This is the only external network request either page makes. Loading a file from any CDN means Cloudflare's servers see the request, subject to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank">Cloudflare's own privacy policy</a>. The integrity of the loaded file is verified via a Subresource Integrity hash embedded in the page.</p>
-<h2>Hosting</h2>
-<p>These pages are served as static files. Depending on the hosting provider, standard web server logs (IP address, requested URL, timestamp, user-agent) may be retained by the host for operational purposes.</p>
-<h2>Contact</h2>
-<p>Questions about this policy: <a href="contact.html">contact us</a>.</p>
-<p><em>Last updated: July 2026.</em></p>
+<div class="eyebrow" style="margin-top:32px;">Open Source License</div>
+<h1>License</h1>
+<p>Both calculators are released under the <strong>Mozilla Public License 2.0 (MPL-2.0)</strong> — the same license used by <a href="https://nighttime-imaging.eu" target="_blank" rel="noopener noreferrer">NINA</a>, whose dome-sync algorithm is ported and used here.</p>
+<p>The MPL is a file-level copyleft license. If you modify and redistribute the calculator files themselves, you must release those specific files under the MPL too. You're free to use, study, and build on this software, and you can combine it with other code under different licenses without those files being affected.</p>
+<div class="card" style="border-color:#3d5c42;">
+  <div class="eyebrow">Summary</div>
+  <p><strong style="color:#7fd88f;">✓ You can</strong> use both tools freely, for any purpose.<br>
+  <strong style="color:#7fd88f;">✓ You can</strong> copy, modify, and redistribute them.<br>
+  <strong style="color:#7fd88f;">✓ You can</strong> use them as part of a larger project under a different license.<br>
+  <strong style="color:#e0685c;">✗ You cannot</strong> release a modified version of these specific files under a different license.<br>
+  <strong style="color:#e0685c;">✗ You cannot</strong> remove or alter this license notice.</p>
+</div>
+<h2>Third-party dependencies</h2>
+<p>Both calculators load <strong>Three.js r128</strong> from the Cloudflare CDN, licensed under the MIT License &copy; mrdoob and Three.js contributors. The SRI hash embedded in the script tag verifies the file's integrity at load time.</p>
+<h2>Mozilla Public License 2.0 — Full Text</h2>
+<div class="card">
+<pre>Mozilla Public License Version 2.0
+
+1. Definitions
+--------------
+1.1. "Contributor" means each individual or legal entity that creates,
+     contributes to the creation of, or owns Covered Software.
+1.2. "Contributor Version" means the combination of the Contributions of
+     others (if any) used by a Contributor and that particular
+     Contributor's Contribution.
+1.3. "Contribution" means Covered Software of a particular Contributor.
+1.4. "Covered Software" means Source Code Form to which the initial
+     Contributor has attached the notice in Exhibit A, the Executable
+     Form of such Source Code Form, and Modifications of such Source
+     Code Form, in each case including portions thereof.
+1.5. "Incompatible With Secondary Licenses" means (a) that the initial
+     Contributor has attached the notice described in Exhibit B to the
+     Covered Software; or (b) that the Covered Software was made
+     available under the terms of version 1.1 or earlier of the
+     License, but not also under the terms of a secondary license.
+1.6. "Executable Form" means any form of the work other than Source
+     Code Form.
+1.7. "Larger Work" means a work that combines Covered Software with
+     other material, in a separate file or files, that is not Covered
+     Software.
+1.8. "License" means this document.
+1.9. "Licensable" means having the right to grant, to the maximum extent
+     possible, whether at the time of the initial grant or subsequently,
+     any and all of the rights conveyed by this License.
+1.10. "Modifications" means any of the following: (a) any file in Source
+      Code Form that results from an addition to, deletion from, or
+      modification of the contents of Covered Software; or (b) any new
+      file in Source Code Form that contains any Covered Software.
+1.11. "Patent Claims" of a Contributor means any patent claim(s),
+      including without limitation, method, process, and apparatus
+      claims, in any patent Licensable by such Contributor that would be
+      infringed, but for the grant of the License, by the making, using,
+      selling, offering for sale, having made, importing, or transferring
+      either its Contributions or its Contributor Version.
+1.12. "Secondary License" means either the GNU General Public License,
+      Version 2.0, the GNU Lesser General Public License, Version 2.1,
+      the GNU Affero General Public License, Version 3.0, or any later
+      versions of those licenses.
+1.13. "Source Code Form" means the form of the work preferred for making
+      modifications.
+1.14. "You" (or "Your") means an individual or a legal entity exercising
+      rights under this License.
+
+2. License Grants and Conditions
+---------------------------------
+2.1. Grants — Each Contributor hereby grants You a world-wide,
+     royalty-free, non-exclusive license: (a) under intellectual
+     property rights Licensable by such Contributor to use, reproduce,
+     make available, prepare derivative works of, display, run, copy,
+     sell, distribute, and otherwise transfer either such Contributions
+     or the Contributor Version; and (b) under Patent Claims of such
+     Contributor to make, use, sell, offer for sale, have made, import,
+     and otherwise transfer either such Contributions or the Contributor
+     Version.
+2.2. Effective Date — The licenses granted in Section 2.1 become
+     effective on the date the Contributor first distributes such
+     Contribution.
+2.3. Limitations on Grant Scope — The licenses granted in this Section 2
+     are the only rights granted under this License. No additional
+     rights or licenses will be implied from the distribution or
+     licensing of Covered Software under this License.
+
+3. Responsibilities
+-------------------
+3.1. Distribution of Source Form — All distribution of Covered Software
+     in Source Code Form must be under the terms of this License.
+3.2. Distribution of Executable Form — If You distribute Covered
+     Software in Executable Form, you must also make it available in
+     Source Code Form.
+3.3. Distribution of a Larger Work — You may create and distribute a
+     Larger Work under terms of Your choice, provided that You also
+     comply with the requirements of this License for the Covered
+     Software.
+3.4. Notices — You may not remove or alter the substance of any license
+     notices contained within the Source Code Form of the Covered
+     Software.
+
+4. Inability to Comply Due to Statute or Regulation
+----------------------------------------------------
+If it is impossible for You to comply with any of the terms of this
+License due to statute, judicial order, or regulation, You must comply
+to the maximum extent possible and describe the limitations.
+
+5. Termination
+--------------
+5.1. The rights granted under this License will terminate automatically
+     if You fail to comply with any of its terms.
+5.2. If You initiate patent infringement litigation against any entity
+     asserting a patent infringement claim, the rights granted to You
+     by all Contributors shall terminate.
+
+6. Disclaimer of Warranty
+--------------------------
+Covered Software is provided under this License on an "as is" basis,
+WITHOUT WARRANTY OF ANY KIND. The entire risk as to quality and
+performance is with You.
+
+7. Limitation of Liability
+---------------------------
+Under no circumstances shall any Contributor be liable to You for any
+direct, indirect, special, incidental, or consequential damages.
+
+8. Litigation
+-------------
+Any litigation relating to this License may be brought only in the
+courts of a jurisdiction where the defendant maintains its principal
+place of business.
+
+9. Miscellaneous
+----------------
+This License represents the complete agreement concerning the subject
+matter hereof. If any provision is held unenforceable, it shall be
+reformed only to the extent necessary to make it enforceable.
+
+10. Versions of the License
+----------------------------
+10.1. Mozilla Foundation is the license steward.
+10.2. You may distribute the Covered Software under the terms of the
+      version under which You originally received the Covered Software,
+      or under any subsequent version published by the license steward.
+
+Exhibit A - Source Code Form License Notice
+-------------------------------------------
+  This Source Code Form is subject to the terms of the Mozilla Public
+  License, v. 2.0. If a copy of the MPL was not distributed with this
+  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+Exhibit B - "Incompatible With Secondary Licenses" Notice
+---------------------------------------------------------
+  This Source Code Form is "Incompatible With Secondary Licenses", as
+  defined by the Mozilla Public License, v. 2.0.</pre>
+</div>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.

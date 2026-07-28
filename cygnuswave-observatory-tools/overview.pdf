@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dome Calculator Manual — CygnusWave Observatory Tools</title>
+<title>Roll-Off-Roof Calculator Manual — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -149,77 +149,69 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <div class="wrap">
 
 <div class="eyebrow" style="margin-top:32px;">User Manual</div>
-<h1>Dome &amp; Mount Geometry → NINA Settings</h1>
-<p><a href="dome-calculator.html">→ Open the calculator</a> &nbsp;·&nbsp; <a href="help.html">← Back to Help</a></p>
+<h1>Roll-Off-Roof Observatory → Sky Coverage &amp; Horizon Planner</h1>
+<p><a href="ror-calculator.html">→ Open the calculator</a> &nbsp;·&nbsp; <a href="help.html">← Back to Help</a></p>
 
 <h2>Feature list</h2>
 <ul>
-  <li>NINA dome-sync geometry — ported directly from <code>DomeSynchronization.cs</code></li>
-  <li>Live azimuth and dome-opening offset for any HA/Dec target</li>
+  <li>Rectangular <strong>or</strong> fully custom 6-wall building footprint</li>
+  <li>Real wall-obstruction model — ray-to-wall distance from the mount's actual position</li>
+  <li>Parked roof modeled as its own obstruction — flat, peaked (gable), or wedge (mono-slope)</li>
+  <li>Local terrain horizon, layered on top of wall/roof obstruction</li>
   <li>GEM and Alt/Az/Fork mount support with meridian-flip pier-side handling</li>
-  <li>Dual-saddle (side-by-side OTA) support with lateral axis length</li>
-  <li>Guide-scope correction</li>
-  <li>Shutter aperture clearance check — ghosted aperture circle on the dome surface</li>
-  <li>Full-sky coverage sweep showing which sky regions the shutter can and cannot reach</li>
-  <li>Local terrain horizon layered on top of dome geometry</li>
-  <li>Exportable horizon profile (.hrz)</li>
-  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place with 1/16" fraction hints; OTA optics always in mm</li>
-  <li><strong>Three-column layout</strong> — data input left, telescope pointing centre, 3D preview right</li>
-  <li><strong>Four-wall measurement workflow</strong> (Step 1) — enter N/S/E/W wall-to-mount distances; NS/EW offset derived automatically as (distS−distN)/2 and (distW−distE)/2</li>
-  <li><strong>Optical System card</strong> — guide scope, dual-saddle, and OTA dimensions grouped together</li>
-  <li><strong>Sky Coverage</strong> as a full-width collapsible row above the three-column layout</li>
-  <li>Save/Load JSON setup, dark/light mode, Reset to Defaults</li>
+  <li>Automatic pointing constraints</li>
+  <li>Full-sky coverage sweep, stretched to your building's actual width/length aspect ratio</li>
+  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place</li>
+  <li><strong>Pier and mount 3D model</strong> — red pier cylinder, steel flange, latitude-angle wedge mount head, and orange RA/Dec pivot in the 3D preview</li>
+  <li>Exportable horizon profile (.hrz) — walls, roof, and terrain combined</li>
+  <li>Save/Load, dark/light mode, Reset to Defaults</li>
 </ul>
 
-<h2>What this tool does</h2>
-<p>NINA can slave your dome to your telescope, but only if it knows precisely where your mount sits relative to the dome's center. Getting those numbers right by hand is easy to get wrong. This tool converts either a physical measurement or values you already have into the exact signed fields NINA's Options → Dome tab expects, then shows you live whether your shutter will actually clear the OTA at any given pointing.</p>
+<h2>Units</h2>
+<p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all building, roof, mount position, height, axis offset, pier gap, and custom wall fields in place. <strong>OTA tube length and aperture always remain in mm</strong> regardless of the unit setting — telescope optics are always specified in millimetres.</p>
+<p>In imperial mode each field shows a fractional-inch hint (e.g. <code>13'1 1/2"</code>) beside it, updating live as you type. The summary chips at the top of the page (Footprint, Wall Height, Roof Travel, Mount Offset) also display in the chosen unit.</p>
 
-<h2>Getting started</h2>
-<p><strong>Save Setup / Load Setup</strong> exports everything as a JSON file, or restores it. <strong>Reset to Defaults</strong> reloads with every field back to its starting value. The <strong>status banner</strong> just below the title tells you at a glance whether the current pointing is valid: green for everything clears, amber for "pointing was adjusted," red for a real problem.</p>
+<h2>Building &amp; Mount Position</h2>
+<p>Enter the building's width, length and wall height, then locate the mount by measuring from each wall to directly below the RA/Dec pivot on the floor &mdash; North, South, East and West. The signed offsets are derived automatically:</p>
+<ul>
+  <li><strong>N/S offset</strong> = (South &minus; North) &divide; 2 &mdash; positive = North of centre</li>
+  <li><strong>E/W offset</strong> = (West &minus; East) &divide; 2 &mdash; positive = East of centre</li>
+</ul>
+<p>Both are shown in orange below the fields and update as you type. Because the building size is also entered, the four measurements are over-determined: N+S should equal the building's North/South span and E+W its East/West span. If they disagree, a warning appears naming the conflict. The offset itself comes from the difference, so it stays correct even when the sums are off.</p>
+<p>Building width, length, wall height, and mount pivot position — height above floor, and N/S and E/W offset from the building's center. All in centimetres.</p>
 
-<h2>Step 1 — Mount Position</h2>
-<p><strong>"I'll measure my dome"</strong> — plumb-bob the dome's true center and the mount's RA/Dec intersection down to the floor, mark them, then measure heights and the straight-line N/S and E/W distance between the marks (true north, not magnetic).</p>
-<p><strong>"I already have my NINA values"</strong> — type in the signed values directly.</p>
+<h2>Building Shape</h2>
+<p>For anything other than a simple rectangle — angled corners, an extension, an irregular footprint — turn on <strong>"Use a custom wall shape"</strong> to describe the building as up to 6 walls, each with its own angle from North and distance from center.</p>
 
-<h2>Step 2 — Dome &amp; Rotator</h2>
-<p>Dome radius (center to rim), shutter width (straight-line, not arc), rotator precision / Azimuth Tolerance, and wall height (affects 3D preview only, not the NINA math).</p>
+<h2>Roll-Off Roof</h2>
+<p>Pick which wall the roof rolls off past and how far. Three roof shapes:</p>
+<ul>
+  <li><strong>Flat</strong> — one constant height. Default 6".</li>
+  <li><strong>Peaked (gable)</strong> — ridge parallel to travel. Enter a pitch ratio (rise:run, default 1:6); the ridge height is computed automatically from the pitch and building span and shown as an orange readout. Eave height is always the wall height.</li>
+  <li><strong>Wedge (mono-slope)</strong> — a single slope from low to high across the roof's full width. Defaults to 12" low side, 36" high side. The most common real-world shape for a roll-off roof.</li>
+</ul>
 
-<h2>Step 3 — Optical Axis Offset</h2>
-<p><strong>GEM</strong> — GEM Axis Length, measured with the mount slewed 90° from the meridian. <strong>Alt/Az or Fork</strong> — Dec Horizontal Offset. <strong>Dual saddle</strong> reveals the Lateral Axis Length field and lets you choose which OTA NINA tracks.</p>
+<h2>Pier Layout &amp; Floor Plan</h2>
+<p>A scaled floor plan of the building sits above the Telescopes card. Click anywhere inside the building outline to place a telescope pier at that position. Drag to reposition. Each enabled telescope appears as a colour-coded dot with a faint dashed swing-radius circle. The NS/EW number fields in the Telescopes card stay in sync — move a pier and the numbers update, or type in a number and the dot moves. Use the floor plan for initial placement and the number fields for fine-tuning.</p>
 
-<h2>Step 4 — Telescope Pointing</h2>
-<p></p>
+<h2>Telescopes</h2>
+<p>Each telescope is on its own independent mount. Telescope 1 uses the mount type and optics from the Optical Axis card, but its own position (NS/EW from building centre, in cm) and mount height defined in the Telescopes card. Enable Telescopes 2–4 for additional mounts — each gets its own position, mount height, mount type (GEM/Alt-Az), GEM axis length or Dec horizontal offset, tube length (mm), and aperture (mm). Note: OTA tube length and aperture are always in mm even in imperial mode.</p>
+<p>Use the <strong>Pointing telescope</strong> dropdown in Step 4 to choose which mount drives the live pointing preview, obstruction check, and sky coverage sweep.</p>
 
-<h2>Local Horizon</h2>
-<p>Flat minimum altitude, or a full custom profile loaded from a <code>.hrz</code> file (same format as Stellarium). Shown in the 3D view as a wireframe skyline.</p>
+<h2>Swing Clearance</h2>
+<p>Each telescope's swing radius is checked independently at its own mount position against the nearest wall, floor, and ceiling — since each is on a separate mount, their clearance envelopes don't share a pivot. A separate check catches telescopes hitting each other: two mounts collide when the distance between their pivots is less than the sum of their swing radii plus the minimum walkway gap you specify.</p>
+<p>The 3D view shows a wireframe sphere per telescope at its actual swing radius. The selected telescope's OTA tube tracks the live pointing direction; other scopes point straight up in a neutral pose.</p>
 
 <h2>Sky Coverage</h2>
-<p>Collapsed by default. Sweeps the entire sky for both pier sides side by side.</p>
-<div class="table-wrap">
-<table>
-  <tr><td style="color:#7fd88f;">🟢 Green</td><td>Shutter clears</td></tr>
-  <tr><td style="color:#e0685c;">🔴 Red</td><td>Vignettes or misses the dome</td></tr>
-  <tr><td style="color:#b5713f;">🟤 Brown</td><td>Below your local horizon</td></tr>
-  <tr><td style="color:#8b93a3;">⚪ Grey</td><td>Mount geometry invalid there</td></tr>
-</table>
-</div>
+<p>Same concept as the dome tool. The plot is stretched to your building's actual width/length ratio. Includes an <strong>Export as Horizon File (.hrz)</strong> button.</p>
 
-<h2>Reading the sky coverage</h2>
-<p>Below the plots, <em>Why this coverage</em> accounts for the sky you cannot reach. Your local horizon is reported first and set aside, since no dome recovers it. What remains is attributed either to the shutter &mdash; with the compass sectors and altitudes affected &mdash; or to the mount, where the optical axis misses the dome entirely.</p>
-<p>If the aperture is wider than the slit, no pointing can clear and the panel says so. If the slit is wider and you are still losing sky, the cause is the aperture swinging off the dome centre line, and moving the mount toward the centre is the fix rather than a larger slit.</p>
+<h2>Dual Saddle (side-by-side OTAs)</h2>
+<p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
+<p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
 
-<h2>Dome size</h2>
-<p>Enter the dome's <strong>diameter</strong> &mdash; rim to rim across the base, which is what manufacturers quote and what you can measure directly. The radius every calculation works from is shown immediately beneath it, so you can check the halving rather than take it on trust.</p>
-
-<h2>The NINA values</h2>
-<p>The Options &rarr; Dome panel is <strong>always in millimetres</strong>, whichever units you are working in, because that is what NINA's fields expect. Copy them across unaltered. Your measurement inputs still follow the unit toggle as normal.</p>
-
-<h2>Setup check</h2>
-<p>Beneath the status banner, a four-point summary explains why the setup does or does not hold together: the pointing model, the pier height, what your walls cost you at the horizon, and how far off centre the mount sits. Each line states the reason rather than just a verdict, and the heading takes the worst of the four. Every figure is one the tool has already computed elsewhere, so the summary and the detail cannot disagree.</p>
-
-<h2>Is the pier the right height?</h2>
-<p>The Mount System card judges your pier against the target the classic pier-height worksheets use: the declination axis level with the dome's centre height. At that height the volume your tube sweeps is concentric with the hemisphere, which is the condition that needs the smallest dome.</p>
-<p>The verdict says how far off you are and which way, gives the pier height that would centre it, and states what the miss costs in dome radius. If the optics will not fit the dome at any pier height, it says that too.</p>
+<h2>Swing Clearance</h2>
+<p>Swing clearance is driven by the tube body, so the Optical System card asks for the OTA's <strong>outer diameter</strong> as well as its clear aperture. Left at 0 it is estimated at 1.3&times; the aperture, roughly right for a CDK once rings and dovetail are included &mdash; but if you are building to tight clearance, measure across your own tube and saddle and enter it.</p>
+<p>The swept radius is the hypotenuse of how far the tube reaches along the optical axis and how far its far corner sits across it. Wall and roof limits include the aperture radius, so the whole light cone clears rather than just the centre ray.</p>
 
 <h2>OTA offset</h2>
 <p>The tube is usually balanced so its centre sits on the declination axis, but not always. <strong>OTA offset</strong> is the distance between the centre of the whole assembly &mdash; tube plus dew shield &mdash; and that axis, measured along the tube. Positive slides it toward the aperture, negative toward the focuser. Leave it at 0 if the assembly is balanced on the axis.</p>
@@ -227,6 +219,16 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Dew shield</h2>
 <p>The Optical System card takes a dew shield length. It is added to the tube and drawn ahead of it in a lighter tone. It counts toward the swept reach, because a shield is the part most likely to catch a wall or a shutter edge. Leave it at 0 if you do not use one.</p>
+
+<h2>Setup check</h2>
+<p>Under the status banner, four lines explain why the setup does or does not hold together: the pointing model, swing clearance, what the walls cost you against what your terrain already blocks, and how far off centre the mount sits. Each states the reason rather than just a verdict, and the heading takes the worst of the four.</p>
+<p>The <strong>swing clearance</strong> line is the one to read before building. It compares the radius your tube sweeps against the tightest obstruction &mdash; nearest wall, floor, or the parked roof &mdash; names which is tightest, and gives the margin. Under about six inches it says so is worth measuring on site. If the tube would strike, it says which obstruction and by how much.</p>
+
+<h2>Reading the sky coverage</h2>
+<p>Beneath the plot, the losses are attributed structure by structure, so you can see which wall costs what, in which direction, and to what altitude. Raising the mount lifts every limit at once; lowering a single wall only helps on that side.</p>
+
+<h2>Two telescopes</h2>
+<p>With <strong>Dual saddle</strong> enabled, OTA 2 is described with the same figures as the first &mdash; tube length, clear aperture, outer diameter and offset along the tube. Each tube's reach is worked out separately and the larger governs the swing clearance, rather than mixing the longest length with the widest aperture from different tubes. A guide scope or wide-field refractor riding alongside can easily be the tube that reaches furthest.</p>
 
 <h2>Mount System</h2>
 <p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>
@@ -238,26 +240,22 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Because B runs along the polar axis, the declination axis sits at <em>A + B &times; sin(latitude)</em> above the flange, so the figure follows your site. Any box left at 0 leaves the corresponding value alone.</p>
 
 <h2>Mount Types</h2>
-<p class="note">Selecting Alt/Az sets the pier height to 6&Prime;. The L-500 carries its altitude axis 32.3&Prime; above the pier flange, so a 6&Prime; pier puts that axis level with the 38&Prime; dome springline &mdash; the swing sphere then sits concentric with the hemisphere, which needs the smallest dome. Your equatorial pier height is restored if you switch back.</p>
-<p><strong>Equatorial (GEM)</strong> draws a German equatorial with a latitude-tilted RA axis and counterweight shaft. <strong>Alt/Az or Fork</strong> draws a PlaneWave L-500 direct drive instead &mdash; wide base drum, single offset arm and altitude drive drum. Both are driven from the same calculated sky position, so the picture always agrees with the numbers.</p>
+<p class="note">Selecting Alt/Az sets the pier height to 12&Prime;, the shortest PlaneWave offers for the L-500 (piers come in 12&Prime; steps up to 48&Prime;). Your equatorial pier height is restored if you switch back.</p>
+<p><strong>Equatorial (GEM)</strong> draws a German equatorial: latitude-tilted RA axis, RA and Dec rotors, and a counterweight shaft. Swing clearance is measured from the RA axis and includes the counterweight sweep.</p>
+<p><strong>Alt/Az or Fork</strong> draws a PlaneWave L-500 direct drive: wide base drum, single offset arm and altitude drive drum. There is no counterweight, and the tube pivots about the altitude axis near its balance point, so the swept radius is the longer half of the tube plus the aperture radius &mdash; floored at the L-500's published 650.748&nbsp;mm swing-through. This is materially smaller than the equatorial figure, so an alt/az is not asked to clear a swept volume it never occupies.</p>
 
 <h2>The 3D Mount Model</h2>
 <p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>
-<p>With <strong>dual saddle</strong> enabled, both tubes are drawn side by side, separated by the lateral axis length you enter. The ghost aperture circles projected on the dome surface, the shutter clearance checks and the hit markers all continue to work for each tube independently.</p>
 <p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
 
-<h2>3D Preview</h2>
-<p>Drag to orbit, scroll to zoom. The shutter turns red whenever it doesn't clear. Toggle the local horizon and celestial equator from the preview header.</p>
-
-<h2>NINA · Options → Dome panel</h2>
-<p>The final answer — <strong>Copy NINA Settings</strong> copies all eight values to your clipboard as clean, pasteable text.</p>
+<h2>Telescope Pointing &amp; 3D Preview</h2>
+<p>Same Hour Angle/Dec or Alt/Az controls, jog pad, and pier-side handling as the dome tool. The 3D view shows the actual building shape, the parked roof, cardinal directions, the celestial equator, and wireframe swing-radius spheres per telescope (red if any fails to clear).</p>
 
 <h2>Tips</h2>
 <ul>
-  <li>The status banner is the fastest sanity check — green means done, otherwise it tells you exactly which problem to fix.</li>
-  <li>Run Sky Coverage before your first real night out, especially with a dual-saddle setup.</li>
-  <li>Save your setup once it's dialed in.</li>
-  <li>Wall height only affects the 3D preview, not the NINA math.</li>
+  <li>Run Swing Clearance early — it's a static check that only needs doing once per hardware configuration.</li>
+  <li>The parked roof's height matters — if it's on a raised track, it can end up taller than the walls.</li>
+  <li>Export the horizon file once your building geometry is finalised, and load it into NINA or Stellarium.</li>
 </ul>
 
 <footer>

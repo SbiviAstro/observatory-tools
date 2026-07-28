@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Help — CygnusWave Observatory Tools</title>
+<title>FAQ — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.02.000</span>
+  <span class="nav-version">v7.15.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -148,28 +148,36 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="wrap">
 
-<div class="eyebrow" style="margin-top:32px;">Documentation</div>
-<h1>Help &amp; User Manuals</h1>
-<p>Full section-by-section walkthroughs for each calculator — what every field means, how the live checks work, and how to read the 3D preview.</p>
-<div class="grid-2" style="margin-top:20px;">
-  <div class="card">
-    <h2 style="margin-top:0;">Dome Calculator Manual</h2>
-    <p>Measurement worksheet, mount offset conventions, live dome-azimuth calculation, sky coverage sweep, meridian/celestial equator reference lines, and the local horizon model.</p>
-    <a class="btn" href="dome-manual.html">Read the Dome Manual →</a>
-  </div>
-  <div class="card">
-    <h2 style="margin-top:0;">Roll-Off-Roof Manual</h2>
-    <p>Building &amp; mount geometry, custom wall shapes, roof travel and roof-shape modeling, telescope swing-radius clearance, and the horizon-file export.</p>
-    <a class="btn" href="ror-manual.html">Read the ROR Manual →</a>
-  </div>
-</div>
-<h2>Quick tips — both tools</h2>
-<ul>
-  <li>The <strong>status banner</strong> at the top of each calculator is the fastest check — green means go, amber means something was auto-adjusted, red means look closer.</li>
-  <li>Both tools support <strong>Save Setup / Load Setup</strong> — export your configuration as a JSON file so you can pick up where you left off.</li>
-  <li>Both have a <strong>dark/light mode toggle</strong> in the header.</li>
-  <li>Nothing you enter is sent anywhere — both tools run entirely in your browser. See the <a href="privacy.html">Privacy Policy</a> for details.</li>
-</ul>
+<div class="eyebrow" style="margin-top:32px;">Frequently Asked Questions</div>
+<h1>FAQ</h1>
+<h2>General</h2>
+<div class="card"><h3>Are these tools free?</h3>
+<p>Yes. Both calculators are free to use, and the source code is open under the <a href="license.html">Mozilla Public License 2.0</a>.</p></div>
+<div class="card"><h3>Do I need to install anything?</h3>
+<p>No. Both tools run entirely in your browser. No installation, no account, no internet connection required after the page first loads (other than the initial Three.js CDN fetch, which is a ~600 KB file).</p></div>
+<div class="card"><h3>Will my data be saved between sessions?</h3>
+<p>Not automatically. Use <strong>Save Setup</strong> to export your configuration as a JSON file, then <strong>Load Setup</strong> to restore it. Both work entirely locally.</p></div>
+
+<h2>Dome Calculator</h2>
+<div class="card"><h3>Which version of NINA do these values work with?</h3>
+<p>The dome-azimuth math is ported from NINA's <code>DomeSynchronization.cs</code>. The field names and sign conventions in the Options → Dome tab have been stable across NINA 2.x and 3.x. If you're on an older or newer build and see unexpected behaviour, check that the field layout in NINA's Dome tab matches what the calculator describes.</p></div>
+<div class="card"><h3>My dome isn't tracking correctly even with these values — what should I check?</h3>
+<p>The most common causes: (1) the mount's RA/Dec pivot height was measured to the wrong point — it should be the true intersection of the RA and Dec axes; (2) the N/S or E/W sign is inverted — try flipping the sign of the offset that's largest; (3) the dome radius is to the inner surface of the shell, not to the outer edge or the track.</p></div>
+<div class="card"><h3>The sky coverage plot shows red in places I'd expect to be fine — why?</h3>
+<p>The most common cause is the OTA aperture being set wider than the shutter. The shutter check looks at whether the full aperture footprint fits inside the shutter opening. Check your shutter width measurement — it's the straight-line width of the gap, not the arc length along the dome.</p></div>
+
+<h2>Roll-Off-Roof Calculator</h2>
+<div class="card"><h3>My building isn't a rectangle — can I still use this?</h3>
+<p>Yes. Enable <strong>"Use a custom wall shape"</strong> in the Building Shape card. You can describe any convex building footprint as up to 6 walls, each with its own angle from North and distance from center.</p></div>
+<div class="card"><h3>What's the difference between "offset from pivot" and "lateral offset" for telescopes 2–4?</h3>
+<p>"Offset from pivot" is how far along the main axis from the mount's RA/Dec pivot to that scope's mounting point — this goes into the swing-radius calculation. "Lateral offset" is how far to the side the scope sits — this goes into the telescope-vs-telescope collision check and the plan-view diagram.</p></div>
+<div class="card"><h3>What does the Swing Clearance check actually test?</h3>
+<p>It checks whether each telescope's worst-case distance from the mount's pivot fits within the available clearance in every direction at once — the nearest wall, the floor, and the ceiling. If the swing radius clears in every direction, the telescope can point anywhere without hitting anything.</p></div>
+<div class="card"><h3>The exported .hrz horizon file — which programs accept it?</h3>
+<p>The exported file uses the same azimuth/altitude format as Stellarium's custom horizon files, and is compatible with NINA's horizon import. It's a plain text file, so it's easy to inspect or edit in any text editor.</p></div>
+
+<h2>Something else?</h2>
+<p>If your question isn't answered here, <a href="contact.html">get in touch</a>.</p>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.

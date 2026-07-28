@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Roll-Off-Roof Calculator Manual — CygnusWave Observatory Tools</title>
+<title>Privacy Policy — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.02.000</span>
+  <span class="nav-version">v7.15.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -148,99 +148,20 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="wrap">
 
-<div class="eyebrow" style="margin-top:32px;">User Manual</div>
-<h1>Roll-Off-Roof Observatory → Sky Coverage &amp; Horizon Planner</h1>
-<p><a href="ror-calculator.html">→ Open the calculator</a> &nbsp;·&nbsp; <a href="help.html">← Back to Help</a></p>
-
-<h2>Feature list</h2>
-<ul>
-  <li>Rectangular <strong>or</strong> fully custom 6-wall building footprint</li>
-  <li>Real wall-obstruction model — ray-to-wall distance from the mount's actual position</li>
-  <li>Parked roof modeled as its own obstruction — flat, peaked (gable), or wedge (mono-slope)</li>
-  <li>Local terrain horizon, layered on top of wall/roof obstruction</li>
-  <li>GEM and Alt/Az/Fork mount support with meridian-flip pier-side handling</li>
-  <li>Automatic pointing constraints</li>
-  <li>Full-sky coverage sweep, stretched to your building's actual width/length aspect ratio</li>
-  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place</li>
-  <li><strong>Pier and mount 3D model</strong> — red pier cylinder, steel flange, latitude-angle wedge mount head, and orange RA/Dec pivot in the 3D preview</li>
-  <li>Exportable horizon profile (.hrz) — walls, roof, and terrain combined</li>
-  <li>Save/Load, dark/light mode, Reset to Defaults</li>
-</ul>
-
-<h2>Units</h2>
-<p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all building, roof, mount position, height, axis offset, pier gap, and custom wall fields in place. <strong>OTA tube length and aperture always remain in mm</strong> regardless of the unit setting — telescope optics are always specified in millimetres.</p>
-<p>In imperial mode each field shows a fractional-inch hint (e.g. <code>13'1 1/2"</code>) beside it, updating live as you type. The summary chips at the top of the page (Footprint, Wall Height, Roof Travel, Mount Offset) also display in the chosen unit.</p>
-
-<h2>Building &amp; Mount Position</h2>
-<p>Enter the building's width, length and wall height, then locate the mount by measuring from each wall to directly below the RA/Dec pivot on the floor &mdash; North, South, East and West. The signed offsets are derived automatically:</p>
-<ul>
-  <li><strong>N/S offset</strong> = (South &minus; North) &divide; 2 &mdash; positive = North of centre</li>
-  <li><strong>E/W offset</strong> = (West &minus; East) &divide; 2 &mdash; positive = East of centre</li>
-</ul>
-<p>Both are shown in orange below the fields and update as you type. Because the building size is also entered, the four measurements are over-determined: N+S should equal the building's North/South span and E+W its East/West span. If they disagree, a warning appears naming the conflict. The offset itself comes from the difference, so it stays correct even when the sums are off.</p>
-<p>Building width, length, wall height, and mount pivot position — height above floor, and N/S and E/W offset from the building's center. All in centimetres.</p>
-
-<h2>Building Shape</h2>
-<p>For anything other than a simple rectangle — angled corners, an extension, an irregular footprint — turn on <strong>"Use a custom wall shape"</strong> to describe the building as up to 6 walls, each with its own angle from North and distance from center.</p>
-
-<h2>Roll-Off Roof</h2>
-<p>Pick which wall the roof rolls off past and how far. Three roof shapes:</p>
-<ul>
-  <li><strong>Flat</strong> — one constant height. Default 6".</li>
-  <li><strong>Peaked (gable)</strong> — ridge parallel to travel. Enter a pitch ratio (rise:run, default 1:6); the ridge height is computed automatically from the pitch and building span and shown as an orange readout. Eave height is always the wall height.</li>
-  <li><strong>Wedge (mono-slope)</strong> — a single slope from low to high across the roof's full width. Defaults to 12" low side, 36" high side. The most common real-world shape for a roll-off roof.</li>
-</ul>
-
-<h2>Pier Layout &amp; Floor Plan</h2>
-<p>A scaled floor plan of the building sits above the Telescopes card. Click anywhere inside the building outline to place a telescope pier at that position. Drag to reposition. Each enabled telescope appears as a colour-coded dot with a faint dashed swing-radius circle. The NS/EW number fields in the Telescopes card stay in sync — move a pier and the numbers update, or type in a number and the dot moves. Use the floor plan for initial placement and the number fields for fine-tuning.</p>
-
-<h2>Telescopes</h2>
-<p>Each telescope is on its own independent mount. Telescope 1 uses the mount type and optics from the Optical Axis card, but its own position (NS/EW from building centre, in cm) and mount height defined in the Telescopes card. Enable Telescopes 2–4 for additional mounts — each gets its own position, mount height, mount type (GEM/Alt-Az), GEM axis length or Dec horizontal offset, tube length (mm), and aperture (mm). Note: OTA tube length and aperture are always in mm even in imperial mode.</p>
-<p>Use the <strong>Pointing telescope</strong> dropdown in Step 4 to choose which mount drives the live pointing preview, obstruction check, and sky coverage sweep.</p>
-
-<h2>Swing Clearance</h2>
-<p>Each telescope's swing radius is checked independently at its own mount position against the nearest wall, floor, and ceiling — since each is on a separate mount, their clearance envelopes don't share a pivot. A separate check catches telescopes hitting each other: two mounts collide when the distance between their pivots is less than the sum of their swing radii plus the minimum walkway gap you specify.</p>
-<p>The 3D view shows a wireframe sphere per telescope at its actual swing radius. The selected telescope's OTA tube tracks the live pointing direction; other scopes point straight up in a neutral pose.</p>
-
-<h2>Sky Coverage</h2>
-<p>Same concept as the dome tool. The plot is stretched to your building's actual width/length ratio. Includes an <strong>Export as Horizon File (.hrz)</strong> button.</p>
-
-<h2>Dual Saddle (side-by-side OTAs)</h2>
-<p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
-<p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
-
-<h2>Swing Clearance</h2>
-<p>Swing clearance is driven by the tube body, so the Optical System card asks for the OTA's <strong>outer diameter</strong> as well as its clear aperture. Left at 0 it is estimated at 1.3&times; the aperture, roughly right for a CDK once rings and dovetail are included &mdash; but if you are building to tight clearance, measure across your own tube and saddle and enter it.</p>
-<p>The swept radius is the hypotenuse of how far the tube reaches along the optical axis and how far its far corner sits across it. Wall and roof limits include the aperture radius, so the whole light cone clears rather than just the centre ray.</p>
-
-<h2>Mount System</h2>
-<p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>
-<p>An equatorial's declination axis sits at <em>A + B &times; sin(latitude)</em> above the pier flange, since dimension B runs along the polar axis. Presets re-apply when you change latitude so the figure stays right for your site.</p>
-<p class="note">Preset dimensions are community measurements, not manufacturer specifications, and every field they fill remains editable. Where sources disagree the card says so. Measure your own mount before building to tight clearances.</p>
-
-<h2>Measuring your own mount</h2>
-<p>Select <strong>Measure my own</strong> and the card lets you type into the dimension boxes beside the labelled diagram. <strong>Generic equatorial</strong> is a plausible mid-size mount for getting started; picking any library mount fills the same boxes read-only so you can read its geometry against the diagram. Measure <b>A</b> vertically from the pier flange to the RA pivot, <b>B</b> from that pivot to the declination axis <em>along the polar axis</em>, and <b>C</b> from the declination axis across to the optical axis. <b>I</b>, the counterweight shaft, is optional. For an alt/az mount there is a single measurement, <b>H</b>, from the pier flange to the altitude axis.</p>
-<p>Because B runs along the polar axis, the declination axis sits at <em>A + B &times; sin(latitude)</em> above the flange, so the figure follows your site. Any box left at 0 leaves the corresponding value alone.</p>
-
-<h2>Mount Types</h2>
-<p class="note">Selecting Alt/Az sets the pier height to 12&Prime;, the shortest PlaneWave offers for the L-500 (piers come in 12&Prime; steps up to 48&Prime;). Your equatorial pier height is restored if you switch back.</p>
-<p class="note">The guide-scope correction applies to both mount types &mdash; it shifts the tracked optical axis regardless of whether the mount is equatorial or Alt/Az.</p>
-<p><strong>Equatorial (GEM)</strong> draws a German equatorial: latitude-tilted RA axis, RA and Dec rotors, and a counterweight shaft. Swing clearance is measured from the RA axis and includes the counterweight sweep.</p>
-<p><strong>Alt/Az or Fork</strong> draws a PlaneWave L-500 direct drive: wide base drum, single offset arm and altitude drive drum. There is no counterweight, and the tube pivots about the altitude axis near its balance point, so the swept radius is the longer half of the tube plus the aperture radius &mdash; floored at the L-500's published 650.748&nbsp;mm swing-through. This is materially smaller than the equatorial figure, so an alt/az is not asked to clear a swept volume it never occupies.</p>
-
-<h2>The 3D Mount Model</h2>
-<p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>
-<p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
-
-<h2>Telescope Pointing &amp; 3D Preview</h2>
-<p>Same Hour Angle/Dec or Alt/Az controls, jog pad, and pier-side handling as the dome tool. The 3D view shows the actual building shape, the parked roof, cardinal directions, the celestial equator, and wireframe swing-radius spheres per telescope (red if any fails to clear).</p>
-
-<h2>Tips</h2>
-<ul>
-  <li>Run Swing Clearance early — it's a static check that only needs doing once per hardware configuration.</li>
-  <li>The parked roof's height matters — if it's on a raised track, it can end up taller than the walls.</li>
-  <li>Export the horizon file once your building geometry is finalised, and load it into NINA or Stellarium.</li>
-</ul>
+<div class="eyebrow" style="margin-top:32px;">Privacy</div>
+<h1>Privacy Policy</h1>
+<div class="status-chip">✓ These tools collect no data about you</div>
+<h2>What we collect</h2>
+<p><strong>Nothing.</strong> Both calculators run entirely in your browser. No measurements, settings, or values you enter are sent to any server. There are no accounts, no login, no analytics, no tracking scripts, no cookies set by these pages.</p>
+<h2>What stays in your browser</h2>
+<p>When you use Save Setup, the resulting JSON file is created within your browser and downloaded directly to your device — nothing touches a server at any point. When you load a setup file, it is read locally by your browser.</p>
+<h2>Third-party content</h2>
+<p>Both calculators load <strong>Three.js</strong> from the Cloudflare CDN (<code>cdnjs.cloudflare.com</code>). This is the only external network request either page makes. Loading a file from any CDN means Cloudflare's servers see the request, subject to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer">Cloudflare's own privacy policy</a>. The integrity of the loaded file is verified via a Subresource Integrity hash embedded in the page.</p>
+<h2>Hosting</h2>
+<p>These pages are served as static files. Depending on the hosting provider, standard web server logs (IP address, requested URL, timestamp, user-agent) may be retained by the host for operational purposes.</p>
+<h2>Contact</h2>
+<p>Questions about this policy: <a href="contact.html">contact us</a>.</p>
+<p><em>Last updated: July 2026.</em></p>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.

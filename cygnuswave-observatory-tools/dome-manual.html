@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dome Calculator Manual — CygnusWave Observatory Tools</title>
+<title>Disclaimer — CygnusWave Observatory Tools</title>
 <style>
 :root{
   --bg: #0a0d12; --panel: #12161d; --panel-2: #171c25; --line: #262d38;
@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.02.000</span>
+  <span class="nav-version">v7.15.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -148,94 +148,20 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <div class="wrap">
 
-<div class="eyebrow" style="margin-top:32px;">User Manual</div>
-<h1>Dome &amp; Mount Geometry → NINA Settings</h1>
-<p><a href="dome-calculator.html">→ Open the calculator</a> &nbsp;·&nbsp; <a href="help.html">← Back to Help</a></p>
-
-<h2>Feature list</h2>
-<ul>
-  <li>NINA dome-sync geometry — ported directly from <code>DomeSynchronization.cs</code></li>
-  <li>Live azimuth and dome-opening offset for any HA/Dec target</li>
-  <li>GEM and Alt/Az/Fork mount support with meridian-flip pier-side handling</li>
-  <li>Dual-saddle (side-by-side OTA) support with lateral axis length</li>
-  <li>Guide-scope correction</li>
-  <li>Shutter aperture clearance check — ghosted aperture circle on the dome surface</li>
-  <li>Full-sky coverage sweep showing which sky regions the shutter can and cannot reach</li>
-  <li>Local terrain horizon layered on top of dome geometry</li>
-  <li>Exportable horizon profile (.hrz)</li>
-  <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place with 1/16" fraction hints; OTA optics always in mm</li>
-  <li><strong>Three-column layout</strong> — data input left, telescope pointing centre, 3D preview right</li>
-  <li><strong>Four-wall measurement workflow</strong> (Step 1) — enter N/S/E/W wall-to-mount distances; NS/EW offset derived automatically as (distS−distN)/2 and (distW−distE)/2</li>
-  <li><strong>Optical System card</strong> — guide scope, dual-saddle, and OTA dimensions grouped together</li>
-  <li><strong>Sky Coverage</strong> as a full-width collapsible row above the three-column layout</li>
-  <li>Save/Load JSON setup, dark/light mode, Reset to Defaults</li>
-</ul>
-
-<h2>What this tool does</h2>
-<p>NINA can slave your dome to your telescope, but only if it knows precisely where your mount sits relative to the dome's center. Getting those numbers right by hand is easy to get wrong. This tool converts either a physical measurement or values you already have into the exact signed fields NINA's Options → Dome tab expects, then shows you live whether your shutter will actually clear the OTA at any given pointing.</p>
-
-<h2>Getting started</h2>
-<p><strong>Save Setup / Load Setup</strong> exports everything as a JSON file, or restores it. <strong>Reset to Defaults</strong> reloads with every field back to its starting value. The <strong>status banner</strong> just below the title tells you at a glance whether the current pointing is valid: green for everything clears, amber for "pointing was adjusted," red for a real problem.</p>
-
-<h2>Step 1 — Mount Position</h2>
-<p><strong>"I'll measure my dome"</strong> — plumb-bob the dome's true center and the mount's RA/Dec intersection down to the floor, mark them, then measure heights and the straight-line N/S and E/W distance between the marks (true north, not magnetic).</p>
-<p><strong>"I already have my NINA values"</strong> — type in the signed values directly.</p>
-
-<h2>Step 2 — Dome &amp; Rotator</h2>
-<p>Dome radius (center to rim), shutter width (straight-line, not arc), rotator precision / Azimuth Tolerance, and wall height (affects 3D preview only, not the NINA math).</p>
-
-<h2>Step 3 — Optical Axis Offset</h2>
-<p><strong>GEM</strong> — GEM Axis Length, measured with the mount slewed 90° from the meridian. <strong>Alt/Az or Fork</strong> — Dec Horizontal Offset. <strong>Dual saddle</strong> reveals the Lateral Axis Length field and lets you choose which OTA NINA tracks.</p>
-
-<h2>Step 4 — Telescope Pointing</h2>
-<p>Two modes — Hour Angle + Dec, or Point at Alt/Az — with a jog pad (0.1°/1°/5°/15° steps, hold to keep moving). Pier side is manual by default; "Auto-flip at the meridian" resolves it automatically.</p>
-
-<h2>Local Horizon</h2>
-<p>Flat minimum altitude, or a full custom profile loaded from a <code>.hrz</code> file (same format as Stellarium). Shown in the 3D view as a wireframe skyline.</p>
-
-<h2>Sky Coverage</h2>
-<p>Collapsed by default. Sweeps the entire sky for both pier sides side by side.</p>
-<div class="table-wrap">
-<table>
-  <tr><td style="color:#7fd88f;">🟢 Green</td><td>Shutter clears</td></tr>
-  <tr><td style="color:#e0685c;">🔴 Red</td><td>Vignettes or misses the dome</td></tr>
-  <tr><td style="color:#b5713f;">🟤 Brown</td><td>Below your local horizon</td></tr>
-  <tr><td style="color:#8b93a3;">⚪ Grey</td><td>Mount geometry invalid there</td></tr>
-</table>
+<div class="eyebrow" style="margin-top:32px;">Legal</div>
+<h1>Disclaimer</h1>
+<div class="card" style="border-color:#6b3833; background:rgba(224,104,92,0.06);">
+  <p style="font-size:15px; color:var(--text);">These calculators produce numbers intended to assist in planning an observatory. They are provided <strong>as-is, without warranty of any kind</strong>. Always independently verify critical measurements and clearances before construction, purchase, or any physical build decision.</p>
 </div>
-
-<h2>Mount System</h2>
-<p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>
-<p>An equatorial's declination axis sits at <em>A + B &times; sin(latitude)</em> above the pier flange, since dimension B runs along the polar axis. Presets re-apply when you change latitude so the figure stays right for your site.</p>
-<p class="note">Preset dimensions are community measurements, not manufacturer specifications, and every field they fill remains editable. Where sources disagree the card says so. Measure your own mount before building to tight clearances.</p>
-
-<h2>Measuring your own mount</h2>
-<p>Select <strong>Measure my own</strong> and the card lets you type into the dimension boxes beside the labelled diagram. <strong>Generic equatorial</strong> is a plausible mid-size mount for getting started; picking any library mount fills the same boxes read-only so you can read its geometry against the diagram. Measure <b>A</b> vertically from the pier flange to the RA pivot, <b>B</b> from that pivot to the declination axis <em>along the polar axis</em>, and <b>C</b> from the declination axis across to the optical axis. <b>I</b>, the counterweight shaft, is optional. For an alt/az mount there is a single measurement, <b>H</b>, from the pier flange to the altitude axis.</p>
-<p>Because B runs along the polar axis, the declination axis sits at <em>A + B &times; sin(latitude)</em> above the flange, so the figure follows your site. Any box left at 0 leaves the corresponding value alone.</p>
-
-<h2>Mount Types</h2>
-<p class="note">Selecting Alt/Az sets the pier height to 6&Prime;. The L-500 carries its altitude axis 32.3&Prime; above the pier flange, so a 6&Prime; pier puts that axis level with the 38&Prime; dome springline &mdash; the swing sphere then sits concentric with the hemisphere, which needs the smallest dome. Your equatorial pier height is restored if you switch back.</p>
-<p class="note">The guide-scope correction applies to both mount types &mdash; it shifts the tracked optical axis regardless of whether the mount is equatorial or Alt/Az.</p>
-<p><strong>Equatorial (GEM)</strong> draws a German equatorial with a latitude-tilted RA axis and counterweight shaft. <strong>Alt/Az or Fork</strong> draws a PlaneWave L-500 direct drive instead &mdash; wide base drum, single offset arm and altitude drive drum. Both are driven from the same calculated sky position, so the picture always agrees with the numbers.</p>
-
-<h2>The 3D Mount Model</h2>
-<p>The pier and telescope are drawn as a real German equatorial mount: the head tilts to the site latitude so the RA axis points at the celestial pole, the RA rotor turns with Right Ascension, and the Dec rotor swings the tube about the declination axis. At RA&nbsp;0h / Dec&nbsp;90&deg; the mount sits in the park position &mdash; counterweight hanging down, tube along the polar axis.</p>
-<p>With <strong>dual saddle</strong> enabled, both tubes are drawn side by side, separated by the lateral axis length you enter. The ghost aperture circles projected on the dome surface, the shutter clearance checks and the hit markers all continue to work for each tube independently.</p>
-<p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
-
-<h2>3D Preview</h2>
-<p>Drag to orbit, scroll to zoom. The shutter turns red whenever it doesn't clear. Toggle the local horizon and celestial equator from the preview header.</p>
-
-<h2>NINA · Options → Dome panel</h2>
-<p>The final answer — <strong>Copy NINA Settings</strong> copies all eight values to your clipboard as clean, pasteable text.</p>
-
-<h2>Tips</h2>
-<ul>
-  <li>The status banner is the fastest sanity check — green means done, otherwise it tells you exactly which problem to fix.</li>
-  <li>Run Sky Coverage before your first real night out, especially with a dual-saddle setup.</li>
-  <li>Save your setup once it's dialed in.</li>
-  <li>Wall height only affects the 3D preview, not the NINA math.</li>
-</ul>
+<h2>No warranty</h2>
+<p>The software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose, and non-infringement. In no event shall the authors or copyright holders be liable for any claim, damages, or other liability, whether in an action of contract, tort, or otherwise, arising from, out of, or in connection with the software or the use or other dealings in the software.</p>
+<h2>Physical construction</h2>
+<p>These tools perform geometric calculations based on the measurements you enter. The accuracy of any output depends entirely on the accuracy of your inputs. A measuring error, a transcription error, or a misunderstanding of what a field represents will produce incorrect output — and an incorrect clearance figure used in a real build could result in physical damage to equipment or the observatory structure.</p>
+<p><strong>Before cutting material, placing a foundation, or purchasing components based on these calculations, independently verify the critical measurements yourself</strong> — ideally with a second method or by having another person check your inputs and interpret the results.</p>
+<h2>Astrophotography software</h2>
+<p>The dome calculator produces values intended for NINA's Options → Dome tab. NINA is third-party software maintained independently of these tools. We make no warranty that values produced here will behave correctly in any specific version of NINA.</p>
+<h2>Not professional advice</h2>
+<p>These tools are geometry calculators, not a substitute for professional engineering advice. For any observatory build involving permanent foundations, structural modifications, or significant investment, consult a qualified professional.</p>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.
