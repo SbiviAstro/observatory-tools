@@ -172,7 +172,53 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.34.004 — Current</div>
+<div class="card"><div class="eyebrow">v8.00.000 — Current</div>
+<p><strong>Both calculators rebuilt around a single screen.</strong> This is the first major version because it replaces the interface wholesale &mdash; the arithmetic, the mount library and every saved setup carry across untouched, but nothing is where it was.</p>
+
+<p><strong>What changed.</strong> The three-column page of expanding cards is gone. In its place:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><b>One viewport, no page scrolling.</b> Everything needed to answer a question is on screen at once.</li>
+  <li><b>A workflow rail down the left</b>, following the order you actually work in. Steps are collapsed by default and open independently, each showing a live summary when shut &mdash; dome diameter, pier height, mount, optics, horizon &mdash; so the rail reads as a description of the setup rather than a wall of fields.</li>
+  <li><b>The 3D view is now the page</b>, not a panel in a column. It fills the space left over and carries a live header: where the telescope points, the required dome azimuth, the intersection altitude and the aperture clearance. The roll-off tool shows what is blocking instead, since that is the question it answers.</li>
+  <li><b>Pointing sits under the view</b> rather than in the rail, because you jog it while watching the model move.</li>
+  <li><b>The verdict is pinned below</b>, with the reasoning always open and the sky-coverage plots beside it.</li>
+</ul>
+
+<p><strong>The NINA card is now the first thing in the rail</strong> and stays open. Each value can be clicked for an explanation of what NINA does with it, and the five figures you can supply yourself &mdash; the three offsets, the dome radius and the GEM axis &mdash; become editable when you tick <em>I already have my NINA values</em>.</p>
+
+<p><strong>Saved setups still load.</strong> The calculation layer was not touched: it reaches the page through 251 lookups by name, and every name survived the rebuild. Verified by round-trip, 52 fields on the dome and 94 on the roll-off tool.</p>
+
+<p><strong>Responsive.</strong> Three shapes rather than one that stretches: side by side on a desktop, stacked on a tablet, a single column on a phone. Below 900&nbsp;pixels the rail moves above the view; below 680 the controls, the reasoning and the sky text each drop to one column and the navigation wraps. Checked from 1440 down to 360&nbsp;pixels on both tools &mdash; no horizontal scrolling and nothing pushed off the right edge at any width, and the whole thing is usable by touch.</p>
+<p>Also in this release: a colour-coded key on the 3D view, larger and more legible text throughout the lower half, and a formulas panel explaining where each NINA figure comes from.</p>
+
+<p class="note" style="margin-top:12px;">The previous layout remains available as v7.36.002 if you prefer it.</p></div>
+
+<div class="card"><div class="eyebrow">v7.36.002</div>
+<p><strong>Fixed a formula that described a feature removed twenty-eight releases ago.</strong> The <em>Formulas used</em> panel still read &ldquo;GEM Axis Length = raw measurement + 0.5 &times; guidescope offset (if used)&rdquo;. The guide-scope correction was taken out in v7.08.000 as redundant with the mount's C dimension, but the note explaining how to calculate the value was never updated &mdash; so anyone following it was adding a correction the tool no longer wants.</p>
+<p>It now reads: <em>declination axis to the optical axis you image through (include your rings)</em>, which is what the field has actually meant since then.</p></div>
+
+<div class="card"><div class="eyebrow">v7.36.001</div>
+<p><strong>Default telescope changed to 625&nbsp;mm long, 106&nbsp;mm aperture.</strong> Both tools previously started at 200&nbsp;mm aperture &mdash; the dome at 450&nbsp;mm long, the roll-off tool at 600&nbsp;mm, which was an inconsistency in itself. The new figures describe a mid-size apo refractor, which is closer to what most people put on the mounts in the library.</p>
+<p>The tube outer diameter is left at 0, so it is still estimated at 1.3&times; the aperture &mdash; 138&nbsp;mm for this default. Enter a measured figure if your rings run wider.</p></div>
+
+<div class="card"><div class="eyebrow">v7.36.000</div>
+<p><strong>The swept volume can now be shown in the 3D preview.</strong> Both mount models have carried the mesh all along and neither ever displayed it. <em>Show swept volume</em> in the preview controls turns it on, and the setting is saved with the rest of the setup.</p>
+<p>The clearance figures describe this shape in words &mdash; &ldquo;the tube sweeps a radius of 18.6&Prime; and the tightest obstruction sits at 47.0&Prime;&rdquo; &mdash; and seeing it sitting inside the dome, or against the walls, makes the number something you can check rather than take on trust.</p>
+<p><strong>It turns red when something fouls.</strong> With an 8&Prime; pier the counterweight clears by 161&nbsp;mm and the volume draws blue; widen the pier to 30&Prime; and the clearance goes to &minus;118&nbsp;mm and the volume turns red, matching the pier-strike warning in the panel. The harmonic model could already recolour itself; the equatorial one could not, so that was added &mdash; the picture and the verdict should never disagree.</p></div>
+
+<div class="card"><div class="eyebrow">v7.35.000</div>
+<p><strong>Save your own mounts, and a pier-strike check that was built but never called.</strong></p>
+<p><strong>Your mounts.</strong> Measure a mount, tick <em>Use my own values</em>, and save it under a name. It joins the list in its own group at the top, survives closing the browser, and can be exported as a file to hand to someone else &mdash; or imported from one. Most manufacturers do not publish the axis geometry this tool needs, so the library will always be short of the mounts people own; this puts that within reach of anyone with a tape measure.</p>
+<p><strong>Pier strike.</strong> Both mount models could always work out whether the counterweight fouls the pier, and nothing ever asked them. The setup check now reports it: <em>&ldquo;The counterweight passes the pier with 4.1&Prime; to spare&rdquo;</em>, or on a wide pier, <em>&ldquo;fouls the pier by 4.9&Prime;&rdquo;</em> with what to change. Under 6&Prime; it says the margin is worth checking on the real thing. Harmonic mounts get the equivalent question about the back of the tube, which is what binds on those.</p>
+<p><strong>The check was broken, which is presumably why it was never wired in.</strong> It sampled the negative side of the declination axis, but this tool passes the axis length negative to match NINA's convention, which flips the counterweight to the other side. It had been measuring where the telescope is, finding nothing below the pier flange, and returning nothing at all &mdash; at every pointing, on every setup.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.005</div>
+<p><strong>Comparison document rewritten, and removed from the download.</strong> It had become a stale to-do list: all four items it recommended &mdash; the aperture radius in wall limits, the L-500 axis height, the Pythagorean swept radius, and a mount preset library &mdash; were done some thirty releases ago, but the document still asked for them.</p>
+<p>It now records what actually happened. Those four differences are marked closed, with what each turned out to cost. It adds the areas where the tools now go further &mdash; counterweight sweep, harmonic mounts, per-azimuth coverage, provenance per dimension &mdash; and, more usefully, what the comparison found <em>in our own data</em>: the Paramount figures were measuring the wrong quantity and were out by up to 2.75&Prime;, while the Astro-Physics offsets were confirmed correct against the manufacturer's own calculator.</p>
+<p>It closes with why only two of five manufacturers checked publish the geometry these tools need, which is the reason the mount list is grouped by data quality.</p>
+<p><strong>It is no longer packaged in the site download.</strong> It is an internal analysis rather than a site page, and nothing on the site links to it.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.004</div>
 <p><strong>A and B now visibly meet at the pivot on the mount diagram.</strong> They were already connected &mdash; A is offset to the side as a dimension line, with an extension line carrying its upper end across to the pivot, which is ordinary drafting practice. But that extension line was drawn one pixel wide at 55% opacity and simply disappeared against the dark background, leaving two arrows that looked like they floated apart.</p>
 <p>The extension lines are now thicker and brighter, and the upper one runs to the pivot dot itself rather than stopping just past it. Checked pixel by pixel: an unbroken run from A's dimension line across to the pivot, no gaps.</p>
 <p>Nothing measured has changed &mdash; A still spans pier flange to RA pivot, exactly as before. Only the connection is now visible.</p></div>

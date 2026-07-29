@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Dome & Mount Geometry — NINA Settings Worksheet</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dome Geometry — CygnusWave</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
     --bg: #0a0d12;
@@ -169,194 +171,447 @@
     -webkit-appearance:none; appearance:none; margin:0;
   }
   input[type=number]{ -moz-appearance:textfield; appearance:textfield; }
+
+
+  /* ---- experimental single-viewport shell -------------------------------- */
+  html, body { height:100%; margin:0; overflow:auto; }
+  body.app   { display:flex; flex-direction:column; min-height:100%; }
+
+  .appbar { display:flex; align-items:center; gap:12px; padding:6px 16px;
+    min-height:52px; flex:0 0 auto; flex-wrap:wrap; row-gap:6px;
+    border-bottom:1px solid var(--line); background:var(--panel); }
+  .appbar .title { font-weight:600; font-size:15px; color:var(--text); white-space:nowrap; }
+  .appbar .brandmark { display:flex; flex:0 0 auto; }
+  .appbar .brandmark svg { width:26px; height:26px; border-radius:5px; display:block; }
+  .appnav { display:flex; gap:2px; margin-left:6px; }
+  .appnav a { color:var(--text-dim); text-decoration:none; font-size:12.5px;
+    padding:5px 10px; border-radius:5px; white-space:nowrap; }
+  .appnav a:hover { color:var(--amber); background:var(--panel-2); }
+  .appbar .spacer{ margin-left:auto; }
+  .appbar .chip  { font-family:"Courier New",monospace; font-size:11px;
+    color:var(--text-dim); opacity:.75; }
+
+  .stage { flex:1 1 auto; display:flex; min-height:0; }
+
+  .rail { flex:0 0 clamp(360px, 27%, 460px); display:flex; flex-direction:column; min-height:0;
+    border-right:1px solid var(--line); background:var(--panel); }
+  .steps { display:flex; flex-direction:column; overflow-y:auto; min-height:0; }
+  .pinned { flex:0 0 auto; border-bottom:1px solid var(--line); padding:11px 14px 13px;
+    background:var(--panel-2); max-height:52vh; overflow-y:auto; }
+  .pinned-head { display:flex; align-items:center; gap:8px; font-size:14.5px;
+    font-weight:500; color:var(--text); margin-bottom:9px; }
+  .pinned-head .preset-btn { padding:3px 11px; font-size:11px; font-weight:normal; }
+  /* The button lives on the card that shows the figures; the panel opens at the
+     foot of the rail. Anchored to the header it was cut off by the rail's own
+     scrolling, which is exactly the space the collapsed steps leave free. */
+  .formulas-btn { margin-left:auto; cursor:pointer; font-family:inherit;
+    font-size:11px; font-weight:normal; color:var(--text-dim); background:none;
+    border:1px solid var(--line); border-radius:5px; padding:3px 10px; white-space:nowrap; }
+  .formulas-btn:hover, .formulas-btn[aria-expanded="true"] {
+    color:var(--amber); border-color:var(--amber); }
+  .formulas-panel { margin:12px 14px 16px; padding:12px 14px;
+    background:var(--panel-2); border:1px solid var(--amber); border-radius:7px;
+    font-size:12px; line-height:1.55; color:var(--text-dim); }
+  .formulas-panel[hidden] { display:none; }
+  .formulas-panel strong, .formulas-panel b { color:var(--amber); }
+  .formulas-panel p { margin:0 0 8px; }
+  .formulas-panel p:last-child { margin-bottom:0; }
+  .pinned-head::before { content:''; width:6px; height:6px; border-radius:50%;
+    background:var(--amber); flex:0 0 auto; }
+  .pinned .nina-head { display:none; }
+
+  .step { border-bottom:1px solid var(--line); }
+  .step-head { display:flex; align-items:center; gap:11px; width:100%;
+    background:none; border:none; color:var(--text-dim); cursor:pointer;
+    padding:13px 16px; font-family:inherit; font-size:14.5px; text-align:left; }
+  .step-head:hover { color:var(--text); }
+  .step.active > .step-head { color:var(--text); background:var(--panel-2); }
+  .step-num { flex:0 0 22px; height:22px; border-radius:50%; font-size:12px;
+    display:flex; align-items:center; justify-content:center;
+    background:var(--panel-2); color:var(--text-dim); border:1px solid var(--line); }
+  .step.active .step-num { background:var(--amber); color:#1b1b1b; border-color:var(--amber); }
+  .step-name { font-weight:500; }
+  .step-sum  { margin-left:auto; font-size:12.5px; color:var(--text-dim);
+    font-family:"Courier New",monospace; white-space:nowrap; overflow:hidden;
+    max-width:180px; text-overflow:ellipsis; }
+  /* A plain +/- so it is obvious the row opens, and which way it will go. */
+  .step-head::after { content:'+'; flex:0 0 14px; text-align:center;
+    font-size:15px; line-height:1; color:var(--text-dim); }
+  .step.active > .step-head::after { content:'−'; color:var(--amber); }
+  .step-head:hover::after { color:var(--amber); }
+  .step-body { display:none; padding:2px 16px 18px; font-size:14px; }
+  .step.active .step-body { display:block; }
+
+  .view { flex:1 1 auto; display:flex; flex-direction:column; min-width:0;
+    min-height:0; overflow-y:auto; }
+  /* Bounded rather than simply filling: on a tall window the canvas grew far
+     past the model and left it floating in empty space. Capped, the frame stays
+     in proportion to what is in it. */
+  .viewport { flex:1 1 auto; position:relative; min-height:420px;
+    max-height:58vh; background:#0d1016; }
+  .viewport #threeContainer { position:absolute; inset:0; width:100%; height:100%; }
+  .viewport .overlay { position:absolute; left:12px; top:10px; z-index:5;
+    display:flex; gap:14px; flex-wrap:wrap; align-items:center;
+    background:rgba(13,16,22,.72); padding:6px 12px; border-radius:6px; }
+  /* Amber rather than dim grey: at 11px in the corner of a dark canvas the
+     grey was easy to miss entirely, and it is the only thing telling you the
+     view can be moved at all. */
+  .viewport .hint { position:absolute; right:12px; bottom:10px; z-index:5;
+    font-size:12px; color:var(--amber); }
+  /* Folded away in the corner: useful the first few times, clutter afterwards. */
+  .viewkey { position:absolute; left:12px; bottom:10px; z-index:6; max-width:min(420px, 48%); }
+  .viewkey > summary { list-style:none; cursor:pointer; display:inline-flex;
+    align-items:center; gap:6px; font-size:12.5px; color:var(--amber);
+    background:rgba(9,11,15,.82); border:1px solid var(--line);
+    border-radius:5px; padding:3px 10px; }
+  .viewkey > summary::-webkit-details-marker { display:none; }
+  .viewkey > summary::before { content:'?'; opacity:.7; }
+  .viewkey > summary:hover { color:#f0a578; border-color:var(--amber); }
+  .viewkey[open] > summary { color:var(--amber); border-color:var(--amber); margin-bottom:8px; }
+  .viewkey ul { margin:0 !important; padding:11px 15px 12px 30px !important;
+    background:rgba(9,11,15,.92); border:1px solid var(--line); border-radius:6px;
+    font-size:13px !important; line-height:1.55 !important; max-height:42vh; overflow-y:auto;
+    color:var(--text-dim); }
+  .viewkey li { margin-bottom:6px; }
+  /* Each term is tinted to match what it points at in the scene, so the key can
+     be read against the model rather than by matching words to shapes. */
+  .viewkey li strong { font-weight:600; }
+
+  /* Pointing sits under the 3D rather than in the rail: you jog it while
+     watching the view, so it belongs beside what it moves. Laid out across
+     rather than down, to keep the 3D as large as possible. */
+  .aim { flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel);
+    padding:8px 18px; display:flex; gap:14px 18px; align-items:center;
+    flex-wrap:wrap; row-gap:8px; }
+  .aim .row { display:flex; align-items:center; gap:7px; margin:0; flex:0 0 auto; }
+  .aim label { font-size:14px; white-space:nowrap; }
+  /* Prose and hints go; every pixel here is taken from the 3D view. */
+  /* The heading is redundant beside the controls it names, and at 218px wide it
+     was pushing the row to wrap and costing height the card needs. */
+  .aim .hint, .aim .step-note, .aim p, .aim .eyebrow, .aim hr,
+  .aim h1, .aim h2, .aim h3 { display:none; }
+  .aim .row { align-items:baseline; }
+  /* The sliders are rebuilt into the space going spare on the right, labelled,
+     rather than sitting under their own number box where they made the bar too
+     tall for a strip beneath the 3D. */
+  .slider-stack { flex:1 1 200px; min-width:170px; max-width:340px;
+    display:flex; flex-direction:column; gap:5px; justify-content:center; }
+  .slider-stack:empty { display:none; }
+  .sl { display:flex; align-items:center; gap:9px; }
+  .sl span { flex:0 0 34px; font-size:13px; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--text-dim); text-align:right; }
+  .sl input[type=range] { flex:1 1 auto; display:block; accent-color:var(--amber); }
+  .aim input[type=number] { width:74px; font-size:14.5px; padding:5px 8px; }
+  .aim .jog-wrap { margin:0; gap:8px; flex:0 0 auto; }
+  .aim .jog-pad { grid-template-columns:32px 32px 32px; grid-template-rows:32px 32px 32px; gap:4px; }
+  .aim .jog-btn { font-size:15px; }
+  .aim .preset-btn { padding:6px 12px; font-size:13px; }
+  .aim .toggle-row { margin:0; }
+
+  /* No cap and no scrollbar: the card is as tall as what it has to say, and the
+     3D view absorbs the difference. On a short window that leaves the model
+     small, which is the honest trade - the alternative is hiding half the
+     reasoning behind a scrollbar, which is what this was meant to fix. */
+  .answer { flex:1 1 auto; display:flex; flex-direction:column;
+    border-top:1px solid var(--line); background:var(--panel);
+    padding:12px 20px 0; font-size:14px; }
+  /* A CygnusWave orange rule closes the page, with breathing room above it. */
+  .answer::after { content:''; display:block; flex:0 0 auto; height:4px;
+    margin-top:auto; background:var(--amber); border-radius:2px;
+    margin-bottom:12px; }
+  .answer .status-banner { margin:0 0 8px; }
+  .answer #setupCheck { display:block; margin:0; }
+  /* Two columns: the reasoning on the left, the sky plots on the right. The
+     strip is over a thousand pixels wide and stacking these would have cost
+     another two hundred of height that the 3D view cannot spare. */
+  /* Stacked, not side by side: the reasoning takes the full width in two
+     columns, and the sky coverage runs as a horizontal band beneath it. That
+     band was previously squeezed into a 340px column where its own text had to
+     scroll, while the width below the reasoning sat empty. */
+  .answer-cols { display:flex; flex-direction:column; gap:12px; margin-top:9px; }
+  .answer-cols #setupCheck { columns:1; font-size:15.5px !important;
+    line-height:1.7 !important; padding:16px 20px !important; }
+  .answer-cols #setupCheck > div { break-inside:avoid; margin-bottom:9px; }
+  .answer-cols #setupCheck > div:first-child { column-span:all; margin-bottom:7px; }
+
+  /* Everything on one line: plots, colour key, then the explanation beside them
+     rather than stacked beneath. Stacked it added its own 96px to a row that was
+     already 96px tall, for no gain - the width was there all along. */
+  /* The two tools nest this differently - the dome keeps the explanation as a
+     sibling of the plot row, the roll-off tool puts it inside - so both levels
+     are laid out the same way and every child is bounded. Targeting one shape
+     let the other run to full width and stack. */
+  .answer-cols #skyCoverageBody,
+  .answer-cols #skyCoverageBody > div:first-child { display:flex !important;
+    flex-direction:row; flex-wrap:wrap; align-items:flex-start; gap:16px;
+    margin:0 !important; }
+  /* Sized to its contents rather than grown to fill: expanding, it left no room
+     for the explanation beside it and pushed it onto a second line, doubling the
+     height of the band for nothing. */
+  .answer-cols #skyCoverageBody > div:first-child { flex:0 1 auto; min-width:0; }
+  .answer-cols #skyCoverageBody > div:first-child { display:flex !important;
+    gap:16px; flex-wrap:nowrap; margin:0 !important; align-items:flex-start; }
+  .answer-cols #skyCoverageBody > div:first-child > div { flex:0 1 auto !important; }
+  /* Size the plot wrapper, not the svg: the svg fills its parent, so setting a
+     height on it alone did nothing while the wrapper stayed at 96px. */
+  .answer-cols #skyCoverageBody > div:first-child > div[style*="220px"],
+  .answer-cols #skyCoverageBody > div:first-child > div[style*="240px"] {
+    flex:0 0 196px !important; width:196px; }
+  /* The colour key is the child that is not a plot wrapper. The dome wraps its
+     plots at 220px and the roll-off tool at 240px, so match both. */
+  /* The colour key block carries a paragraph as well as the list, and in the
+     roll-off tool that paragraph is long enough to claim the whole row and push
+     everything else onto another line. Bounded and flowed in two columns. */
+  .answer-cols #skyCoverageBody > div:first-child > div:not([style*="220px"]):not([style*="240px"]):not(#sweepWhy) {
+    /* No fixed cap. The dome carries two plots and the roll-off tool one, so
+       any width I pinned suited one and squeezed the other - they traded places
+       every time. Both text blocks now share whatever the plots leave, and each
+       tool balances itself. */
+    flex:1 1 260px !important; min-width:0; max-width:38%;
+    font-size:12px; line-height:1.5; }
+  .answer-cols #skyCoverageBody > div:first-child > div:not([style*="220px"]):not([style*="240px"]):not(#sweepWhy) > * {
+    break-inside:avoid; }
+  /* The colour key reads as a stacked list in the original, which is five lines
+     tall. In a horizontal band it flows across instead. */
+  .answer-cols #skyCoverageBody ul { display:flex !important; flex-wrap:wrap;
+    gap:4px 16px; margin:0 !important; padding:0 !important; list-style:none; }
+  .answer-cols #skyCoverageBody ul li { margin:0; white-space:nowrap; }
+  .answer-cols #skyCoverageBody ul li::before { content:'2'; margin-right:5px;
+    color:var(--text-dim); }
+  .answer-cols #skyCoverageBody svg { width:100% !important; height:auto !important;
+    max-height:none !important; display:block; }
+  .answer-cols #skyCoverageBody .eyebrow { font-size:10px !important; margin-bottom:4px !important; }
+  .answer-cols #skyCoverageBody li { margin-bottom:1px; }
+  /* Wide enough that its paragraphs are two or three lines rather than five:
+     at 296px it stood 190 tall and set the height of the whole row on its own. */
+  .answer-cols #sweepWhy { flex:1 1 260px !important; min-width:0; max-width:38%;
+    font-size:13.5px; line-height:1.6; margin:0 !important; }
+  .answer-cols #sweepWhy > div { margin:0 0 3px; break-inside:avoid; }
+  .answer-cols #sweepWhy > div:first-child { column-span:all; }
+  @media (max-width: 1200px) {
+    .answer-cols { grid-template-columns:1fr; }
+    .answer-cols #skyCoverageBody svg { max-height:104px; }
+  }
+  .answer .header-readout { margin:0; padding:0; background:none; border:none; }
+  .answer .header-stats { display:flex; gap:10px; flex-wrap:wrap; align-items:stretch; }
+  .answer .stat { padding:5px 9px; }
+  .answer .stat .k { font-size:9.5px; }
+  .answer .stat .v { font-size:12.5px; }
+  .answer svg { max-height:96px; }
+  .answer .eyebrow { display:none; }
+
+
+  /* ---- NINA card --------------------------------------------------------- */
+  .nina-head { display:flex; align-items:baseline; gap:10px; margin-bottom:7px; }
+  .nina-title { font-family:"Courier New",monospace; font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--amber); }
+  .nina-sub { font-size:11px; color:var(--text-dim); }
+  .nina-copy { margin-left:auto; padding:3px 10px; font-size:11px; }
+  .nina-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .step-body .nina-head { margin-bottom:8px; }
+  .nv { display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%;
+    background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+    padding:7px 11px; cursor:pointer; font-family:inherit; text-align:left;
+    min-width:78px; position:relative; }
+  .nv:hover { border-color:var(--amber); }
+  .nv.sel  { border-color:var(--amber); background:rgba(200,98,63,.10); }
+  /* the affordance: a small key in the corner, so it is clear the number tells
+     you more if you ask it */
+  .nv::after { content:'?'; position:absolute; top:3px; right:5px; font-size:9px;
+    color:var(--text-dim); opacity:.55; }
+  .nv:hover::after, .nv.sel::after { opacity:1; color:var(--amber); }
+  .nk { font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--text-dim); }
+  .nval { font-family:"Courier New",monospace; font-size:14.5px; color:var(--amber); }
+  .nina-own { display:flex; align-items:center; gap:7px; font-size:13px;
+    color:var(--text-dim); margin:0 0 9px; cursor:pointer; }
+  .nina-own input { margin:0; }
+  .nin { display:none; align-items:baseline; gap:4px; }
+  .nin input { width:74px; }
+  .nin em { font-style:normal; font-size:10px; color:var(--text-dim); }
+  .nina.own .nv-set .nval { display:none; }
+  .nina.own .nv-set .nin  { display:flex; }
+  .nina.own .nv-set { border-color:var(--amber); cursor:default; }
+  .nina.own .nv-set::after { content:''; }
+  .nina-explain { display:none; font-size:12px; color:var(--text-dim); line-height:1.55;
+    margin-top:8px; padding:8px 11px; background:var(--panel-2);
+    border-left:2px solid var(--amber); border-radius:0 5px 5px 0; }
+  .nina-explain.on { display:block; }
+  /* Live readouts describing what the view is currently showing, so they sit on
+     the view rather than in the results below it. Overlaid rather than stacked
+     above, so they cost no height from the 3D. */
+  .viewhead { position:absolute; left:0; right:0; top:0; z-index:6;
+    display:flex; gap:20px; flex-wrap:wrap; align-items:baseline;
+    padding:8px 14px; background:linear-gradient(rgba(9,11,15,.88), rgba(9,11,15,0));
+    pointer-events:none; }
+  .viewhead .vh i { font-style:normal; font-size:9.5px; letter-spacing:.05em;
+    text-transform:uppercase; color:var(--text-dim); margin-right:7px; }
+  .viewhead .vh b { font-family:"Courier New",monospace; font-size:12.5px;
+    color:var(--amber); font-weight:normal; }
+
+  /* the moved controls keep their own styling; only spacing is tightened */
+  .step-body .row { margin-bottom:11px; }
+  .step-body label { font-size:14px; }
+  .step-body .hint { font-size:12px; }
+  .step-body input[type=number], .step-body select { font-size:14px; }
+  .step-body h2, .step-body h3 { display:none; }
+  .step-body .step-note:first-of-type { margin-top:0; }
+
+  /* ---- responsive ---------------------------------------------------------
+     Three shapes rather than one that stretches: side by side on a desktop,
+     stacked on a tablet, and a single column on a phone with the controls
+     allowed to wrap. Every bar that was set to nowrap is released, since a
+     fixed row is what pushed content past the right edge. */
+
+  @media (max-width: 1180px) {
+    .rail { flex:0 0 300px; }
+    .aim  { flex-wrap:wrap; overflow-x:visible; }
+    .slider-stack { flex:1 1 100%; max-width:none; }
+  }
+
+  @media (max-width: 900px) {
+    .stage { flex-direction:column; }
+    .rail  { flex:0 0 auto; max-width:none; max-height:none;
+             border-right:none; border-bottom:1px solid var(--line); }
+    .steps { overflow-y:visible; }
+    .pinned { max-height:none; }
+    .view  { overflow-y:visible; }
+    .viewport { min-height:320px; }
+    .answer-cols #skyCoverageBody,
+    .answer-cols #skyCoverageBody > div:first-child { flex-wrap:wrap; }
+  }
+
+  @media (max-width: 680px) {
+    .appbar { padding:6px 12px; }
+    .appbar .title { font-size:14px; }
+    .appnav { flex-wrap:wrap; margin-left:0; }
+    .appnav a { padding:4px 8px; font-size:12px; }
+    .appbar .spacer { display:none; }
+    .appbar .chip { order:99; }
+    .aim { padding:8px 12px; gap:12px; }
+    .aim .jog-wrap { order:5; }
+    .answer { padding:8px 12px 10px; }
+      .answer-cols #sweepWhy { columns:1; }
+    .answer-cols #skyCoverageBody > div:first-child > div:not([style*="220px"]):not([style*="240px"]):not(#sweepWhy) { columns:1; }
+    .viewport { min-height:280px; }
+    .viewkey { max-width:calc(100% - 24px); }
+    .rail { flex-basis:auto; }
+    .nina-grid { grid-template-columns:1fr; }
+    .formulas-panel { margin:10px 12px 14px; }
+  }
+
+  @media (max-width: 420px) {
+    .appnav a { padding:4px 6px; font-size:11.5px; }
+    .aim input[type=number] { width:58px; }
+    .answer-cols #skyCoverageBody > div:first-child > div[style*="220px"],
+    .answer-cols #skyCoverageBody > div:first-child > div[style*="240px"] {
+      flex:0 0 132px !important; width:132px; }
+  }
 </style>
-<style>
-#cw-sitenav a:hover { color:#c8623f !important; }
-</style>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
-<body>
-<div id="cw-sitenav" style="
-  display:flex; align-items:center; gap:0;
-  background:#0d111a; border-bottom:1px solid #1e2530;
-  padding:0; font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
-  position:relative; z-index:200;">
-  <a href="index.html" style="display:flex; align-items:center; gap:9px;
-    padding:9px 16px; text-decoration:none; border-right:1px solid #1e2530; flex-shrink:0;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
-<rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
-<g transform="translate(170,140) scale(1.7) rotate(-45)">
-<g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
-<line x1="0" y1="-52" x2="0" y2="5"/>
-<line x1="0" y1="5" x2="0" y2="30"/>
-<line x1="0" y1="30" x2="0" y2="54"/>
-<line x1="-42" y1="-12" x2="0" y2="5"/>
-<line x1="0" y1="5" x2="36" y2="-8"/>
-</g>
-<g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
-<line x1="36" y1="-8" x2="50" y2="-20"/>
-<line x1="-42" y1="-12" x2="-54" y2="-2"/>
-</g>
-<circle cx="0" cy="-52" r="7" fill="#FFFFFF"/>
-<circle cx="0" cy="5" r="9" fill="#FFFFFF"/>
-<circle cx="0" cy="30" r="4" fill="#FFFFFF" opacity="0.85"/>
-<circle cx="0" cy="54" r="7" fill="#FFFFFF"/>
-<circle cx="-42" cy="-12" r="5.5" fill="#FFFFFF"/>
-<circle cx="36" cy="-8" r="5" fill="#FFFFFF"/>
-<circle cx="50" cy="-20" r="3" fill="#FFFFFF" opacity="0.75"/>
-<circle cx="-54" cy="-2" r="3" fill="#FFFFFF" opacity="0.75"/>
-<path d="M20 10 Q32 20 20 30" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
-<path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
-</g>
-</svg>
+<body class="app">
 
-
-    <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:700;
-      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CygnusWave Observatory Calculator</span>
+<div class="appbar">
+  <a class="brandmark" href="index.html" title="CygnusWave home">
+    <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="340" height="340" fill="#D85A30"/>
+      <g transform="translate(170,140) scale(1.7) rotate(-45)" stroke="#fff"
+         stroke-width="3.5" stroke-linecap="round" fill="none">
+        <line x1="0" y1="-52" x2="0" y2="54"/><line x1="-42" y1="-12" x2="0" y2="5"/>
+        <line x1="0" y1="5" x2="36" y2="-8"/>
+      </g>
+    </svg>
   </a>
-  <div style="display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-    <a href="index.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Home</a>
-    <a href="dome-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Dome Calculator</a>
-    <a href="ror-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Roll-Off-Roof Calculator</a>
-    <a href="help.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Help</a>
-    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
-  </div>
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
-    font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.34.004</span>
+  <span class="title">Dome Geometry</span>
+  <nav class="appnav">
+    <a href="index.html">Home</a>
+    <a href="dome-calculator.html">Dome</a>
+    <a href="ror-calculator.html">Roll-Off-Roof</a>
+    <a href="dome-manual.html">Manual</a>
+    <a href="help.html">Help</a>
+  </nav>
+  <span class="spacer"></span>
+  <button class="preset-btn" id="btnUnitMetric">Metric</button>
+  <button class="preset-btn" id="btnUnitImperial">Imperial</button>
+  <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
+  <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
+  <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
+  <span class="chip">v8.00.000</span>
 </div>
-<div class="wrap">
-  <header>
-    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; flex-wrap:wrap;">
-      <div>
-        <div class="eyebrow">Observatory Calibration Worksheet</div>
-        <h1>Dome &amp; Mount Geometry → NINA Settings</h1>
-      </div>
-      <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
-        <div class="mount-type-toggle" style="margin:0;">
-          <button id="btnUnitMetric" title="Metric units (mm)">Metric</button>
-          <button id="btnUnitImperial" class="active" title="Imperial units (inches) — OTA optics always mm">Imperial</button>
-        </div>
-        <button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button>
-        <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
-        <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
-        <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
-        <input type="file" id="loadSetupFile" accept="application/json" style="display:none;">
-      </div>
-    </div>
-  </header>
 
-  <div class="note" style="margin-bottom: 20px;">
-    <strong>Formulas used</strong><br>
-    Up/Down = (mount axis height) − (dome center height) &nbsp;·&nbsp; N/S and E/W = signed floor-mark distances &nbsp;·&nbsp;
-    GEM Axis Length = raw measurement + 0.5 × guidescope offset (if used) &nbsp;·&nbsp; Radius = as measured (or diameter ÷ 2).<br><br>
-    These are direct geometric inputs — NINA computes the live dome azimuth internally from these plus your mount's current RA/Dec and pier side.
-    Once entered, turn on dome synchronization and nudge one value at a time only if you re-measure it and find it wrong;
-    don't tune values arbitrarily to patch a specific slew position, or it'll get worse elsewhere in the sky.
+<div class="stage">
+  <aside class="rail">
+    <div class="pinned"><div class="pinned-head"><span>NINA values</span><button type="button" class="formulas-btn" id="btnFormulas">Formulas</button><button class="preset-btn nina-copy" id="btnCopySettings">Copy</button></div>
+<div class="nina">
+  <div class="nina-head">
+    <span class="nina-title">NINA &middot; Options &rarr; Dome</span>
+    <span class="nina-sub">always millimetres</span>
+    
   </div>
-
-  <div id="statusBanner" class="status-banner status-ok">
-    <span id="statusIcon">✓</span> <span id="statusText">Valid pointing — the shutter clears and everything checks out.</span>
+  <label class="nina-own"><input type="checkbox" id="ninaOwn"> I already have my NINA values</label>
+  <div class="nina-grid">
+    <button class="nv" data-k="type"><span class="nk">Mount type</span><span class="nval" id="outMountType">&mdash;</span></button>
+    <div class="nv nv-set" data-k="ns"><span class="nk">+N / &minus;S</span>
+      <span class="nval" id="outNS">&mdash;</span><span class="nin"><input type="number" id="directNS" value="3"><em>mm</em></span></div>
+    <div class="nv nv-set" data-k="ew"><span class="nk">+E / &minus;W</span>
+      <span class="nval" id="outEW">&mdash;</span><span class="nin"><input type="number" id="directEW" value="0"><em>mm</em></span></div>
+    <div class="nv nv-set" data-k="ud"><span class="nk">+Up / &minus;Down</span>
+      <span class="nval" id="outUD">&mdash;</span><span class="nin"><input type="number" id="directUD" value="11"><em>mm</em></span></div>
+    <div class="nv nv-set" data-k="rad"><span class="nk">Dome radius</span>
+      <span class="nval" id="outRadius">&mdash;</span>
+      <span class="nin"><input type="number" id="ninaRadius" step="0.1"><em>mm</em></span></div>
+    <div class="nv nv-set" data-k="gem"><span class="nk">GEM axis</span>
+      <span class="nval" id="outGem">&mdash;</span>
+      <span class="nin"><input type="number" id="ninaGem" step="0.1"><em>mm</em></span></div>
+    <button class="nv" data-k="lat"><span class="nk">Lateral axis</span><span class="nval" id="outLateral">&mdash;</span></button>
+    <button class="nv" data-k="tol"><span class="nk">Az tolerance</span><span class="nval" id="outTol">&mdash;</span></button>
   </div>
-
-  <div id="setupCheck" class="panel-bar" style="margin-top:10px; padding:12px 16px; font-size:12.5px;
-       line-height:1.6; border-radius:8px;"></div>
-
-  <div class="header-readout panel-bar">
-    <div class="header-stats">
-      <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
-      <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Always millimetres &mdash; NINA&rsquo;s fields are mm, so these ignore the unit toggle.</div>
-      <div class="stat-row">
-        <div class="stat-chip"><span class="stat-lbl">Mount Type</span><span class="stat-val" id="outMountType">Equatorial</span></div>
-        <div class="stat-chip"><span class="stat-lbl">+N/-S</span><span class="stat-val" id="outNS">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">+E/-W</span><span class="stat-val" id="outEW">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">+Up/-Down</span><span class="stat-val" id="outUD">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Dome Radius</span><span class="stat-val" id="outRadius">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">GEM Axis</span><span class="stat-val" id="outGem">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Lateral Axis</span><span class="stat-val" id="outLateral">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Az Tolerance</span><span class="stat-val" id="outTol">—</span></div>
-      </div>
-      <button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy NINA Settings</button>
-    </div>
-
-    <div class="header-stats">
-      <div class="eyebrow" style="margin-bottom:8px;">Live Dome Aim</div>
-      <div class="stat-row">
-        <div class="stat-chip"><span class="stat-lbl">Telescope points at</span><span class="stat-val" id="outTargetAltAz">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Required Dome Az</span><span class="stat-val" id="outAz">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Intersection Alt</span><span class="stat-val" id="outAlt">—</span></div>
-        <div class="stat-chip"><span class="stat-lbl">Aperture Clearance</span><span class="stat-val" id="outClearance">—</span></div>
-      </div>
-      <div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
-        ⚠ Mount offset falls outside the dome radius for this configuration — check your radius and offset measurements.
-      </div>
-      <div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
-        ⚠ This pointing sits below your horizon limit at this azimuth. The pointing has not been altered.
-      </div>
-      <div id="decWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
-        ⚠ Declination was raised to the lowest value ever observable from this latitude (lat − 90°) — anything below that never clears the horizon, at any hour angle.
-      </div>
-    </div>
-
-    <div class="schematic header-schematic">
-      <svg viewBox="0 0 260 260" id="schematicSvg">
-        <circle cx="130" cy="130" r="110" fill="none" stroke="#5c6570" stroke-width="3" stroke-dasharray="6 5"/>
-        <line x1="130" y1="18" x2="130" y2="242" stroke="#48505c" stroke-width="2"/>
-        <line x1="18" y1="130" x2="242" y2="130" stroke="#48505c" stroke-width="2"/>
-        <text x="130" y="12" text-anchor="middle" font-size="13" font-weight="700" fill="#c3cad4" font-family="Courier New">N</text>
-        <text x="252" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#c3cad4" font-family="Courier New">E</text>
-        <circle cx="130" cy="130" r="5" fill="#8b93a3"/>
-        <line id="offsetLine" x1="130" y1="130" x2="130" y2="130" stroke="#c8623f" stroke-width="2.5" stroke-dasharray="4 3"/>
-        <circle id="mountDot" cx="130" cy="130" r="7" fill="#ff8952" stroke="#fff2df" stroke-width="1.5"/>
-        <text id="mountLabel" x="130" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#ffb27a" font-family="Courier New">mount</text>
-        <!-- Dual saddle OTA markers — hidden unless dual saddle is active -->
-        <line id="lateralLine" x1="130" y1="130" x2="130" y2="130" stroke="#6ab0e0" stroke-width="1.5" stroke-dasharray="3 4" display="none"/>
-        <circle id="ota1Dot" cx="130" cy="130" r="6" fill="#c8623f" stroke="#fff2df" stroke-width="1.5" display="none"/>
-        <text id="ota1Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#c8623f" font-family="Courier New" display="none">OTA 1</text>
-        <circle id="ota2Dot" cx="130" cy="130" r="6" fill="#6ab0e0" stroke="#fff2df" stroke-width="1.5" display="none"/>
-        <text id="ota2Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#6ab0e0" font-family="Courier New" display="none">OTA 2</text>
-      </svg>
-    </div>
-  </div>
-
-  <details class="section-card" id="sec-sky" style="margin-bottom:18px;">
-    <summary class="section-header"><span class="section-title">Sky Coverage</span></summary>
-    <div class="section-body">
-<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
-      <h2 style="margin-bottom:0;">Sky Coverage</h2>
-    </div>
-    <p class="step-note" style="margin-top:6px;">Sweeps a grid across the whole sky and checks whether the shutter actually clears at each point — for both pier sides side by side, so a meridian flip's effect is visible directly rather than found by trial and error.</p>
-    <div id="skyCoverageBody" >
-      <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:10px;">
-        <div style="flex:0 0 220px;">
-          <div class="eyebrow" style="margin-bottom:6px;" id="skyPlotEastLabel">Pier East</div>
-          <svg viewBox="0 0 200 200" id="skyPlotEast" style="width:100%; max-width:220px; background:#05070a; border-radius:6px; display:block;"></svg>
+  <div class="nina-explain" id="ninaExplain"></div>
+</div>
+</div>
+    <div class="steps">
+      <div class="step" data-step="dome">
+        <button class="step-head" type="button">
+          <span class="step-num">1</span>
+          <span class="step-name">Dome</span>
+          <span class="step-sum"></span>
+        </button>
+        <div class="step-body">
+<h2>Dome &amp; Rotator</h2>
+        <div class="row">
+          <div><label>Dome diameter</label><span class="hint">rim to rim across the base &mdash; usually the figure on the spec sheet</span></div>
+          <div class="field"><input type="number" id="domeDiameter" value="94"><span class="unit">mm</span><span class="frac-hint" id="hint_domeDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
-        <div style="flex:0 0 220px;" id="skyPlotWestWrap">
-          <div class="eyebrow" style="margin-bottom:6px;">Pier West</div>
-          <svg viewBox="0 0 200 200" id="skyPlotWest" style="width:100%; max-width:220px; background:#05070a; border-radius:6px; display:block;"></svg>
+        <div style="background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+             padding:9px 13px; margin:2px 0 10px; font-size:12px; color:#c8623f;
+             font-family:'Courier New',monospace;">
+          Radius: <span id="outDomeRadius">&mdash;</span>
+          <span style="font-size:11px; color:var(--text-dim);">&middot; every calculation works from this</span>
         </div>
-        <div style="flex:1 1 200px; min-width:200px;">
-          <div class="eyebrow" style="margin-bottom:6px;">Reading this</div>
-          <p class="step-note" style="margin:0;">Center = zenith, edge = horizon, up = North, right = East. Updates live as you change your setup.<br><br>
-          <span style="color:#7fd88f;">●</span> Green — shutter clears<br>
-          <span style="color:#e0685c;">●</span> Red — vignettes or misses the dome entirely<br>
-          <span style="color:#b5713f;">●</span> Brown — below your local horizon, not observable regardless<br>
-          <span style="color:#8b93a3;">●</span> Grey — mount geometry invalid there</p>
+        <div class="row" style="margin-top:12px;">
+          <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
+          <div class="field"><input type="number" id="shutterWidth" value="20"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
+        <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
+          <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
+          <div class="field"><input type="number" id="rotatorRes" value="1" step="0.1"><span class="unit">°</span></div>
+        </div>
+        <div class="row" style="margin-top:12px; display:none;" id="rotatorDirectRow">
+          <div><label>Azimuth Tolerance</label></div>
+          <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
+          <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+        </div>
+    </div>
       </div>
-      <div id="sweepWhy" style="margin-top:14px; border-radius:8px; padding:13px 16px;
-           background:var(--panel-2); border:1px solid var(--line); font-size:12.5px; line-height:1.65;"></div>
-
-    </div>
-    </div>
-  </details>
-
-  <div class="two-col-layout">
-  <div class="col-setup">
-  <details class="section-card" id="sec-mount" open>
-    <summary class="section-header"><span class="section-title">Mount Position</span></summary>
-    <div class="section-body">
+      <div class="step" data-step="mount">
+        <button class="step-head" type="button">
+          <span class="step-num">2</span>
+          <span class="step-name">Mount position</span>
+          <span class="step-sum"></span>
+        </button>
+        <div class="step-body">
 <h2><span id="step1Title">Mount Position</span></h2>
         <div class="mount-type-toggle" style="margin-top:8px;">
           <button id="btnModeMeasure" class="active">I'll measure my dome</button>
@@ -414,20 +669,7 @@
           </div>
         </div>
 
-        <div id="step1Direct" style="display:none;">
-          <div class="row" style="margin-top:6px;">
-            <div><label>Scope Position +N/-S</label></div>
-            <div class="field"><input type="number" id="directNS" value="3"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>Scope Position +E/-W</label></div>
-            <div class="field"><input type="number" id="directEW" value="0"><span class="unit">mm</span><span class="frac-hint" id="hint_directEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-          <div class="row">
-            <div><label>Scope Position +Up/-Down</label></div>
-            <div class="field"><input type="number" id="directUD" value="11"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-          </div>
-        </div>
+        
       <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
       <h2>Optical Axis Offset</h2>
         <p class="step-note">Mount type changes what NINA needs here.</p>
@@ -461,123 +703,14 @@
           </div>
         </div>
     </div>
-  </details>
-  <details class="section-card" id="sec-dome">
-    <summary class="section-header"><span class="section-title">Dome &amp; Rotator</span></summary>
-    <div class="section-body">
-<h2>Dome &amp; Rotator</h2>
-        <div class="row">
-          <div><label>Dome diameter</label><span class="hint">rim to rim across the base &mdash; usually the figure on the spec sheet</span></div>
-          <div class="field"><input type="number" id="domeDiameter" value="94"><span class="unit">mm</span><span class="frac-hint" id="hint_domeDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-        <div style="background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
-             padding:9px 13px; margin:2px 0 10px; font-size:12px; color:#c8623f;
-             font-family:'Courier New',monospace;">
-          Radius: <span id="outDomeRadius">&mdash;</span>
-          <span style="font-size:11px; color:var(--text-dim);">&middot; every calculation works from this</span>
-        </div>
-        <div class="row" style="margin-top:12px;">
-          <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
-          <div class="field"><input type="number" id="shutterWidth" value="20"><span class="unit">mm</span><span class="frac-hint" id="hint_shutterWidth" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-        <div class="row" style="margin-top:12px;" id="rotatorMeasureRow">
-          <div><label>Smallest azimuth step your rotator can reliably slew to</label><span class="hint">older NexDome units were 1°</span></div>
-          <div class="field"><input type="number" id="rotatorRes" value="1" step="0.1"><span class="unit">°</span></div>
-        </div>
-        <div class="row" style="margin-top:12px; display:none;" id="rotatorDirectRow">
-          <div><label>Azimuth Tolerance</label></div>
-          <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
-        </div>
-        <div class="row" style="margin-top:12px;">
-          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
-          <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
-        </div>
-    </div>
-  </details>
-  
-
-  <details class="section-card" id="sec-optical-system">
-    <summary class="section-header"><span class="section-title">Optical System</span></summary>
-    <div class="section-body">
-      <p class="step-note">Used for the 3D preview and shutter aperture clearance check. Always in mm.</p>
-      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
-      <div class="toggle-row">
-        <input type="checkbox" id="hasDualSaddle">
-        <label for="hasDualSaddle">Dual saddle with side-by-side OTAs — set Lateral Axis Length</label>
       </div>
-      <div class="sub-fields" id="lateralFields" style="display:none;">
-        <div class="row" id="lateralMeasureRow">
-          <div><label>Offset of imaging OTA center from mount axis</label></div>
-          <div class="field">
-            <input type="number" id="lateralDist" value="100"><span class="unit">mm</span>
-            <select id="lateralDir"><option value="1">right</option><option value="-1">left</option></select>
-          </div>
-        </div>
-        <div class="row" id="lateralDirectRow" style="display:none;">
-          <div><label>Lateral Axis Length</label></div>
-          <div class="field"><input type="number" id="lateralDirect" value="0"><span class="unit">mm</span></div>
-        </div>
-        <div class="row" style="margin-top:2px;">
-          <div>
-            <label>Which OTA does NINA track?</label>
-            <span class="hint">The centered one defines the dome azimuth — the other rides along, mirrored</span>
-          </div>
-          <div class="field">
-            <select id="centerScope"><option value="between">Between OTA 1 &amp; 2</option><option value="1" selected>OTA 1</option><option value="2">OTA 2</option></select>
-          </div>
-        </div>
-      </div>
-      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
-      <div class="row">
-        <div><label id="otaLengthLabel">OTA tube length</label></div>
-        <div class="field"><input type="number" id="otaLength" value="450"><span class="unit">mm</span></div>
-      </div>
-      <div class="row">
-        <div><label id="otaApertureLabel">OTA clear aperture</label></div>
-        <div class="field"><input type="number" id="otaAperture" value="200"><span class="unit">mm</span></div>
-      </div>
-        <div class="row">
-          <div><label>OTA outer diameter</label><span class="hint">tube body including rings and dovetail &mdash; 0 estimates it from the aperture</span></div>
-          <div class="field"><input type="number" id="otaOuterDia" value="0"><span class="unit">mm</span></div>
-        </div>
-      <div class="row">
-      <div><label>Dew shield length</label><span class="hint">adds to the tube length; drawn in a lighter tone</span></div>
-      <div class="field"><input type="number" id="dewShield" value="0"><span class="unit">mm</span></div>
-      </div>
-      <div class="row">
-      <div><label>OTA offset along the tube</label><span class="hint">centre of tube + shield relative to the Dec axis; + = toward the aperture</span></div>
-      <div class="field"><input type="number" id="otaOffset" value="0"><span class="unit">mm</span></div>
-      </div>
-        <div class="row">
-        <div><label>Counterweight reach</label><span class="hint">RA axis to the far end of the shaft &mdash; 0 if you run without one</span></div>
-        <div class="field"><input type="number" id="cwReach" value="0"><span class="unit">mm</span></div>
-        </div>
-      <div id="ota2Fields" style="display:none;">
-        <hr style="border:none; border-top:1px solid var(--line); margin:12px 0;">
-        <div class="row">
-          <div><label>OTA 2 tube length</label></div>
-          <div class="field"><input type="number" id="ota2Length" value="450"><span class="unit">mm</span></div>
-        </div>
-        <div class="row">
-          <div><label>OTA 2 clear aperture</label></div>
-          <div class="field"><input type="number" id="ota2Aperture" value="130"><span class="unit">mm</span></div>
-        </div>
-          <div class="row">
-            <div><label>OTA 2 outer diameter</label><span class="hint">0 estimates it from the aperture</span></div>
-            <div class="field"><input type="number" id="ota2OuterDia" value="0"><span class="unit">mm</span></div>
-          </div>
-          <div class="row">
-            <div><label>OTA 2 offset along the tube</label><span class="hint">+ = toward the aperture</span></div>
-            <div class="field"><input type="number" id="ota2Offset" value="0"><span class="unit">mm</span></div>
-          </div>
-      </div>
-    </div>
-  </details>
-
-
-  <details class="section-card" id="sec-mount-system">
-    <summary class="section-header"><span class="section-title">Mount System</span></summary>
-    <div class="section-body">
+      <div class="step" data-step="mountsys">
+        <button class="step-head" type="button">
+          <span class="step-num">3</span>
+          <span class="step-name">Mount</span>
+          <span class="step-sum"></span>
+        </button>
+        <div class="step-body">
       <p class="step-note">Pick your mount to fill in its geometry, or leave it on Generic and enter your own.</p>
       <div class="row">
         <div><label>Mount model</label></div>
@@ -730,6 +863,15 @@
         <input type="checkbox" id="mountCustomValues">
         <label for="mountCustomValues">Use my own values &mdash; unlock the dimensions below</label>
       </div>
+      <div id="customMountRow" style="display:none; margin-top:10px; gap:8px; flex-wrap:wrap;">
+        <button class="preset-btn" id="btnSaveMount">Save this mount&hellip;</button>
+        <button class="preset-btn" id="btnExportMounts">Export my mounts</button>
+        <button class="preset-btn" id="btnImportMounts">Import mounts</button>
+        <button class="preset-btn" id="btnDeleteMount" style="display:none;">Delete this mount</button>
+        <input type="file" id="importMountsFile" accept=".json,application/json" style="display:none;">
+      </div>
+      <div id="customMountNote" style="font-size:11.5px; color:var(--text-dim);
+        margin-top:6px; line-height:1.55;"></div>
       <div id="mountGenericFields" style="display:none; margin-top:10px;">
         <div id="mountGenericGEM">
           <div class="row">
@@ -763,11 +905,95 @@
         </div>
       </div>
     </div>
-  </details>
-  
-  <details class="section-card" id="sec-horizon">
-    <summary class="section-header"><span class="section-title">Local Horizon</span></summary>
-    <div class="section-body">
+      </div>
+      <div class="step" data-step="optics">
+        <button class="step-head" type="button">
+          <span class="step-num">4</span>
+          <span class="step-name">Optical System</span>
+          <span class="step-sum"></span>
+        </button>
+        <div class="step-body">
+      <p class="step-note">Used for the 3D preview and shutter aperture clearance check. Always in mm.</p>
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="toggle-row">
+        <input type="checkbox" id="hasDualSaddle">
+        <label for="hasDualSaddle">Dual saddle with side-by-side OTAs — set Lateral Axis Length</label>
+      </div>
+      <div class="sub-fields" id="lateralFields" style="display:none;">
+        <div class="row" id="lateralMeasureRow">
+          <div><label>Offset of imaging OTA center from mount axis</label></div>
+          <div class="field">
+            <input type="number" id="lateralDist" value="100"><span class="unit">mm</span>
+            <select id="lateralDir"><option value="1">right</option><option value="-1">left</option></select>
+          </div>
+        </div>
+        <div class="row" id="lateralDirectRow" style="display:none;">
+          <div><label>Lateral Axis Length</label></div>
+          <div class="field"><input type="number" id="lateralDirect" value="0"><span class="unit">mm</span></div>
+        </div>
+        <div class="row" style="margin-top:2px;">
+          <div>
+            <label>Which OTA does NINA track?</label>
+            <span class="hint">The centered one defines the dome azimuth — the other rides along, mirrored</span>
+          </div>
+          <div class="field">
+            <select id="centerScope"><option value="between">Between OTA 1 &amp; 2</option><option value="1" selected>OTA 1</option><option value="2">OTA 2</option></select>
+          </div>
+        </div>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="row">
+        <div><label id="otaLengthLabel">OTA tube length</label></div>
+        <div class="field"><input type="number" id="otaLength" value="625"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+        <div><label id="otaApertureLabel">OTA clear aperture</label></div>
+        <div class="field"><input type="number" id="otaAperture" value="106"><span class="unit">mm</span></div>
+      </div>
+        <div class="row">
+          <div><label>OTA outer diameter</label><span class="hint">tube body including rings and dovetail &mdash; 0 estimates it from the aperture</span></div>
+          <div class="field"><input type="number" id="otaOuterDia" value="0"><span class="unit">mm</span></div>
+        </div>
+      <div class="row">
+      <div><label>Dew shield length</label><span class="hint">adds to the tube length; drawn in a lighter tone</span></div>
+      <div class="field"><input type="number" id="dewShield" value="0"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+      <div><label>OTA offset along the tube</label><span class="hint">centre of tube + shield relative to the Dec axis; + = toward the aperture</span></div>
+      <div class="field"><input type="number" id="otaOffset" value="0"><span class="unit">mm</span></div>
+      </div>
+        <div class="row">
+        <div><label>Counterweight reach</label><span class="hint">RA axis to the far end of the shaft &mdash; 0 if you run without one</span></div>
+        <div class="field"><input type="number" id="cwReach" value="0"><span class="unit">mm</span></div>
+        </div>
+      <div id="ota2Fields" style="display:none;">
+        <hr style="border:none; border-top:1px solid var(--line); margin:12px 0;">
+        <div class="row">
+          <div><label>OTA 2 tube length</label></div>
+          <div class="field"><input type="number" id="ota2Length" value="450"><span class="unit">mm</span></div>
+        </div>
+        <div class="row">
+          <div><label>OTA 2 clear aperture</label></div>
+          <div class="field"><input type="number" id="ota2Aperture" value="130"><span class="unit">mm</span></div>
+        </div>
+          <div class="row">
+            <div><label>OTA 2 outer diameter</label><span class="hint">0 estimates it from the aperture</span></div>
+            <div class="field"><input type="number" id="ota2OuterDia" value="0"><span class="unit">mm</span></div>
+          </div>
+          <div class="row">
+            <div><label>OTA 2 offset along the tube</label><span class="hint">+ = toward the aperture</span></div>
+            <div class="field"><input type="number" id="ota2Offset" value="0"><span class="unit">mm</span></div>
+          </div>
+      </div>
+    </div>
+      </div>
+      <div class="step" data-step="horizon">
+        <button class="step-head" type="button">
+          <span class="step-num">5</span>
+          <span class="step-name">Horizon</span>
+          <span class="step-sum"></span>
+        </button>
+        <div class="step-body">
       <p class="step-note" style="margin-top:2px;"><a href="horizon-guide.html" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">How to measure and write a horizon file &rarr;</a> &middot; <a href="sample-horizon.hrz" download style="color:var(--amber);">sample file</a></p>
 <h2>Local Horizon</h2>
         <p class="step-note">Buildings, trees, or terrain that block the sky below a certain altitude — drawn as a wireframe skyline in the 3D preview so you can see where the dome slit would be pointed at something other than open sky.</p>
@@ -799,12 +1025,39 @@
 360 20</textarea>
         </div>
     </div>
-  </details>
-  </div>
-  <div class="col-persistent">
-  <div class="section-card persistent" id="sec-pointing">
-    <div class="section-header persistent-header"><span class="section-title">Telescope Pointing</span></div>
-    <div class="section-body">
+      </div>
+      <div class="formulas-panel" id="formulasPanel" hidden><div class="note" id="formulasBlock" style="margin-bottom: 20px;">
+    <strong>Formulas used</strong><br>
+    Up/Down = (mount axis height) − (dome center height) &nbsp;·&nbsp; N/S and E/W = signed floor-mark distances &nbsp;·&nbsp;
+    GEM Axis Length = declination axis to the optical axis you image through (include your rings) &nbsp;·&nbsp; Radius = as measured (or diameter ÷ 2).<br><br>
+    These are direct geometric inputs — NINA computes the live dome azimuth internally from these plus your mount's current RA/Dec and pier side.
+    Once entered, turn on dome synchronization and nudge one value at a time only if you re-measure it and find it wrong;
+    don't tune values arbitrarily to patch a specific slew position, or it'll get worse elsewhere in the sky.
+  </div></div>
+    </div>
+  </aside>
+
+  <section class="view">
+    <div class="viewport">
+      <div class="viewhead"><span class="vh"><i>Telescope points at</i><b id="outTargetAltAz">&mdash;</b></span><span class="vh"><i>Required dome az</i><b id="outAz">&mdash;</b></span><span class="vh"><i>Intersection alt</i><b id="outAlt">&mdash;</b></span><span class="vh"><i>Aperture clearance</i><b id="outClearance">&mdash;</b></span></div>
+      <div id="threeContainer" style="width:100%; height:100%; border-radius:4px; overflow:hidden; background:#05070a; cursor:grab;"></div>
+      <details class="viewkey">
+        <summary>Key</summary>
+        <ul id="threeLegendList" style=" margin:10px 0 0; padding-left:18px; font-size:12.5px; color:var(--text-dim); line-height:1.6;">
+              <li><strong style="color:var(--text);">Wireframe dome</strong> — upper hemisphere, sitting on the wall down to your measured floor height</li>
+              <li><strong style="color:var(--text);">N / E / S / W</strong> — cardinal directions at the dome wall</li>
+              <li><strong style="color:var(--text);">Small bar</strong> — OTA</li>
+              <li><strong style="color:var(--text);">Amber line</strong> — optical axis</li>
+              <li><strong style="color:var(--text);">Glowing strip</strong> — the shutter door, full height, tracking azimuth only, like a real slit dome</li>
+              <li><strong style="color:var(--text);">Thin ring at the dome surface</strong> — each OTA's actual aperture footprint; if it pokes past the door's edge, that part is vignetted</li>
+              <li><strong style="color:var(--text);">Rust-colored skyline</strong> — your local horizon limit, from the Local Horizon card</li>
+              <li><strong style="color:var(--text);">Blue arc</strong> — the celestial equator (Dec=0), traced on the dome shell; genuinely tilts with latitude, crossing the horizon due East and due West</li>
+              <li><strong style="color:var(--text);">Bright dot</strong> — the elevated celestial pole, at altitude = your latitude on the North (or South) horizon-to-zenith line, where a polar-aligned GEM's RA axis points; HA=0 and GEM meridian flips happen along that same line</li>
+            </ul>
+      </details>
+      <div class="hint">Drag to orbit · scroll to zoom</div>
+    </div>
+    <div class="aim">
 <h2>Telescope Pointing</h2>
         <p class="step-note">Drives the live azimuth calculation and the 3D preview, using the exact same math NINA runs internally.</p>
         <div class="row">
@@ -824,12 +1077,12 @@
             <div><label>Right Ascension (RA)</label><span class="hint">0 = on the meridian, + = west of meridian</span></div>
             <div class="field"><input type="number" id="ha" value="0" min="-80" max="80" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="haSlider" min="-80" max="80" step="1" value="0" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          
           <div class="row">
             <div><label>Declination (Dec)</label></div>
             <div class="field"><input type="number" id="dec" value="90" min="0" max="180" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
             <button class="preset-btn" data-ha="0" data-dec="45">Meridian</button>
             <button class="preset-btn" data-ha="-5.5" data-dec="20">6h East</button>
@@ -843,12 +1096,12 @@
             <div><label>Altitude</label><span class="hint">Height above the horizon</span></div>
             <div class="field"><input type="number" id="targetAlt" value="45" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          
           <div class="row">
             <div><label>Azimuth</label><span class="hint">0 = North, 90 = East, 180 = South, 270 = West</span></div>
             <div class="field"><input type="number" id="targetAz" value="180" step="1"><span class="unit">°</span></div>
           </div>
-          <input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin: -6px 0 12px; accent-color: var(--amber);">
+          
           <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
             <button class="preset-btn" data-alt="45" data-az="180">Due South, 45°</button>
             <button class="preset-btn" data-alt="15" data-az="90">Due East, low</button>
@@ -881,11 +1134,335 @@
           <div><label>Pier side</label></div>
           <div class="field"><select id="pierSide"><option value="East">East</option><option value="West">West</option></select></div>
         </div>
+    <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-80" max="80" step="1" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
+    <div class="answer" id="answerStrip">
+      <div id="statusBanner" class="status-banner status-ok">
+    <span id="statusIcon">✓</span> <span id="statusText">Valid pointing — the shutter clears and everything checks out.</span>
+  </div>
+      <div class="answer-cols"><div id="setupCheck" class="panel-bar" style="margin-top:10px; padding:12px 16px; font-size:12.5px;
+       line-height:1.6; border-radius:8px;"></div><div id="skyCoverageBody" >
+      <div style="display:flex; gap:28px; flex-wrap:wrap; margin-top:10px;">
+        <div style="flex:0 0 220px;">
+          <div class="eyebrow" style="margin-bottom:6px;" id="skyPlotEastLabel">Pier East</div>
+          <svg viewBox="0 0 200 200" id="skyPlotEast" style="width:100%; max-width:220px; background:#05070a; border-radius:6px; display:block;"></svg>
+        </div>
+        <div style="flex:0 0 220px;" id="skyPlotWestWrap">
+          <div class="eyebrow" style="margin-bottom:6px;">Pier West</div>
+          <svg viewBox="0 0 200 200" id="skyPlotWest" style="width:100%; max-width:220px; background:#05070a; border-radius:6px; display:block;"></svg>
+        </div>
+        <div style="flex:1 1 200px; min-width:200px;">
+          <div class="eyebrow" style="margin-bottom:6px;">Reading this</div>
+          <p class="step-note" style="margin:0;">Center = zenith, edge = horizon, up = North, right = East. Updates live as you change your setup.<br><br>
+          <span style="color:#7fd88f;">●</span> Green — shutter clears<br>
+          <span style="color:#e0685c;">●</span> Red — vignettes or misses the dome entirely<br>
+          <span style="color:#b5713f;">●</span> Brown — below your local horizon, not observable regardless<br>
+          <span style="color:#8b93a3;">●</span> Grey — mount geometry invalid there</p>
+        </div>
+      </div>
+      <div id="sweepWhy" style="margin-top:14px; border-radius:8px; padding:13px 16px;
+           background:var(--panel-2); border:1px solid var(--line); font-size:12.5px; line-height:1.65;"></div>
+
+    </div></div>
     </div>
+  </section>
+</div>
+
+<div id="legacyAttic" aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;"><div id="cw-sitenav" style="
+  display:flex; align-items:center; gap:0;
+  background:#0d111a; border-bottom:1px solid #1e2530;
+  padding:0; font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;
+  position:relative; z-index:200;">
+  <a href="index.html" style="display:flex; align-items:center; gap:9px;
+    padding:9px 16px; text-decoration:none; border-right:1px solid #1e2530; flex-shrink:0;"><svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" style="width:32px;height:32px;border-radius:5px;flex-shrink:0;">
+<rect x="0" y="0" width="340" height="340" fill="#D85A30"/>
+<g transform="translate(170,140) scale(1.7) rotate(-45)">
+<g stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round">
+<line x1="0" y1="-52" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="0" y2="30"/>
+<line x1="0" y1="30" x2="0" y2="54"/>
+<line x1="-42" y1="-12" x2="0" y2="5"/>
+<line x1="0" y1="5" x2="36" y2="-8"/>
+</g>
+<g stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.7">
+<line x1="36" y1="-8" x2="50" y2="-20"/>
+<line x1="-42" y1="-12" x2="-54" y2="-2"/>
+</g>
+<circle cx="0" cy="-52" r="7" fill="#FFFFFF"/>
+<circle cx="0" cy="5" r="9" fill="#FFFFFF"/>
+<circle cx="0" cy="30" r="4" fill="#FFFFFF" opacity="0.85"/>
+<circle cx="0" cy="54" r="7" fill="#FFFFFF"/>
+<circle cx="-42" cy="-12" r="5.5" fill="#FFFFFF"/>
+<circle cx="36" cy="-8" r="5" fill="#FFFFFF"/>
+<circle cx="50" cy="-20" r="3" fill="#FFFFFF" opacity="0.75"/>
+<circle cx="-54" cy="-2" r="3" fill="#FFFFFF" opacity="0.75"/>
+<path d="M20 10 Q32 20 20 30" fill="none" stroke="#FFFFFF" stroke-width="2.5" opacity="0.85" stroke-linecap="round"/>
+<path d="M26 4 Q42 20 26 36" fill="none" stroke="#FFFFFF" stroke-width="1.5" opacity="0.5" stroke-linecap="round"/>
+</g>
+</svg>
+
+
+    <span style="font-family:'Courier New',monospace; font-size:12px; font-weight:700;
+      color:#e7e2d6; letter-spacing:0.05em; white-space:nowrap;">CygnusWave Observatory Calculator</span>
+  </a>
+  <div style="display:flex; gap:0; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+    <a href="index.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Home</a>
+    <a href="dome-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Dome Calculator</a>
+    <a href="ror-calculator.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Roll-Off-Roof Calculator</a>
+    <a href="help.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Help</a>
+    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
   </div>
-  </div>
-  <div class="col-preview">
-  <div class="section-card persistent" id="sec-preview">
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
+    font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
+    flex-shrink:0;">v8.00.000</span>
+</div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><div id="ninaPanel" class="header-readout panel-bar">
+    <div class="header-stats">
+      <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
+      <div style="font-size:11px; color:var(--text-dim); margin-bottom:8px;">Always millimetres &mdash; NINA&rsquo;s fields are mm, so these ignore the unit toggle.</div>
+      <div class="stat-row">
+        <div class="stat-chip"><span class="stat-lbl">Mount Type</span></div>
+        <div class="stat-chip"><span class="stat-lbl">+N/-S</span></div>
+        <div class="stat-chip"><span class="stat-lbl">+E/-W</span></div>
+        <div class="stat-chip"><span class="stat-lbl">+Up/-Down</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Dome Radius</span></div>
+        <div class="stat-chip"><span class="stat-lbl">GEM Axis</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Lateral Axis</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Az Tolerance</span></div>
+      </div>
+      
+    </div>
+
+    <div class="header-stats">
+      <div class="eyebrow" style="margin-bottom:8px;">Live Dome Aim</div>
+      <div class="stat-row">
+        <div class="stat-chip"><span class="stat-lbl">Telescope points at</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Required Dome Az</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Intersection Alt</span></div>
+        <div class="stat-chip"><span class="stat-lbl">Aperture Clearance</span></div>
+      </div>
+      <div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
+        ⚠ Mount offset falls outside the dome radius for this configuration — check your radius and offset measurements.
+      </div>
+      <div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
+        ⚠ This pointing sits below your horizon limit at this azimuth. The pointing has not been altered.
+      </div>
+      <div id="decWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
+        ⚠ Declination was raised to the lowest value ever observable from this latitude (lat − 90°) — anything below that never clears the horizon, at any hour angle.
+      </div>
+    </div>
+
+    <div class="schematic header-schematic">
+      <svg viewBox="0 0 260 260" id="schematicSvg">
+        <circle cx="130" cy="130" r="110" fill="none" stroke="#5c6570" stroke-width="3" stroke-dasharray="6 5"/>
+        <line x1="130" y1="18" x2="130" y2="242" stroke="#48505c" stroke-width="2"/>
+        <line x1="18" y1="130" x2="242" y2="130" stroke="#48505c" stroke-width="2"/>
+        <text x="130" y="12" text-anchor="middle" font-size="13" font-weight="700" fill="#c3cad4" font-family="Courier New">N</text>
+        <text x="252" y="135" text-anchor="middle" font-size="13" font-weight="700" fill="#c3cad4" font-family="Courier New">E</text>
+        <circle cx="130" cy="130" r="5" fill="#8b93a3"/>
+        <line id="offsetLine" x1="130" y1="130" x2="130" y2="130" stroke="#c8623f" stroke-width="2.5" stroke-dasharray="4 3"/>
+        <circle id="mountDot" cx="130" cy="130" r="7" fill="#ff8952" stroke="#fff2df" stroke-width="1.5"/>
+        <text id="mountLabel" x="130" y="152" text-anchor="middle" font-size="11" font-weight="700" fill="#ffb27a" font-family="Courier New">mount</text>
+        <!-- Dual saddle OTA markers — hidden unless dual saddle is active -->
+        <line id="lateralLine" x1="130" y1="130" x2="130" y2="130" stroke="#6ab0e0" stroke-width="1.5" stroke-dasharray="3 4" display="none"/>
+        <circle id="ota1Dot" cx="130" cy="130" r="6" fill="#c8623f" stroke="#fff2df" stroke-width="1.5" display="none"/>
+        <text id="ota1Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#c8623f" font-family="Courier New" display="none">OTA 1</text>
+        <circle id="ota2Dot" cx="130" cy="130" r="6" fill="#6ab0e0" stroke="#fff2df" stroke-width="1.5" display="none"/>
+        <text id="ota2Label" x="130" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#6ab0e0" font-family="Courier New" display="none">OTA 2</text>
+      </svg>
+    </div>
+  </div><details class="section-card" id="sec-sky" style="margin-bottom:18px;">
+    <summary class="section-header"><span class="section-title">Sky Coverage</span></summary>
+    <div class="section-body">
+<div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <h2 style="margin-bottom:0;">Sky Coverage</h2>
+    </div>
+    <p class="step-note" style="margin-top:6px;">Sweeps a grid across the whole sky and checks whether the shutter actually clears at each point — for both pier sides side by side, so a meridian flip's effect is visible directly rather than found by trial and error.</p>
+    
+    </div>
+  </details><details class="section-card" id="sec-mount" open>
+    <summary class="section-header"><span class="section-title">Mount Position</span></summary>
+    <div class="section-body">
+<h2></h2>
+        <div class="mount-type-toggle" style="margin-top:8px;">
+          
+          
+        </div>
+        
+
+        
+
+        <div id="step1Direct" style="display:none;">
+          <div class="row" style="margin-top:6px;">
+            <div><label>Scope Position +N/-S</label></div>
+            <div class="field"><span class="unit">mm</span><span class="frac-hint" id="hint_directNS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Scope Position +E/-W</label></div>
+            <div class="field"><span class="unit">mm</span><span class="frac-hint" id="hint_directEW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+          <div class="row">
+            <div><label>Scope Position +Up/-Down</label></div>
+            <div class="field"><span class="unit">mm</span><span class="frac-hint" id="hint_directUD" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+          </div>
+        </div>
+      <hr style="border:none; border-top:1px solid var(--line); margin:20px 0;">
+      <h2>Optical Axis Offset</h2>
+        <p class="step-note">Mount type changes what NINA needs here.</p>
+        <div class="mount-type-toggle">
+          
+          
+        </div>
+
+        
+
+        
+    </div>
+  </details><details class="section-card" id="sec-dome">
+    <summary class="section-header"><span class="section-title">Dome &amp; Rotator</span></summary>
+    <div class="section-body">
+<h2>Dome &amp; Rotator</h2>
+        <div class="row">
+          <div><label>Dome diameter</label><span class="hint">rim to rim across the base &mdash; usually the figure on the spec sheet</span></div>
+          <div class="field"><span class="unit">mm</span></div>
+        </div>
+        <div style="background:var(--panel-2); border:1px solid var(--line); border-radius:6px;
+             padding:9px 13px; margin:2px 0 10px; font-size:12px; color:#c8623f;
+             font-family:'Courier New',monospace;">
+          Radius: 
+          <span style="font-size:11px; color:var(--text-dim);">&middot; every calculation works from this</span>
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <div><label>Shutter (slit) width</label><span class="hint">straight-line width of the open gap</span></div>
+          <div class="field"><span class="unit">mm</span></div>
+        </div>
+        
+        
+        <div class="row" style="margin-top:12px;">
+          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
+          <div class="field"><span class="unit">mm</span></div>
+        </div>
+    </div>
+  </details><details class="section-card" id="sec-optical-system">
+    <summary class="section-header"><span class="section-title">Optical System</span></summary>
+    <div class="section-body">
+      <p class="step-note">Used for the 3D preview and shutter aperture clearance check. Always in mm.</p>
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="toggle-row">
+        
+        <label for="hasDualSaddle">Dual saddle with side-by-side OTAs — set Lateral Axis Length</label>
+      </div>
+      
+      <hr style="border:none; border-top:1px solid var(--line); margin:14px 0;">
+      <div class="row">
+        <div></div>
+        <div class="field"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+        <div></div>
+        <div class="field"><span class="unit">mm</span></div>
+      </div>
+        <div class="row">
+          <div><label>OTA outer diameter</label><span class="hint">tube body including rings and dovetail &mdash; 0 estimates it from the aperture</span></div>
+          <div class="field"><span class="unit">mm</span></div>
+        </div>
+      <div class="row">
+      <div><label>Dew shield length</label><span class="hint">adds to the tube length; drawn in a lighter tone</span></div>
+      <div class="field"><span class="unit">mm</span></div>
+      </div>
+      <div class="row">
+      <div><label>OTA offset along the tube</label><span class="hint">centre of tube + shield relative to the Dec axis; + = toward the aperture</span></div>
+      <div class="field"><span class="unit">mm</span></div>
+      </div>
+        <div class="row">
+        <div><label>Counterweight reach</label><span class="hint">RA axis to the far end of the shaft &mdash; 0 if you run without one</span></div>
+        <div class="field"><span class="unit">mm</span></div>
+        </div>
+      
+    </div>
+  </details><details class="section-card" id="sec-mount-system">
+    <summary class="section-header"><span class="section-title">Mount System</span></summary>
+    <div class="section-body">
+      <p class="step-note">Pick your mount to fill in its geometry, or leave it on Generic and enter your own.</p>
+      <div class="row">
+        <div><label>Mount model</label></div>
+        <div class="field" style="min-width:230px;">
+          
+        </div>
+      </div>
+      
+      
+      
+
+
+      <!-- ---------- how the measurements are taken ---------- -->
+      
+
+      <!-- ---------- measure-my-own inputs ---------- -->
+      <div class="toggle-row" style="margin-top:10px;">
+        
+        <label for="mountCustomValues">Use my own values &mdash; unlock the dimensions below</label>
+      </div>
+      
+      
+      
+    </div>
+  </details><details class="section-card" id="sec-horizon">
+    <summary class="section-header"><span class="section-title">Local Horizon</span></summary>
+    <div class="section-body">
+      <p class="step-note" style="margin-top:2px;"><a href="horizon-guide.html" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">How to measure and write a horizon file &rarr;</a> &middot; <a href="sample-horizon.hrz" download style="color:var(--amber);">sample file</a></p>
+<h2>Local Horizon</h2>
+        <p class="step-note">Buildings, trees, or terrain that block the sky below a certain altitude — drawn as a wireframe skyline in the 3D preview so you can see where the dome slit would be pointed at something other than open sky.</p>
+        <div class="mount-type-toggle">
+          
+          
+        </div>
+
+        
+
+        
+    </div>
+  </details><div class="section-card persistent" id="sec-pointing">
+    <div class="section-header persistent-header"><span class="section-title">Telescope Pointing</span></div>
+    <div class="section-body">
+<h2>Telescope Pointing</h2>
+        <p class="step-note">Drives the live azimuth calculation and the 3D preview, using the exact same math NINA runs internally.</p>
+        <div class="row">
+          <div><label>Site latitude</label></div>
+          <div class="field"><span class="unit">°</span></div>
+        </div>
+      
+
+        <div class="mount-type-toggle">
+          
+          
+        </div>
+
+        
+
+        
+
+        <div class="jog-wrap">
+          <div class="jog-pad">
+            <div></div><div></div>
+            
+            
+            
+            <div></div><div></div>
+          </div>
+          <div class="jog-steps">
+            <div class="step-label">Step size</div>
+            <div class="jog-step-row">
+              <button class="jog-step-btn" data-step="0.1">0.1°</button>
+              <button class="jog-step-btn active" data-step="1">1°</button>
+              <button class="jog-step-btn" data-step="5">5°</button>
+              <button class="jog-step-btn" data-step="15">15°</button>
+            </div>
+            <span class="hint" style="margin-top:2px;">Hold to keep jogging. Nudges whichever pointing mode is active above.</span>
+          </div>
+        </div>
+
+        
+    </div>
+  </div><div class="section-card persistent" id="sec-preview">
     <div class="section-header persistent-header"><span class="section-title">3D Preview</span></div>
     <div class="section-body">
 <h2 style="margin-bottom:10px;">3D Preview</h2>
@@ -894,6 +1471,10 @@
             <div class="toggle-row" style="margin-bottom:0;">
               <input type="checkbox" id="showHorizon3D" checked>
               <label for="showHorizon3D">Show local horizon</label>
+            </div>
+            <div class="toggle-row" style="margin-bottom:0;">
+              <input type="checkbox" id="showSweep3D">
+              <label for="showSweep3D">Show swept volume</label>
             </div>
             <div class="toggle-row" style="margin-bottom:0;">
               <input type="checkbox" id="showMeridian3D" checked>
@@ -908,33 +1489,20 @@
         </div>
         <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start;">
           <div style="flex:1 1 340px; min-width:280px;">
-            <div id="threeContainer" style="width:100%; height:460px; border-radius:4px; overflow:hidden; background:#05070a; cursor:grab;"></div>
+            
           </div>
           <div style="flex:0 1 260px; min-width:220px;">
             <p class="step-note" style="margin-top:0; color:var(--amber);">Drag to orbit, scroll to zoom.</p>
-            <ul id="threeLegendList" style="display:none; margin:10px 0 0; padding-left:18px; font-size:12.5px; color:var(--text-dim); line-height:1.6;">
-              <li><strong style="color:var(--text);">Wireframe dome</strong> — upper hemisphere, sitting on the wall down to your measured floor height</li>
-              <li><strong style="color:var(--text);">N / E / S / W</strong> — cardinal directions at the dome wall</li>
-              <li><strong style="color:var(--text);">Small bar</strong> — OTA</li>
-              <li><strong style="color:var(--text);">Amber line</strong> — optical axis</li>
-              <li><strong style="color:var(--text);">Glowing strip</strong> — the shutter door, full height, tracking azimuth only, like a real slit dome</li>
-              <li><strong style="color:var(--text);">Thin ring at the dome surface</strong> — each OTA's actual aperture footprint; if it pokes past the door's edge, that part is vignetted</li>
-              <li><strong style="color:var(--text);">Rust-colored skyline</strong> — your local horizon limit, from the Local Horizon card</li>
-              <li><strong style="color:var(--text);">Blue arc</strong> — the celestial equator (Dec=0), traced on the dome shell; genuinely tilts with latitude, crossing the horizon due East and due West</li>
-              <li><strong style="color:var(--text);">Bright dot</strong> — the elevated celestial pole, at altitude = your latitude on the North (or South) horizon-to-zenith line, where a polar-aligned GEM's RA axis points; HA=0 and GEM meridian flips happen along that same line</li>
-            </ul>
+            
             <p class="step-note" id="shutterAngleNote" style="margin-top:8px;"></p>
             <button class="preset-btn" id="btnToggleLegend" type="button" style="margin-top:10px;">Show Wire frame legend</button>
           </div>
         </div>
     </div>
-  </div>
-  </div>
-  </div>
-</div>
+  </div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
+
 function num(id){ const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; }
 
 // A local timestamp for filenames: 2026-07-28_1432. Local rather than UTC so
@@ -1389,6 +1957,7 @@ function compute(){
   if(typeof updatePierVerdict === 'function') updatePierVerdict();
   if(typeof updateSetupCheck === 'function') updateSetupCheck();
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
+  if(typeof updateSweptVolume === 'function') updateSweptVolume();
 }
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
@@ -2277,10 +2846,17 @@ function createGEMMount(THREE, options) {
 
   var _p = new THREE.Vector3();
   function pierClearance() {
+    // No shaft, nothing to strike.
+    if (noCounterweight || shaftLen <= 0) return null;
     group.updateMatrixWorld(true);
-    var best = null, end = -(shaftStart + shaftLen);
+    var best = null;
     for (var i = 0; i <= 32; i++) {
-      _p.set(0, 0, -shaftStart + (end + shaftStart) * (i / 32));
+      // Sample along the side the counterweight is actually drawn on. This
+      // assumed the negative direction, but cwSide flips with the sign of the
+      // declination-axis length - and this tool passes it negative to match
+      // NINA's convention. The check was therefore sweeping the telescope side
+      // and finding nothing below the flange, returning null every time.
+      _p.set(0, 0, -cwSide * (shaftStart + shaftLen * (i / 32)));
       decGroup.localToWorld(_p);
       frame.worldToLocal(_p);
       if (_p.z > flangeZ) continue;
@@ -2294,6 +2870,15 @@ function createGEMMount(THREE, options) {
   function showOTA(v) { optics.visible = !!v; return api; }
   function showAxes(v) { axes.visible = !!v; decAxisLine.visible = !!v; return api; }
   function showSweptVolume(v) { sweep.visible = !!v; sweepWire.visible = !!v; return api; }
+  // Recolour the swept volume when something fouls, so the warning in the panel
+  // and the shape in the preview say the same thing. The harmonic model already
+  // had this; the equatorial one did not.
+  function markClash(v) {
+    var col = v ? 0xd9534f : C.sweep;
+    if (sweep.material.color) sweep.material.color.setHex(col);
+    if (sweepWire.material.color) sweepWire.material.color.setHex(col);
+    return api;
+  }
   function dispose() { store.forEach(function (r) { r.dispose && r.dispose(); }); }
 
   var api = null;
@@ -2302,7 +2887,7 @@ function createGEMMount(THREE, options) {
     decGroup: decGroup, decRotor: decRotor, optics: optics,
     params: P, reach: reach,
     update: update, setDetail: setDetail, setOptics: setOptics, showPier: showPier,
-    showOTA: showOTA, showAxes: showAxes, showSweptVolume: showSweptVolume,
+    showOTA: showOTA, showAxes: showAxes, showSweptVolume: showSweptVolume, markClash: markClash,
     opticalAxis: opticalAxis, pierClearance: pierClearance, dispose: dispose
   };
 
@@ -2909,9 +3494,11 @@ const MOUNT_LIBRARY = [
   { id:'l600',      name:'PlaneWave L-600',           type:'AltAz', H:52.7 },
 ];
 
+function allMounts(){ return MOUNT_LIBRARY.concat(customMountEntries()); }
 function mountById(id){
-  for(let i = 0; i < MOUNT_LIBRARY.length; i++){
-    if(MOUNT_LIBRARY[i].id === id) return MOUNT_LIBRARY[i];
+  const all = allMounts();
+  for(let i = 0; i < all.length; i++){
+    if(all[i].id === id) return all[i];
   }
   return MOUNT_LIBRARY[0];
 }
@@ -2957,6 +3544,105 @@ function mountCustomOn(){
   const e = document.getElementById('mountCustomValues');
   return !!(e && e.checked);
 }
+// ---- Mounts you measure yourself -------------------------------------------
+// Most manufacturers do not publish the axis geometry this tool needs, so the
+// library will always be short of the mounts people actually own. Anyone who
+// has one can measure it in a few minutes; this lets them keep that work under
+// a name, and hand it to someone else.
+let customMounts = [];
+
+function loadCustomMounts(){
+  try {
+    const raw = window.localStorage && localStorage.getItem('cygnuswave.mounts');
+    customMounts = raw ? JSON.parse(raw) : [];
+  } catch(e){ customMounts = []; }   // private browsing, or storage disabled
+  if(!Array.isArray(customMounts)) customMounts = [];
+}
+function persistCustomMounts(){
+  try { if(window.localStorage) localStorage.setItem('cygnuswave.mounts', JSON.stringify(customMounts)); }
+  catch(e){ /* still usable this session, and exportable */ }
+}
+function customMountEntries(){
+  return customMounts.map(m => Object.assign({}, m, { id:'custom:' + m.name, custom:true }));
+}
+
+function saveCurrentMount(){
+  const d = genericDims();
+  const isAltAz = (mountType !== 'GEM');
+  if(isAltAz ? !(d.H > 0) : !(d.A > 0 || d.B > 0 || d.C > 0)){
+    setCustomNote('Nothing to save yet \u2014 enter the dimensions above first.', true); return;
+  }
+  const name = (window.prompt('Name this mount', 'My ' + (isAltAz ? 'alt/az' : 'equatorial') + ' mount') || '').trim();
+  if(!name) return;
+  const entry = isAltAz
+    ? { name, type:'AltAz', H:d.H }
+    : { name, type:'GEM', A:d.A, B:d.B, C:d.C, I:d.I || 0 };
+  const at = customMounts.findIndex(m => m.name === name);
+  if(at >= 0){
+    if(!window.confirm('"' + name + '" already exists. Replace it?')) return;
+    customMounts[at] = entry;
+  } else customMounts.push(entry);
+  persistCustomMounts();
+  initMountPresets();
+  selectedMountId = 'custom:' + name;
+  const sel = document.getElementById('mountPreset');
+  if(sel) sel.value = selectedMountId;
+  applyMountPreset(false);
+  setCustomNote('Saved as \u201c' + name + '\u201d. It is now in the list under Your mounts.');
+}
+
+function exportCustomMounts(){
+  if(!customMounts.length){ setCustomNote('No saved mounts to export yet.', true); return; }
+  const blob = new Blob([JSON.stringify({ cygnuswaveMounts: customMounts }, null, 2)],
+                        { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'cygnuswave-mounts_' + fileStamp() + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setCustomNote('Exported ' + customMounts.length + ' mount' + (customMounts.length===1?'':'s') + '.');
+}
+
+function importCustomMounts(file){
+  const r = new FileReader();
+  r.onload = e => {
+    let data;
+    try { data = JSON.parse(e.target.result); }
+    catch(err){ setCustomNote('That file could not be read as mount data.', true); return; }
+    const list = Array.isArray(data) ? data : data.cygnuswaveMounts;
+    if(!Array.isArray(list)){ setCustomNote('No mounts found in that file.', true); return; }
+    let added = 0, replaced = 0;
+    list.forEach(m => {
+      if(!m || !m.name) return;
+      const at = customMounts.findIndex(x => x.name === m.name);
+      if(at >= 0){ customMounts[at] = m; replaced++; } else { customMounts.push(m); added++; }
+    });
+    persistCustomMounts();
+    initMountPresets();
+    setCustomNote('Imported ' + added + ' new mount' + (added===1?'':'s')
+      + (replaced ? ', replaced ' + replaced : '') + '.');
+  };
+  r.readAsText(file);
+}
+
+function deleteCurrentCustomMount(){
+  const m = mountById(selectedMountId);
+  if(!m || !m.custom) return;
+  if(!window.confirm('Delete \u201c' + m.name + '\u201d?')) return;
+  customMounts = customMounts.filter(x => x.name !== m.name);
+  persistCustomMounts();
+  selectedMountId = 'custom';
+  initMountPresets();
+  const sel = document.getElementById('mountPreset');
+  if(sel) sel.value = 'custom';
+  applyMountPreset(false);
+  setCustomNote('Deleted.');
+}
+
+function setCustomNote(text, warn){
+  const el = document.getElementById('customMountNote');
+  if(el){ el.textContent = text; el.style.color = warn ? '#d9a066' : 'var(--text-dim)'; }
+}
+
 function genericDims(){
   const g = id => { const e = document.getElementById(id); return e ? num(id) : 0; };
   return { A:g('genA'), B:g('genB'), C:g('genC'), I:g('genI'), H:g('genH') };
@@ -3011,6 +3697,10 @@ function syncMountDiagram(){
   // diagram; they only become editable when you are measuring your own mount.
   const gf = document.getElementById('mountGenericFields');
   if(gf) gf.style.display = 'block';
+  const row = document.getElementById('customMountRow');
+  if(row) row.style.display = mountCustomOn() || mountById(selectedMountId).custom ? 'flex' : 'none';
+  const del = document.getElementById('btnDeleteMount');
+  if(del) del.style.display = mountById(selectedMountId).custom ? 'inline-block' : 'none';
   // The dimensions unlock only when "Use my own values" is ticked. That keeps a
   // stray keystroke from silently redefining a library mount, and makes the
   // change reversible - unticking restores the published figures.
@@ -3053,6 +3743,48 @@ function syncMountDiagram(){
 // ---- Why the setup is (or is not) sound ------------------------------------
 // Four questions a builder actually has to answer before pouring concrete.
 // Each reuses a figure the tool already computes rather than re-deriving it.
+// Does anything strike the pier as the mount turns? Both mount models have
+// always been able to answer this and nothing ever asked. On a German
+// equatorial it is the counterweight sweeping past the pier; on a strain-wave
+// mount it is the back of the tube dropping toward the pier top, which is why
+// the two models expose different functions for it.
+// ---- Swept volume in the preview -------------------------------------------
+// Both mount models carry a swept-volume mesh and neither was ever shown. The
+// clearance figures describe this shape in words - "sweeps a radius of 18.6
+// inches" - and seeing it against the walls makes the number checkable rather
+// than something to take on trust. Where the model can recolour it, it turns
+// red when the pier-strike check fails, so the warning and the picture agree.
+(function(){
+  const t = document.getElementById('showSweep3D');
+  if(t) t.addEventListener('change', () => { updateSweptVolume(); });
+})();
+function updateSweptVolume(){
+  const on = !!(document.getElementById('showSweep3D') || {}).checked;
+  [typeof gemMount !== 'undefined' ? gemMount : null,
+   typeof l500Mount !== 'undefined' ? l500Mount : null].forEach(m => {
+    if(!m || typeof m.showSweptVolume !== 'function') return;
+    try {
+      m.showSweptVolume(on);
+      if(on && typeof m.markClash === 'function'){
+        const s = pierStrikeCheck();
+        m.markClash(!!(s && s.mm < 0));
+      }
+    } catch(e){ /* model rebuilding */ }
+  });
+}
+
+function pierStrikeCheck(){
+  const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+  if(!m) return null;
+  const harmonic = (m.mountType === 'harmonic');
+  const fn = harmonic ? m.rearClearance : m.pierClearance;
+  if(typeof fn !== 'function') return null;
+  let d;
+  try { d = fn.call(m); } catch(e){ return null; }
+  if(d === null || d === undefined || !isFinite(d)) return null;
+  return { mm: d, what: harmonic ? 'the back of the tube' : 'the counterweight' };
+}
+
 function updateSetupCheck(){
   const el = document.getElementById('setupCheck');
   if(!el) return;
@@ -3125,6 +3857,20 @@ function updateSetupCheck(){
          (cov!==null ? ' \u2014 ' + cov.toFixed(0) + '% of the observable sky clears.' : '.');
   }
   rows.push([mc, 'Mount position', mt]);
+
+  // 5. does anything hit the pier on the way round?
+  const strike = pierStrikeCheck();
+  if(strike){
+    const s = strike.mm;
+    rows.push([s < 0 ? BAD : (s < 40 ? WARN : OK), 'Pier strike',
+      s < 0
+        ? '<b>' + strike.what.charAt(0).toUpperCase() + strike.what.slice(1)
+          + ' fouls the pier by ' + fmt(-s) + '.</b> Raise the mount head, use a narrower pier, '
+          + 'or shorten the counterweight shaft.'
+        : strike.what.charAt(0).toUpperCase() + strike.what.slice(1)
+          + ' passes the pier with ' + fmt(s) + ' to spare.'
+          + (s < 40 ? ' That is tight enough to check on the real thing before pouring.' : '')]);
+  }
 
   const worst = rows.some(r=>r[0]===BAD) ? BAD : rows.some(r=>r[0]===WARN) ? WARN : OK;
   const title = worst===OK ? 'This setup checks out'
@@ -3224,7 +3970,20 @@ function updatePierVerdict(){
 // ---- Mount System card ----------------------------------------------------
 let selectedMountId = 'generic';
 
+function wireCustomMountButtons(){
+  const on = (id, fn) => { const e = document.getElementById(id); if(e && !e._wired){ e._wired = 1; e.addEventListener('click', fn); } };
+  on('btnSaveMount', saveCurrentMount);
+  on('btnExportMounts', exportCustomMounts);
+  on('btnImportMounts', () => document.getElementById('importMountsFile').click());
+  on('btnDeleteMount', deleteCurrentCustomMount);
+  const f = document.getElementById('importMountsFile');
+  if(f && !f._wired){ f._wired = 1;
+    f.addEventListener('change', e => { if(e.target.files[0]) importCustomMounts(e.target.files[0]); e.target.value=''; }); }
+}
+
 function initMountPresets(){
+  loadCustomMounts();
+  wireCustomMountButtons();
   const sel = document.getElementById('mountPreset');
   if(!sel) return;
   sel.innerHTML = '';
@@ -3233,7 +3992,8 @@ function initMountPresets(){
   // An alt/az entry is dimensioned by H, not by A and B - classifying on A
   // alone put the fully-specified PlaneWave mounts under "needs measuring".
   const band = m =>
-      m.type === null || m.id === 'generic'      ? 0
+      m.custom                                   ? 5
+    : m.type === null || m.id === 'generic'      ? 0
     : (m.type === 'AltAz')
         ? ((m.H !== null && m.H !== undefined) ? 1 : 4)
     : (m.A !== null && m.A !== undefined)        ? 1
@@ -3241,9 +4001,9 @@ function initMountPresets(){
     : (m.C !== null && m.C !== undefined)        ? 3
     :                                              4;
   const titles = ['', 'Full dimensions', 'One latitude only',
-                  'Optical-axis offset only', 'Needs measuring'];
-  [0,1,2,3,4].forEach(b => {
-    const items = MOUNT_LIBRARY.filter(m => band(m) === b);
+                  'Optical-axis offset only', 'Needs measuring', 'Your mounts'];
+  [0,5,1,2,3,4].forEach(b => {
+    const items = allMounts().filter(m => band(m) === b);
     if(!items.length) return;
     const parent = b === 0 ? sel : document.createElement('optgroup');
     if(b !== 0){ parent.label = titles[b]; sel.appendChild(parent); }
@@ -4774,7 +5534,7 @@ const SAVE_FIELD_IDS = [
   'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW',
   'domeDiameter','shutterWidth','rotatorRes','wallHeight',
   'gemRaw','decHoriz',
-  'hasDualSaddle','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','lateralDir','centerScope',
+  'hasDualSaddle','showSweep3D','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','lateralDir','centerScope',
   'otaLength','otaAperture','dewShield','otaOuterDia','otaOffset','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
   'directNS','directEW','directUD','gemDirect','lateralDirect','azTolDirect',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
@@ -5139,6 +5899,246 @@ document.getElementById('btnUnitImperial').classList.add('active');
   const bind = (id, fn) => { const el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
   bind('btnUnitMetric', function(){ setUnitSystem(false); });
   bind('btnUnitImperial', function(){ setUnitSystem(true); });
+})();
+
+
+const SUMMARY = {
+  dome:     () => fmtUnit(domeRadiusMm()*2) + ' dia',
+  mount:    () => 'pier ' + fmtUnit(numMmDome('pierHeight')),
+  mountsys: () => mountById(selectedMountId).name.replace(/\s*\(.*$/,''),
+  optics:   () => num('otaAperture') + 'mm f/' + (num('otaLength')/Math.max(num('otaAperture'),1)).toFixed(1),
+  horizon:  () => horizonMode === 'flat' ? num('horizonMinAlt') + '\u00b0 min' : 'profile',
+  nina:     () => (document.getElementById('outUD')||{}).textContent || ''
+};
+
+// What each NINA field means. Shown on demand rather than as permanent prose:
+// the numbers are what you came for, the explanation is what you need once.
+const NINA_HELP = {
+  type: 'Whether NINA treats the mount as a German equatorial or as an alt/az or fork. It changes which of the fields below NINA actually uses.',
+  ns:   'How far the RA/Dec pivot sits north (+) or south (−) of the dome centre, measured on the floor.',
+  ew:   'How far that pivot sits east (+) or west (−) of the dome centre.',
+  ud:   'How far the pivot sits above (+) or below (−) the dome’s centre height. Positive means the mount is higher than the middle of the sphere.',
+  rad:  'The dome radius, centre to rim. NINA projects the optical axis onto a sphere of this size to work out where it meets the shutter.',
+  gem:  'The distance from the declination axis across to the optical axis. Zero on a fork or alt/az. Measure to the axis you actually image through, so include your rings.',
+  lat:  'Sideways offset when two tubes share a saddle. Zero for a single telescope.',
+  tol:  'How far the dome may drift from the ideal azimuth before NINA slews it again. Larger values mean fewer, coarser moves.'
+};
+// The tick drives the tool's existing measure/direct mode rather than a second
+// one of its own, so the mount step and this card can never disagree.
+(function(){
+  const tick = document.getElementById('ninaOwn');
+  const card = document.querySelector('.nina');
+  if(!tick || !card) return;
+  const sync = () => {
+    card.classList.toggle('own', tick.checked);
+    const btn = document.getElementById(tick.checked ? 'btnModeDirect' : 'btnModeMeasure');
+    if(btn) btn.click();
+  };
+  tick.addEventListener('change', sync);
+  // if a saved setup opens in direct mode, show that here without being asked
+  const direct = document.getElementById('btnModeDirect');
+  if(direct && direct.classList.contains('active')){ tick.checked = true; card.classList.add('own'); }
+})();
+
+
+// Dome radius and GEM axis are held elsewhere - as a diameter in the dome step,
+// and as the declination-axis length in the mount step - so these two are
+// proxies rather than the real inputs. They write through in millimetres and
+// read back on every recompute, which keeps one source of truth while letting
+// you type the number NINA actually shows you.
+(function(){
+  const IN = 25.4;
+  const toField = mm => (typeof useImperial !== 'undefined' && useImperial) ? mm / IN : mm;
+  const pairs = [
+    // The dome is held as a diameter, in whatever unit is on screen.
+    { proxy:'ninaRadius', field:'domeDiameter', out:'outRadius',
+      write: mm => toField(mm * 2) },
+    // The GEM axis is not held as itself: it comes from the mount's dimension C,
+    // in inches, and a library preset rewrites it on every recompute. So supply
+    // C directly and switch the mount to your own values, or the preset simply
+    // puts its own figure back and the field appears to do nothing.
+    { proxy:'ninaGem', field:'genC', out:'outGem',
+      write: mm => mm / IN, unlock: true }
+  ];
+  pairs.forEach(p => {
+    const el = document.getElementById(p.proxy), tgt = document.getElementById(p.field);
+    if(!el || !tgt) return;
+    el.addEventListener('input', () => {
+      const mm = parseFloat(el.value);
+      if(!isFinite(mm)) return;
+      if(p.unlock){
+        const own = document.getElementById('mountCustomValues');
+        if(own && !own.checked){ own.checked = true; own.dispatchEvent(new Event('change', { bubbles:true })); }
+      }
+      tgt.value = +(p.write(mm)).toFixed(3);
+      tgt.dispatchEvent(new Event('input', { bubbles:true }));
+      if(typeof applyGenericDims === 'function') applyGenericDims();
+    });
+  });
+  // keep the proxies showing whatever the tool currently holds
+  window.syncNinaProxies = function(){
+    pairs.forEach(p => {
+      const el = document.getElementById(p.proxy);
+      if(!el || el === document.activeElement) return;   // do not fight typing
+      const shown = (document.getElementById(p.out) || {}).textContent || '';
+      const v = parseFloat(String(shown).replace(/[^0-9.\-]/g, ''));
+      if(isFinite(v)) el.value = +v.toFixed(2);
+    });
+  };
+  syncNinaProxies();
+})();
+
+(function(){
+  const box = document.getElementById('ninaExplain');
+  let open = null;
+  document.querySelectorAll('.nv').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.k;
+      if(open === k){ box.textContent = ''; box.classList.remove('on');
+                      document.querySelectorAll('.nv').forEach(b=>b.classList.remove('sel'));
+                      open = null; return; }
+      document.querySelectorAll('.nv').forEach(b=>b.classList.toggle('sel', b === btn));
+      box.textContent = NINA_HELP[k] || '';
+      box.classList.add('on');
+      open = k;
+    });
+  });
+})();
+
+
+// ---- experimental layout: workflow rail ------------------------------------
+// One step open at a time. Closed steps show a short summary of what they hold,
+// so the page stays readable without hiding what you have already set.
+(function(){
+  const steps = [...document.querySelectorAll('.step')];
+  // Independent toggles rather than an accordion: opening one no longer shuts
+  // another, and everything starts closed so the rail opens on a summary of the
+  // whole setup rather than on one card's worth of fields.
+  steps.forEach(s => {
+    const head = s.querySelector('.step-head');
+    if(!head) return;
+    head.setAttribute('aria-expanded', 'false');
+    head.addEventListener('click', () => {
+      const open = s.classList.toggle('active');
+      head.setAttribute('aria-expanded', open ? 'true' : 'false');
+      // the 3D canvas is sized to its container, so nudge it after a reflow
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+    });
+  });
+
+  // Keep each collapsed step's summary current.
+  window.updateStepSummaries = function(){
+    steps.forEach(s => {
+      const el = s.querySelector('.step-sum');
+      if(!el) return;
+      const fn = SUMMARY[s.dataset.step];
+      try { el.textContent = fn ? fn() : ''; } catch(e){ el.textContent = ''; }
+    });
+  };
+})();
+
+// Show whichever slider pair matches the active pointing mode, so the bar never
+// carries two sets of controls for the same thing.
+(function(){
+  const sync = () => {
+    const altaz = document.getElementById('btnAltAzMode');
+    const on = altaz && altaz.classList.contains('active');
+    const a = document.getElementById('sHaDec'), b = document.getElementById('sAltAz');
+    if(a) a.style.display = on ? 'none' : 'flex';
+    if(b) b.style.display = on ? 'flex' : 'none';
+  };
+  ['btnHADec','btnAltAzMode'].forEach(id => {
+    const e = document.getElementById(id);
+    if(e) e.addEventListener('click', () => setTimeout(sync, 30));
+  });
+  sync();
+})();
+// The view is wider and shorter here than the original column, so the default
+// camera distance framed the model too tightly. Nudged back once at load; the
+// scroll wheel still does whatever the person wants afterwards.
+(function(){
+  const out = () => {
+    const c = document.querySelector('#threeContainer canvas');
+    if(!c) return setTimeout(out, 150);
+    // Three steps back. Measured against the frame rather than guessed: the
+    // model then spans about a third of the width, which leaves it readable
+    // without stranding it in empty canvas.
+    for(let i = 0; i < 3; i++)
+      c.dispatchEvent(new WheelEvent('wheel', { deltaY: 100, bubbles: true, cancelable: true }));
+  };
+  window.addEventListener('load', () => setTimeout(out, 700));
+})();
+
+
+// The formulas panel sits at the foot of the rail; the button that opens it is
+// up in the NINA header, so they are wired together explicitly.
+(function(){
+  const btn = document.getElementById('btnFormulas');
+  const panel = document.getElementById('formulasPanel');
+  if(!btn || !panel) return;
+  btn.setAttribute('aria-expanded', 'false');
+  btn.addEventListener('click', () => {
+    const open = panel.hasAttribute('hidden');
+    if(open) panel.removeAttribute('hidden'); else panel.setAttribute('hidden', '');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) panel.scrollIntoView({ block:'nearest', behavior:'smooth' });
+  });
+})();
+
+// Tint each key entry to the colour it describes in the scene. Taken from the
+// model's own palette rather than picked by eye, so the key and the render
+// cannot drift apart.
+(function(){
+  const TINT = [
+    [/wireframe dome|walls/i,            '#8fa6c4'],
+    [/parked roof/i,                     '#b5763f'],
+    [/N \/ E \/ S \/ W/i,                '#e07a4f'],
+    [/small bar/i,                       '#d3d0c6'],
+    [/amber line/i,                      '#ffb020'],
+    [/glowing strip/i,                   '#9fe6a0'],
+    [/thin ring/i,                       '#ffc65c'],
+    [/rust-colou?red skyline/i,          '#c8623f'],
+    [/blue arc/i,                        '#5ba7dd'],
+    [/bright dot/i,                      '#ffffff']
+  ];
+  document.querySelectorAll('.viewkey li strong').forEach(el => {
+    const t = el.textContent;
+    const hit = TINT.find(([re]) => re.test(t));
+    if(hit) el.style.color = hit[1];
+  });
+})();
+
+// The sky plots are computed lazily in the original, triggered when their
+// collapsible card is opened. Here the panel is on screen from the start and
+// nothing ever opens it, so the plots drew empty. Mark it expanded and compute
+// once at load; it then refreshes with everything else.
+(function(){
+  const start = () => {
+    if(typeof computeSkyCoverage !== 'function') return setTimeout(start, 150);
+    try { window.skyCoverageExpanded = true; } catch(e) {}
+    computeSkyCoverage();
+  };
+  window.addEventListener('load', () => setTimeout(start, 400));
+})();
+
+// The 3D view is far larger here than in the original column, so the renderer
+// needs to pick up the new aspect once the layout has settled.
+(function(){
+  const kick = () => window.dispatchEvent(new Event('resize'));
+  window.addEventListener('load', () => { kick(); setTimeout(kick, 250); setTimeout(kick, 900); });
+  new ResizeObserver(kick).observe(document.querySelector('.viewport'));
+
+})();
+// Refresh the rail summaries whenever anything recomputes.
+(function(){
+  const orig = window.compute;
+  if(typeof orig === 'function'){
+    window.compute = function(){ const r = orig.apply(this, arguments);
+      if(window.updateStepSummaries) window.updateStepSummaries();
+      if(window.syncNinaProxies) window.syncNinaProxies();
+      return r; };
+  }
+  setTimeout(() => { if(window.updateStepSummaries) window.updateStepSummaries(); }, 200);
 })();
 </script>
 </body>

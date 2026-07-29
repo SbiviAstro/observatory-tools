@@ -142,7 +142,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v7.34.004</span>
+  <span class="nav-version">v8.00.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -177,6 +177,20 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Units</h2>
 <p>A <strong>Metric / Imperial</strong> toggle sits in the top-right header. Switching units converts all building, roof, mount position, height, axis offset, pier gap, and custom wall fields in place. <strong>OTA tube length and aperture always remain in mm</strong> regardless of the unit setting — telescope optics are always specified in millimetres.</p>
 <p>In imperial mode each field shows a fractional-inch hint (e.g. <code>13'1 1/2"</code>) beside it, updating live as you type. The summary chips at the top of the page (Footprint, Wall Height, Roof Travel, Mount Offset) also display in the chosen unit.</p>
+
+<h2>On a smaller screen</h2>
+<p>The same page rearranges rather than hiding anything. On a tablet the rail moves above the 3D view instead of beside it; on a phone everything becomes a single column and the measurement fields, the reasoning and the sky notes each drop to one column of their own.</p>
+<p>Nothing is removed at any width, and there is no sideways scrolling &mdash; the page simply gets taller.</p>
+
+<h2>Finding your way around</h2>
+<p>Everything sits on one screen; there is nothing to scroll past.</p>
+<ul>
+  <li><strong>The rail down the left</strong> holds your measurements, in the order you work through them. Each step is closed until you click its header, and closing it again is another click on the same header &mdash; the <strong>+</strong> and <strong>&minus;</strong> at the right tell you which will happen. More than one can be open at a time.</li>
+  <li><strong>A closed step still tells you what it holds</strong>, in the summary on its right: the dome diameter, the pier height, which mount is selected, the telescope, your horizon limit. The rail reads as a description of the setup rather than a list of empty rows.</li>
+  <li><strong>The 3D view</strong> takes the rest of the screen. Its header carries the live figures for whatever it is currently showing. Drag to orbit, scroll to zoom, and open <strong>Key</strong> in the corner for what each part of the drawing means &mdash; each entry is tinted to match the thing it describes.</li>
+  <li><strong>Telescope pointing sits under the view</strong>, so you can jog the mount and watch it move.</li>
+  <li><strong>The verdict is pinned at the bottom</strong>: whether this pointing works, why, and the sky-coverage plots.</li>
+</ul>
 
 <h2>Building &amp; Mount Position</h2>
 <p>Enter the building's width, length and wall height, then locate the mount by measuring from each wall to directly below the RA/Dec pivot on the floor &mdash; North, South, East and West. The signed offsets are derived automatically:</p>
@@ -240,6 +254,17 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Two telescopes</h2>
 <p>With <strong>Dual saddle</strong> enabled, OTA 2 is described with the same figures as the first &mdash; tube length, clear aperture, outer diameter and offset along the tube. Each tube's reach is worked out separately and the larger governs the swing clearance, rather than mixing the longest length with the widest aperture from different tubes. A guide scope or wide-field refractor riding alongside can easily be the tube that reaches furthest.</p>
+
+<h2>Saving your own mount</h2>
+<p>If your mount is not in the list, or is listed without dimensions, measure it against the diagram, tick <strong>Use my own values</strong>, and press <strong>Save this mount</strong>. It is added to the list under <em>Your mounts</em> and stays there next time you open the tool.</p>
+<p><strong>Export my mounts</strong> writes them to a file you can keep or pass to someone else; <strong>Import mounts</strong> reads one back. Anyone who owns a mount the manufacturer does not publish figures for can measure it once and share it.</p>
+
+<h2>Seeing the swept volume</h2>
+<p><strong>Show swept volume</strong> in the 3D preview draws the space the telescope and counterweight sweep through as they turn. It is the shape the clearance figures describe, so you can see it against the walls or the dome shell rather than working from the numbers alone.</p>
+<p>It draws blue when everything clears and <strong>red when something fouls the pier</strong>, matching the pier-strike line in the setup check.</p>
+
+<h2>Pier strike</h2>
+<p>The setup check reports whether the counterweight clears the pier as the mount turns, and by how much. A margin under about six inches is flagged as worth confirming on the real thing. On a harmonic mount, which carries no counterweight, the same line reports the back of the tube instead &mdash; that is what comes closest to the pier on those.</p>
 
 <h2>Reading the mount list</h2>
 <p>The list is grouped by how much is actually known about each mount, because more mounts are named than dimensioned:</p>

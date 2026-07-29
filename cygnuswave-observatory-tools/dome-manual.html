@@ -142,7 +142,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v7.34.004</span>
+  <span class="nav-version">v8.00.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -183,6 +183,25 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Getting started</h2>
 <p><strong>Save Setup / Load Setup</strong> exports everything as a JSON file, or restores it. <strong>Reset to Defaults</strong> reloads with every field back to its starting value. The <strong>status banner</strong> just below the title tells you at a glance whether the current pointing is valid: green for everything clears, amber for "pointing was adjusted," red for a real problem.</p>
+
+<h2>On a smaller screen</h2>
+<p>The same page rearranges rather than hiding anything. On a tablet the rail moves above the 3D view instead of beside it; on a phone everything becomes a single column and the measurement fields, the reasoning and the sky notes each drop to one column of their own.</p>
+<p>Nothing is removed at any width, and there is no sideways scrolling &mdash; the page simply gets taller.</p>
+
+<h2>Finding your way around</h2>
+<p>Everything sits on one screen; there is nothing to scroll past.</p>
+<ul>
+  <li><strong>The rail down the left</strong> holds your measurements, in the order you work through them. Each step is closed until you click its header, and closing it again is another click on the same header &mdash; the <strong>+</strong> and <strong>&minus;</strong> at the right tell you which will happen. More than one can be open at a time.</li>
+  <li><strong>A closed step still tells you what it holds</strong>, in the summary on its right: the dome diameter, the pier height, which mount is selected, the telescope, your horizon limit. The rail reads as a description of the setup rather than a list of empty rows.</li>
+  <li><strong>The 3D view</strong> takes the rest of the screen. Its header carries the live figures for whatever it is currently showing. Drag to orbit, scroll to zoom, and open <strong>Key</strong> in the corner for what each part of the drawing means &mdash; each entry is tinted to match the thing it describes.</li>
+  <li><strong>Telescope pointing sits under the view</strong>, so you can jog the mount and watch it move.</li>
+  <li><strong>The verdict is pinned at the bottom</strong>: whether this pointing works, why, and the sky-coverage plots.</li>
+</ul>
+
+<h2>The NINA card</h2>
+<p>The values NINA needs are the first thing in the rail and stay open, since they are usually what you came for. <strong>Copy</strong> puts them on the clipboard in the order NINA's own fields appear.</p>
+<p>Every value can be clicked for a short explanation of what NINA does with it &mdash; worth reading once for the GEM axis in particular, which is measured to the optical axis you image through and so includes your rings.</p>
+<p>If you already have working figures, tick <strong>I already have my NINA values</strong>. The three offsets, the dome radius and the GEM axis become editable, and the rest of the tool follows what you type. <strong>Formulas</strong> opens a note at the foot of the rail describing how each is derived.</p>
 
 <h2>Step 1 — Mount Position</h2>
 <p><strong>"I'll measure my dome"</strong> — plumb-bob the dome's true center and the mount's RA/Dec intersection down to the floor, mark them, then measure heights and the straight-line N/S and E/W distance between the marks (true north, not magnetic).</p>
@@ -249,6 +268,17 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Tube rings</h2>
 <p>What sweeps past a wall or a shutter edge is the widest part of the tube, which is normally the <strong>rings and dovetail</strong> rather than the tube itself. Enter that measurement as the <strong>OTA outer diameter</strong>. Left at 0 it is estimated at 1.3&times; the clear aperture, which suits a closed tube in rings but is only a guess. The 3D preview draws the rings at whichever figure is in force, so if they look wrong against your tube, that is the cue to measure.</p>
 <p>Rings matter a second time. They raise the tube above the saddle, so the optical axis sits further from the declination axis than the mount's own published figure. A library preset gives dimension C for the bare mount; measure C to the optical axis you actually image through and enter that instead.</p>
+
+<h2>Saving your own mount</h2>
+<p>If your mount is not in the list, or is listed without dimensions, measure it against the diagram, tick <strong>Use my own values</strong>, and press <strong>Save this mount</strong>. It is added to the list under <em>Your mounts</em> and stays there next time you open the tool.</p>
+<p><strong>Export my mounts</strong> writes them to a file you can keep or pass to someone else; <strong>Import mounts</strong> reads one back. Anyone who owns a mount the manufacturer does not publish figures for can measure it once and share it.</p>
+
+<h2>Seeing the swept volume</h2>
+<p><strong>Show swept volume</strong> in the 3D preview draws the space the telescope and counterweight sweep through as they turn. It is the shape the clearance figures describe, so you can see it against the walls or the dome shell rather than working from the numbers alone.</p>
+<p>It draws blue when everything clears and <strong>red when something fouls the pier</strong>, matching the pier-strike line in the setup check.</p>
+
+<h2>Pier strike</h2>
+<p>The setup check reports whether the counterweight clears the pier as the mount turns, and by how much. A margin under about six inches is flagged as worth confirming on the real thing. On a harmonic mount, which carries no counterweight, the same line reports the back of the tube instead &mdash; that is what comes closest to the pier on those.</p>
 
 <h2>Reading the mount list</h2>
 <p>The list is grouped by how much is actually known about each mount, because more mounts are named than dimensioned:</p>
