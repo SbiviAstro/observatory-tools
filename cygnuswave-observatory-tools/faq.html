@@ -27,11 +27,18 @@ nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700
   white-space:nowrap; }
 .nav-links a:hover{ color:var(--amber); text-decoration:none; }
 
+/* Base styling for the version chip. This was nested inside the 680px mobile
+   media query, so on any wider screen the chip rendered completely unstyled -
+   default font, no padding, no alignment - and dropped to the left edge when the
+   nav wrapped. It belongs at the top level; only the small-screen positioning
+   override belongs in the media query. */
+.nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
+  opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;
+  margin-left:auto;}
+@media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
+
 @media(max-width:680px){
   .nav-toggle{ display:block; }
-  .nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
-    opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;}
-  @media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
   .nav-links{ display:none; flex-direction:column; width:100%;
     padding:0; border-top:1px solid var(--line); }
   .nav-links.open{ display:flex; }
@@ -133,9 +140,9 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="license.html">License</a>
     <a href="about.html">About</a>
     <a href="faq.html">FAQ</a>
-    <a href="contact.html">Contact</a>
+    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v7.34.000</span>
+  <span class="nav-version">v7.34.004</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -177,7 +184,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>The exported file uses the same azimuth/altitude format as Stellarium's custom horizon files, and is compatible with NINA's horizon import. It's a plain text file, so it's easy to inspect or edit in any text editor.</p></div>
 
 <h2>Something else?</h2>
-<p>If your question isn't answered here, <a href="contact.html">get in touch</a>.</p>
+<p>If your question isn't answered here, <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">get in touch</a>.</p>
 
 <footer>
   <p>&copy; 2026 CygnusWave. Licensed under the <a href="license.html">Mozilla Public License 2.0</a>.

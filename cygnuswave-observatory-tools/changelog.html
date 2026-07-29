@@ -27,11 +27,18 @@ nav .brand{ font-family:"Courier New",monospace; font-size:13px; font-weight:700
   white-space:nowrap; }
 .nav-links a:hover{ color:var(--amber); text-decoration:none; }
 
+/* Base styling for the version chip. This was nested inside the 680px mobile
+   media query, so on any wider screen the chip rendered completely unstyled -
+   default font, no padding, no alignment - and dropped to the left edge when the
+   nav wrapped. It belongs at the top level; only the small-screen positioning
+   override belongs in the media query. */
+.nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
+  opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;
+  margin-left:auto;}
+@media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
+
 @media(max-width:680px){
   .nav-toggle{ display:block; }
-  .nav-version{font-family:"Courier New",monospace; font-size:11px; color:var(--text-dim);
-    opacity:.75; padding:14px 20px 14px 4px; white-space:nowrap; letter-spacing:.05em;}
-  @media(max-width:680px){ .nav-version{position:absolute; right:56px; top:0; padding:14px 0;} }
   .nav-links{ display:none; flex-direction:column; width:100%;
     padding:0; border-top:1px solid var(--line); }
   .nav-links.open{ display:flex; }
@@ -133,7 +140,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="license.html">License</a>
     <a href="about.html">About</a>
     <a href="faq.html">FAQ</a>
-    <a href="contact.html">Contact</a>
+    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
   <span class="nav-version">v7.14.000</span>
 </nav>
@@ -165,7 +172,33 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.34.000 — Current</div>
+<div class="card"><div class="eyebrow">v7.34.004 — Current</div>
+<p><strong>A and B now visibly meet at the pivot on the mount diagram.</strong> They were already connected &mdash; A is offset to the side as a dimension line, with an extension line carrying its upper end across to the pivot, which is ordinary drafting practice. But that extension line was drawn one pixel wide at 55% opacity and simply disappeared against the dark background, leaving two arrows that looked like they floated apart.</p>
+<p>The extension lines are now thicker and brighter, and the upper one runs to the pivot dot itself rather than stopping just past it. Checked pixel by pixel: an unbroken run from A's dimension line across to the pivot, no gaps.</p>
+<p>Nothing measured has changed &mdash; A still spans pier flange to RA pivot, exactly as before. Only the connection is now visible.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.003</div>
+<p><strong>Fixed: the version chip in the header was unstyled on every page at normal screen widths.</strong> Its styling rule had been written <em>inside</em> the 680&nbsp;pixel mobile media query, so above that width it inherited nothing &mdash; default font, no padding, no alignment &mdash; and dropped to the far left edge on its own line whenever the navigation wrapped.</p>
+<p>It only looked right on a phone, which is the one place it had been checked.</p>
+<p>The base rule now sits at the top level where it belongs, with only the small-screen positioning override left in the media query. The chip also gained <code>margin-left:auto</code>, so it stays at the right of whatever line it lands on rather than jumping to the left edge when the navigation wraps &mdash; verified from 1200 down to 640&nbsp;pixels.</p>
+<p>Applied to all fourteen site pages. The calculators were unaffected; they carry their own header markup and never had the rule.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.002</div>
+<p><strong>The dimension arrows on the mount diagram now span what they are supposed to measure.</strong> All three fell short, which made the drawing disagree with the definitions written beside it.</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><b>B</b> began and ended in mid-air. It now runs pivot to pivot, joining the two marked points exactly.</li>
+  <li><b>C</b> stopped partway up the saddle. It now reaches the top of the saddle plate, which is where the optical axis actually sits.</li>
+  <li><b>I</b> covered part of the counterweight bar. It now runs the full length, from the declination axis to the end of the shaft.</li>
+</ul>
+<p>Endpoints were measured from the artwork rather than estimated: the saddle's topmost edge, the far end of the bar, and the two pivot positions were each located in the image, and every endpoint checked against what it lands on.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.001</div>
+<p><strong>The contact page is no longer published.</strong> Its form needs a Web3Forms key that has never been set, so it accepted messages and quietly delivered them nowhere.</p>
+<p>Dropping the file alone would have shipped nineteen broken links, so every <em>Contact</em> and <em>Report a bug</em> link across fifteen pages now opens an email to help@cygnuswave.io with a subject line already filled in. The site is the same size to a visitor; the difference is that messages arrive.</p>
+<p>Verified against the bundle rather than the working folder: fifteen pages, no broken links, contact page absent.</p>
+<p>If the key is ever set, the page can go back into the bundle and the links can point at it again.</p></div>
+
+<div class="card"><div class="eyebrow">v7.34.000</div>
 <p><strong>Paramount names corrected, and the current generation added.</strong> Our entries were the pre-Series-6 mounts under names that no longer identify them, so someone with a mount bought recently would have selected figures describing a different machine.</p>
 <table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px;">
   <tr><td style="padding:4px 8px;">Paramount MEII</td><td style="padding:4px 8px;">&rarr; <b>Paramount ME II</b>, as Software Bisque write it and as the drawing's title block reads</td></tr>
