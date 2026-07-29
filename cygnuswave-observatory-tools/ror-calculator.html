@@ -220,7 +220,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.29.001</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v7.34.000</span>
 </div>
 <div class="wrap">
   <header>
@@ -930,9 +930,11 @@
         </div>
         <div id="horizonFlatFields">
           <div class="row" style="margin-top:12px;">
-            <div><label>Minimum observation altitude</label></div>
-            <div class="field"><input type="number" id="horizonMinAlt" value="10" step="1"><span class="unit">°</span></div>
+            <div><label>Minimum observation altitude</label><span class="hint">your own limit, not an obstruction &mdash; most imaging avoids the thick air below about 15&deg;. Set 0 to apply none, and only the building will block a pointing</span></div>
+            <div class="field"><input type="number" id="horizonMinAlt" value="15" step="1"><span class="unit">°</span></div>
           </div>
+          <div id="horizonFloorNote" style="font-size:11.5px; color:var(--text-dim);
+            margin:2px 0 8px; line-height:1.55;"></div>
         </div>
         <div id="horizonCustomFields" style="display:none;">
           <p class="step-note" style="margin-top:10px;">Load a horizon .hrz file — the same azimuth/altitude format Stellarium's custom horizon files use (comma or space separated, "#" comment lines ignored; .csv/.txt also accepted) — or paste/edit the points directly below.</p>
@@ -3912,24 +3914,33 @@ const MOUNT_LIBRARY = [
     A:null,  B:null, C:7.0,    I:13.625, partial:true },
   { id:'mach1',     name:'Astro-Physics Mach1GTO',    type:'GEM',
     A:null,  B:null, C:6.75,   I:14.625, partial:true },
-  { id:'pmme',      name:'Paramount ME',              type:'GEM',
+  { id:'pmme',      name:'Paramount ME (original)',  type:'GEM',
     A:3.25,  B:13.4, C:9.0,    I:0 },
   // Fitted the same way; reproduces all ten published points to within 0.20".
   // C is left at the previously carried figure - the drawing's analogous
   // dimension reads 14.1", so this one is worth confirming against the mount.
-  { id:'pmmeii',    name:'Paramount MEII',            type:'GEM',
+  { id:'pmmeii',    name:'Paramount ME II',          type:'GEM',
     A:8.707, B:10.618, C:11.5, I:18.5, verify:true },
   // A and B fitted to Software Bisque's own published declination-axis heights
   // across their full latitude table; reproduces every point to within 0.19".
   // Fitted across twenty published points to within 0.22". Software Bisque does
   // not mark the declination-axis to saddle distance on this drawing, so C is
   // null and the preset leaves the optical-axis offset alone.
-  { id:'pmmyt',     name:'Paramount MYT',             type:'GEM',
+  { id:'pmmyt',     name:'Paramount MYT (classic)',  type:'GEM',
     A:8.238, B:7.261, C:null,  I:13.0 },
-  { id:'pmmx',      name:'Paramount MX',              type:'GEM',
+  { id:'pmmx',      name:'Paramount MX / MX+',       type:'GEM',
     A:7.637, B:8.716, C:9.5,   I:16.0 },
 
   // ---- Alt/Az direct drive ----------------------------------------------
+  // Software Bisque's current line. Their dimension drawings do not cover these
+  // yet, and Series 6 changed the declination axis on the MX and the bearings on
+  // the MYT, so the earlier figures cannot simply be carried across.
+  { id:'pmmyt6',    name:'Paramount MYT Series 6',    type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'pmmx6',     name:'Paramount MX Series 6',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'pmme6',     name:'Paramount ME Series 6',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
   // ---- Sky-Watcher ---------------------------------------------------------
   // Sky-Watcher publish capacities, saddle types and shaft diameters, but not
   // the axis geometry. Named here so the mount is recognised; measure A, B and
@@ -4038,6 +4049,31 @@ function applyGenericDims(){
 // meridian flip by default, and the swept envelope is the tube alone.
 function isHarmonicMount(){
   return typeof selectedMountId !== 'undefined' && !!mountById(selectedMountId).harmonic;
+}
+
+// What limit does the building itself already impose? A minimum observation
+// altitude below that changes nothing, so it is worth showing rather than
+// leaving people to guess whether their setting does anything.
+function updateHorizonFloor(){
+  const el = document.getElementById('horizonFloorNote');
+  if(!el) return;
+  if(horizonMode !== 'flat'){ el.textContent = ''; return; }
+  try {
+    const b = getBuildingConfig(), ps = getPointingScope();
+    let lo = 90, hi = 0, sum = 0, n = 0;
+    for(let az = 0; az < 360; az += 5){
+      const a = wallRoofObstructionAlt(az, ps.mx, ps.my, ps.mountH, b).altDeg;
+      lo = Math.min(lo, a); hi = Math.max(hi, a); sum += a; n++;
+    }
+    const set = num('horizonMinAlt');
+    el.innerHTML = 'Your building already blocks from <b>' + lo.toFixed(0) + '&deg;</b> to <b>'
+      + hi.toFixed(0) + '&deg;</b> depending on direction, averaging ' + (sum/n).toFixed(0) + '&deg;. '
+      + (set <= lo
+          ? 'A limit at or below ' + lo.toFixed(0) + '&deg; adds nothing \u2014 the building is stricter everywhere.'
+          : set >= hi
+            ? 'Your ' + set.toFixed(0) + '&deg; limit is above all of that, so it is what governs in every direction.'
+            : 'Your ' + set.toFixed(0) + '&deg; limit only bites in the more open directions.');
+  } catch(e){ el.textContent = ''; }
 }
 
 function syncMountDiagram(){
@@ -5674,6 +5710,7 @@ function compute(){
   updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing);
   if(skyCoverageExpanded) computeSkyCoverage();
   if(typeof rorSetupCheck === 'function') rorSetupCheck();
+  if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
 }
 
 function updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing){

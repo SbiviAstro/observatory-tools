@@ -165,7 +165,65 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v7.29.001 — Current</div>
+<div class="card"><div class="eyebrow">v7.34.000 — Current</div>
+<p><strong>Paramount names corrected, and the current generation added.</strong> Our entries were the pre-Series-6 mounts under names that no longer identify them, so someone with a mount bought recently would have selected figures describing a different machine.</p>
+<table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px;">
+  <tr><td style="padding:4px 8px;">Paramount MEII</td><td style="padding:4px 8px;">&rarr; <b>Paramount ME II</b>, as Software Bisque write it and as the drawing's title block reads</td></tr>
+  <tr><td style="padding:4px 8px;">Paramount MX</td><td style="padding:4px 8px;">&rarr; <b>Paramount MX / MX+</b> &mdash; the drawing covers both</td></tr>
+  <tr><td style="padding:4px 8px;">Paramount MYT</td><td style="padding:4px 8px;">&rarr; <b>Paramount MYT (classic)</b></td></tr>
+  <tr><td style="padding:4px 8px;">Paramount ME</td><td style="padding:4px 8px;">&rarr; <b>Paramount ME (original)</b></td></tr>
+</table>
+<p><strong>Paramount MYT, MX and ME Series 6 added</strong> under <em>Needs measuring</em>. Software Bisque's dimension drawings do not cover them, and Series 6 is not a relabelling &mdash; it changed the declination axis on the MX and the internal bearings on the MYT &mdash; so the earlier figures cannot be carried across. Naming them at least means an owner finds their mount and is told what to measure, rather than picking a similar name and getting the wrong geometry.</p>
+<p>Thirty entries now: eleven with full dimensions, nineteen in the lower groups.</p></div>
+
+<div class="card"><div class="eyebrow">v7.33.002</div>
+<p><strong>Manuals brought up to date.</strong> An audit of both manuals against every feature shipped found six gaps &mdash; the changelog was complete, the manuals were not.</p>
+<p>Added to the roll-off-roof manual: counterweight reach, harmonic mounts, and how to read the grouped mount list. Added to the dome manual: how the dome wall blocks low pointings. Added to both: what a partial mount entry is and why it deliberately leaves figures alone, and that saved files carry a date and time.</p>
+<p>Most of the gaps were in the roll-off-roof manual, because earlier edits were written against the dome manual's headings and silently did nothing when those headings did not exist in the other file. Also merged two sections that had both ended up titled &ldquo;Swing Clearance&rdquo;.</p>
+<p>Both manuals now cover every feature checked, and the changelog has an entry for all 76 releases in this line with no gaps or duplicates.</p></div>
+
+<div class="card"><div class="eyebrow">v7.33.001</div>
+<p><strong>Minimum observation altitude now defaults to 15&deg;</strong> in both tools, with a note that most imaging avoids the thick air below about that, and that 0 applies no limit.</p>
+<p>A default of 15&deg; is safe to carry now in a way it was not two releases ago. The tool no longer describes it as an obstruction: when a pointing falls below it the message says plainly that it is <em>your</em> limit and the geometry itself clears, and the horizon note reports what your structure already blocks so you can see whether the figure adds anything. Previously the same default would have claimed terrain was in the way.</p>
+<p>The two tools now read differently on their own defaults, correctly. The dome clears down to 15.2&deg; and reports anything lower as your own limit. The roll-off roof blocks at 18.8&deg; &mdash; but by its east wall at 30.7&deg;, not by the 15&deg; figure, and the note says so: <em>&ldquo;your 15&deg; limit only bites in the more open directions.&rdquo;</em></p></div>
+
+<div class="card"><div class="eyebrow">v7.33.000</div>
+<p><strong>Fixed: the dome tool contradicted itself about its own wall.</strong> The solid wall below the springline blocks low pointings exactly as a roll-off roof's walls do, and the setup check has always said so &mdash; but the pointing check ignored it entirely.</p>
+<p>With a 60&Prime; wall the panel reported <em>&ldquo;the walls cut the sky off at 19.2&deg; &mdash; they are the binding limit&rdquo;</em> while the banner called a pointing at <b>1.3&deg;</b> a valid one. Two parts of the same page, opposite answers, on a wall the field described as affecting only the preview.</p>
+<p>The wall now feeds the pointing check, with the same aperture allowance used everywhere else &mdash; the whole beam has to clear, not just the centre ray. When it is the wall rather than terrain that stops you, the message says so: <em>&ldquo;Below 19.2&deg; the solid wall beneath the springline is in the way &mdash; the shutter opening is not the limit here.&rdquo;</em></p>
+<p>The horizon note reports the wall's limit too, and whether your own minimum observation altitude adds anything on top.</p>
+<p><strong>Defaults are unaffected</strong>: at a 36&Prime; wall with the optical axis at 47.6&Prime;, the wall top sits below the axis and takes no sky at all. This only changes results for domes whose walls rise above the mount &mdash; where it was previously reporting clear pointings that a wall was standing in front of.</p></div>
+
+<div class="card"><div class="eyebrow">v7.32.000</div>
+<p><strong>The minimum observation altitude now shows what your structure already imposes</strong>, so you can see whether the figure you type does anything at all.</p>
+<p>In the roll-off-roof tool it is derived from the building on every recompute, and it varies by direction rather than being one number &mdash; on the defaults, <em>&ldquo;your building already blocks from 0&deg; to 33&deg; depending on direction, averaging 25&deg;&rdquo;</em>, with 0&deg; where the roof rolls off and 33&deg; at the south wall. The note then says what your own limit adds:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li>at or below the lowest &mdash; adds nothing, the building is stricter everywhere</li>
+  <li>in between &mdash; bites only in the more open directions</li>
+  <li>above the worst &mdash; governs in every direction</li>
+</ul>
+<p>It tracks the building: raising the walls from 94&Prime; to 150&Prime; moves the range to 0&ndash;54&deg;, averaging 43&deg;.</p>
+<p>The dome answers a different question honestly. It has no low-altitude limit of its own, because <strong>the model treats the shutter as reaching the horizon</strong> &mdash; so the note says exactly that, and points out this is the field to use if your shutter does not open that far. That is a real limit of the model, and better stated than left for someone to discover.</p>
+<p>The note hides itself when a measured horizon profile is in use, since the question no longer applies.</p></div>
+
+<div class="card"><div class="eyebrow">v7.31.000</div>
+<p><strong>The minimum observation altitude now defaults to 0, applying no limit.</strong> Both tools previously shipped with a figure in that field, and neither value was neutral: 20&deg; or 10&deg; asserts an obstruction all the way round your site, and paints reachable sky as blocked.</p>
+<p>Zero is an assumption too &mdash; it supposes a clear horizon in every direction. But it is the assumption that reports <em>only what your observatory does</em>, which is what the tool is for. A pointing now turns red when the building blocks it, never because of a figure someone else chose.</p>
+<p>The difference is visible immediately, and the two tools now say different things because they <em>are</em> different:</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li><b>Dome</b> &mdash; clears at every declination tested, down to 0.6&deg; altitude. A shutter genuinely can point that low, and the dome does not stop it.</li>
+  <li><b>Roll-off roof</b> &mdash; still blocked at 15.2&deg;, but now <em>by the east wall at 31.6&deg;</em>. A real obstruction, named.</li>
+</ul>
+<p>The horizon is now opt-in: enter a measured profile, or raise the limit if you would rather not observe close to the ground, and it starts applying. <strong>If you had set a limit deliberately, set it again</strong> &mdash; this only changes what the field starts at.</p></div>
+
+<div class="card"><div class="eyebrow">v7.30.000</div>
+<p><strong>Fixed: a setting of your own was being reported as an obstruction.</strong> The field is called <em>Minimum observation altitude</em> &mdash; a preference about how low you are willing to observe. When a pointing fell below it, the warning said the view was &ldquo;obstructed by terrain or buildings&rdquo; and told you to check your horizon profile. There was nothing to check. Nothing was in the way.</p>
+<p>The two cases now read differently. Below your own limit: <em>&ldquo;below your minimum observation altitude of 10&deg;, not blocked by the dome &mdash; the geometry itself clears. That figure is a preference, not an obstruction.&rdquo;</em> Below a measured terrain profile, the wording about terrain stands, because then it is true.</p>
+<p><strong>The dome's default was also 20&deg; where the roll-off-roof tool used 10&deg;</strong> &mdash; the same setting, two different values. Twenty degrees is a defensible imaging habit but a strong claim to make on someone's behalf: it painted a wide band of perfectly reachable sky as blocked. Both now default to 10&deg;.</p>
+<p>On the reported case &mdash; RA 0, Dec 156 at latitude 40.2&deg;, which points at 15.2&deg; altitude &mdash; the shutter now reads as clearing, because it does.</p>
+<p>The field carries a note saying it is your own limit rather than an obstruction. <strong>If you had deliberately set 20&deg;, set it again</strong>; the change only moves the default.</p></div>
+
+<div class="card"><div class="eyebrow">v7.29.001</div>
 <p><strong>Saved files now carry the date and time they were saved.</strong> Every save used the same filename, so a second one landed as <code>&hellip;setup(1).json</code> and a folder of them told you nothing about which was which.</p>
 <ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
   <li><code>dome-geometry-setup_2026-07-28_1909.json</code></li>

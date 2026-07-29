@@ -135,7 +135,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
   </div>
-  <span class="nav-version">v7.29.001</span>
+  <span class="nav-version">v7.34.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -209,7 +209,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Enable <strong>Dual saddle</strong> in the Optical System card to mount two tubes side by side. Enter how far each sits from the mount axis (half the centre-to-centre spacing) plus OTA&nbsp;2's length and aperture. Both tubes are rigidly mounted, so they share the same pointing &mdash; only their position differs.</p>
 <p>The offset feeds the clearance check: the swing radius uses the larger tube plus the offset, so the wall, floor and ceiling limits reflect the outer tube's reach rather than the mount axis alone.</p>
 
-<h2>Swing Clearance</h2>
+<h2>What sets the swing radius</h2>
 <p>Swing clearance is driven by the tube body, so the Optical System card asks for the OTA's <strong>outer diameter</strong> as well as its clear aperture. Left at 0 it is estimated at 1.3&times; the aperture, roughly right for a CDK once rings and dovetail are included &mdash; but if you are building to tight clearance, measure across your own tube and saddle and enter it.</p>
 <p>The swept radius is the hypotenuse of how far the tube reaches along the optical axis and how far its far corner sits across it. Wall and roof limits include the aperture radius, so the whole light cone clears rather than just the centre ray.</p>
 
@@ -220,6 +220,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Dew shield</h2>
 <p>The Optical System card takes a dew shield length. It is added to the tube and drawn ahead of it in a lighter tone. It counts toward the swept reach, because a shield is the part most likely to catch a wall or a shutter edge. Leave it at 0 if you do not use one.</p>
 
+<h2>Minimum observation altitude</h2>
+<p>This is <strong>your own limit</strong>, not an obstruction: how low you are willing to observe. It starts at <strong>0</strong>, which applies no limit, so a pointing is only reported as blocked when the building or dome actually blocks it.</p>
+<p>Raise it if you would rather not observe close to the ground, or switch to a measured horizon profile if terrain is the real constraint. Either way the tool will tell you which of the two is stopping you.</p>
+
 <h2>Setup check</h2>
 <p>Under the status banner, four lines explain why the setup does or does not hold together: the pointing model, swing clearance, what the walls cost you against what your terrain already blocks, and how far off centre the mount sits. Each states the reason rather than just a verdict, and the heading takes the worst of the four.</p>
 <p>The <strong>swing clearance</strong> line is the one to read before building. It compares the radius your tube sweeps against the tightest obstruction &mdash; nearest wall, floor, or the parked roof &mdash; names which is tightest, and gives the margin. Under about six inches it says so is worth measuring on site. If the tube would strike, it says which obstruction and by how much.</p>
@@ -229,6 +233,27 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <h2>Two telescopes</h2>
 <p>With <strong>Dual saddle</strong> enabled, OTA 2 is described with the same figures as the first &mdash; tube length, clear aperture, outer diameter and offset along the tube. Each tube's reach is worked out separately and the larger governs the swing clearance, rather than mixing the longest length with the widest aperture from different tubes. A guide scope or wide-field refractor riding alongside can easily be the tube that reaches furthest.</p>
+
+<h2>Reading the mount list</h2>
+<p>The list is grouped by how much is actually known about each mount, because more mounts are named than dimensioned:</p>
+<ul>
+  <li><strong>Full dimensions</strong> &mdash; figures taken from a manufacturer's own drawings or dimension sheets.</li>
+  <li><strong>One latitude only</strong> &mdash; published at a single latitude, so the height is right there and drifts elsewhere. The card says how far off you are.</li>
+  <li><strong>Optical-axis offset only</strong> &mdash; the distance to the saddle is published, the declination-axis height is not.</li>
+  <li><strong>Needs measuring</strong> &mdash; recognised by name, nothing published. Selecting one changes nothing at all, and says so.</li>
+</ul>
+<p>A <strong>partial entry</strong> fills in what is known and deliberately leaves the rest alone rather than inventing a figure. If your mount is in one of the lower groups, measure it and enter the figures under <em>Use my own values</em>; the tool then treats it exactly like a full entry.</p>
+
+<h2>Saved files</h2>
+<p>Setups and exported horizon files carry the date and time they were saved &mdash; <code>dome-geometry-setup_2026-07-28_1432.json</code>. Year first, so a folder of them sorts into order by name, and local time so the stamp matches the clock you were looking at.</p>
+
+<h2>Counterweight reach</h2>
+<p>The counterweight sweeps its own circle about the RA axis, and on a short optical tube it is the widest thing on the mount &mdash; the part nearest the pier and the floor. Enter the distance from the RA axis to the far end of the shaft. Choosing a library mount fills this from that mount's published shaft length.</p>
+<p>Set it to <strong>0</strong> for a harmonic mount run without one. Whichever reaches further, telescope or counterweight, sets the swept radius, and the clearance line names which.</p>
+
+<h2>Harmonic mounts</h2>
+<p>Strain-wave mounts &mdash; the ZWO AM series and similar &mdash; are drawn and modelled as their own machine rather than as an equatorial with the weights hidden. No counterweight shaft, no meridian flip, and the swept envelope is the tube alone, so the same telescope needs materially less room than it would on a German equatorial.</p>
+<p>The counterweight reach is held at 0 and locked for these, since the mount does not carry a bar.</p>
 
 <h2>Mount System</h2>
 <p>The Mount System card carries a small library of common mounts. Choosing one fills in its geometry &mdash; the mount head height and, for an equatorial, the declination-axis offset &mdash; and switches the mount type to match. <strong>Generic</strong> is the default and changes nothing, so measured values are never overwritten unless you ask for a preset.</p>

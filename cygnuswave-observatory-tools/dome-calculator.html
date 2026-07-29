@@ -223,7 +223,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v7.29.001</span>
+    flex-shrink:0;">v7.34.000</span>
 </div>
 <div class="wrap">
   <header>
@@ -291,7 +291,7 @@
         ⚠ Mount offset falls outside the dome radius for this configuration — check your radius and offset measurements.
       </div>
       <div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
-        ⚠ This pointing sits below your local horizon at this azimuth — obstructed by terrain or buildings. The pointing has not been altered.
+        ⚠ This pointing sits below your horizon limit at this azimuth. The pointing has not been altered.
       </div>
       <div id="decWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
         ⚠ Declination was raised to the lowest value ever observable from this latitude (lat − 90°) — anything below that never clears the horizon, at any hour angle.
@@ -489,7 +489,7 @@
           <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
         </div>
         <div class="row" style="margin-top:12px;">
-          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts — only affects the 3D preview, not the NINA math</span></div>
+          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
           <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
     </div>
@@ -771,9 +771,11 @@
 
         <div id="horizonFlatFields">
           <div class="row" style="margin-top:12px;">
-            <div><label>Minimum observation altitude</label></div>
-            <div class="field"><input type="number" id="horizonMinAlt" value="20" step="1"><span class="unit">°</span></div>
+            <div><label>Minimum observation altitude</label><span class="hint">your own limit, not an obstruction &mdash; most imaging avoids the thick air below about 15&deg;. Set 0 to apply none, and only the building will block a pointing</span></div>
+            <div class="field"><input type="number" id="horizonMinAlt" value="15" step="1"><span class="unit">°</span></div>
           </div>
+          <div id="horizonFloorNote" style="font-size:11.5px; color:var(--text-dim);
+            margin:2px 0 8px; line-height:1.55;"></div>
         </div>
 
         <div id="horizonCustomFields" style="display:none;">
@@ -1084,6 +1086,21 @@ function getNsEwFromWalls(){
 
 // Users measure a dome by its diameter, so that is what is asked for; every
 // calculation works from the radius, which is shown back to them.
+// The solid wall below the springline blocks low pointings, exactly as a
+// roll-off roof's walls do. The setup check has always reported this limit,
+// but the pointing check ignored it - so the two contradicted each other, the
+// panel naming the walls as the binding constraint while the banner called a
+// pointing beneath them valid. Same aperture allowance as everywhere else:
+// the whole beam has to clear, not just the centre ray.
+function domeWallLimitDeg(){
+  const wall   = numMmDome('wallHeight');
+  const axisH  = numMmDome('pierHeight') + numMmDome('mountHeadHeight');
+  const radius = domeRadiusMm();
+  if(!(radius > 0)) return 0;
+  const apR = num('otaAperture') / 2;
+  return Math.max(0, Math.atan2((wall - axisH) + apR, radius) * 180 / Math.PI);
+}
+
 function domeRadiusMm(){ return numMmDome('domeDiameter') / 2; }
 function numMmDome(id){
   return num(id) * (useImperial ? IN_TO_MM : 1);
@@ -1364,6 +1381,7 @@ function compute(){
   updateFracHints();
   if(typeof updatePierVerdict === 'function') updatePierVerdict();
   if(typeof updateSetupCheck === 'function') updateSetupCheck();
+  if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
 }
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
@@ -2814,24 +2832,33 @@ const MOUNT_LIBRARY = [
     A:null,  B:null, C:7.0,    I:13.625, partial:true },
   { id:'mach1',     name:'Astro-Physics Mach1GTO',    type:'GEM',
     A:null,  B:null, C:6.75,   I:14.625, partial:true },
-  { id:'pmme',      name:'Paramount ME',              type:'GEM',
+  { id:'pmme',      name:'Paramount ME (original)',  type:'GEM',
     A:3.25,  B:13.4, C:9.0,    I:0 },
   // Fitted the same way; reproduces all ten published points to within 0.20".
   // C is left at the previously carried figure - the drawing's analogous
   // dimension reads 14.1", so this one is worth confirming against the mount.
-  { id:'pmmeii',    name:'Paramount MEII',            type:'GEM',
+  { id:'pmmeii',    name:'Paramount ME II',          type:'GEM',
     A:8.707, B:10.618, C:11.5, I:18.5, verify:true },
   // A and B fitted to Software Bisque's own published declination-axis heights
   // across their full latitude table; reproduces every point to within 0.19".
   // Fitted across twenty published points to within 0.22". Software Bisque does
   // not mark the declination-axis to saddle distance on this drawing, so C is
   // null and the preset leaves the optical-axis offset alone.
-  { id:'pmmyt',     name:'Paramount MYT',             type:'GEM',
+  { id:'pmmyt',     name:'Paramount MYT (classic)',  type:'GEM',
     A:8.238, B:7.261, C:null,  I:13.0 },
-  { id:'pmmx',      name:'Paramount MX',              type:'GEM',
+  { id:'pmmx',      name:'Paramount MX / MX+',       type:'GEM',
     A:7.637, B:8.716, C:9.5,   I:16.0 },
 
   // ---- Alt/Az direct drive ----------------------------------------------
+  // Software Bisque's current line. Their dimension drawings do not cover these
+  // yet, and Series 6 changed the declination axis on the MX and the bearings on
+  // the MYT, so the earlier figures cannot simply be carried across.
+  { id:'pmmyt6',    name:'Paramount MYT Series 6',    type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'pmmx6',     name:'Paramount MX Series 6',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
+  { id:'pmme6',     name:'Paramount ME Series 6',     type:'GEM',
+    A:null, B:null, C:null, I:0, partial:true, needsMeasuring:true },
   // ---- Sky-Watcher ---------------------------------------------------------
   // Sky-Watcher publish capacities, saddle types and shaft diameters, but not
   // the axis geometry. Named here so the mount is recognised; measure A, B and
@@ -2943,6 +2970,23 @@ function applyGenericDims(){
 // meridian flip by default, and the swept envelope is the tube alone.
 function isHarmonicMount(){
   return typeof selectedMountId !== 'undefined' && !!mountById(selectedMountId).harmonic;
+}
+
+// What limit does the structure itself already impose? A minimum observation
+// altitude below that changes nothing, so it is worth showing rather than
+// leaving people to guess whether their setting does anything.
+function updateHorizonFloor(){
+  const el = document.getElementById('horizonFloorNote');
+  if(!el) return;
+  if(horizonMode !== 'flat'){ el.textContent = ''; return; }
+  const w = domeWallLimitDeg();
+  el.innerHTML = w > 0.05
+    ? 'Your dome wall already blocks everything below <b>' + w.toFixed(1) + '&deg;</b>. '
+      + (num('horizonMinAlt') <= w
+          ? 'A limit at or below that adds nothing.'
+          : 'Your ' + num('horizonMinAlt').toFixed(0) + '&deg; limit is the stricter of the two.')
+    : 'The wall top sits at or below the optical axis, so it takes no sky from you. The shutter is '
+      + 'treated as reaching the horizon &mdash; if yours does not open that far, say so here.';
 }
 
 function syncMountDiagram(){
@@ -3833,6 +3877,8 @@ function createHarmonicMount(THREE, options) {
 }
 
 let harmonicMount = null;
+// Why the last pointing was reported as obstructed: 'wall' or 'horizon'.
+let _clampReason = 'horizon';
 let gemMount = null;
 let _lastGemInForce = 0;
 
@@ -4679,7 +4725,11 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     three.setSlit(mesh);
 
     document.getElementById('shutterAngleNote').textContent = horizonClamped
-      ? `⚠ This pointing sits below your local horizon — obstructed by terrain or buildings rather than open sky, regardless of how well the dome geometry itself clears. Check your local horizon profile if you expected it to be clear.`
+      ? (_clampReason === 'wall'
+          ? `⚠ The dome wall blocks this pointing. Below ${domeWallLimitDeg().toFixed(1)}° the solid wall beneath the springline is in the way — the shutter opening is not the limit here. A lower wall, or a taller pier, buys back the difference.`
+          : horizonMode === 'flat'
+          ? `⚠ This pointing is below the minimum observation altitude of ${num('horizonMinAlt').toFixed(0)}° you set, not blocked by the dome — the geometry itself clears. Set it to 0 in Local Horizon to apply no limit.`
+          : `⚠ This pointing sits below your local horizon profile — obstructed by terrain or buildings rather than open sky, regardless of how well the dome geometry itself clears.`)
       : (dualSaddleActive && !(ota1Clears && ota2Clears))
       ? `⚠ ${!ota1Clears && !ota2Clears ? 'Both OTAs fall' : (!ota1Clears ? 'OTA 1 falls' : 'OTA 2 falls')} outside the shutter's footprint at this pointing — a wider shutter, smaller lateral offset, or a different tracked OTA would fix it.`
       : dualSaddleActive
@@ -4994,9 +5044,15 @@ function computeLiveDomeAim(){
 
   let skyPos = haDecToAltAz(ha, dec, lat);
   const horizonLimit = horizonAltAt(skyPos.azDeg);
+  // Whichever is higher, the terrain or the dome's own wall, is what stops you.
+  const _wallLimit = domeWallLimitDeg();
+  const effectiveLimit = Math.max(horizonLimit, _wallLimit);
+  // Remember which one it was; the message is written in another function where
+  // the sky position is out of scope.
+  _clampReason = (_wallLimit >= horizonLimit) ? 'wall' : 'horizon';
   // Blocked pointings are reported (status text + coloured ray), not snapped
   // back. This previously rewrote HA/Dec, which made the controls refuse to move.
-  const horizonClamped = skyPos.altDeg < horizonLimit;
+  const horizonClamped = skyPos.altDeg < effectiveLimit;
   document.getElementById('outTargetAltAz').textContent = `Alt ${skyPos.altDeg.toFixed(1)}°, Az ${skyPos.azDeg.toFixed(1)}°`;
   document.getElementById('horizonWarning').style.display = horizonClamped ? 'block' : 'none';
 
