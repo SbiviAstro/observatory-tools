@@ -172,7 +172,28 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.03.002 — Current</div>
+<div class="card"><div class="eyebrow">v8.04.000 — Current</div>
+<p><strong>Fixed: the hour-angle field was six hours out.</strong> This is the most consequential error found so far, because the required dome azimuth depends on it &mdash; every figure the tool produced for a target away from the pole was for the wrong part of the sky.</p>
+<p>The field is labelled <em>0 = on the meridian</em>, and the calculation added six hours to it. The results were plainly wrong once checked against cases anyone can verify by hand:</p>
+<table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px;">
+  <tr><td style="padding:4px 8px;"><b>RA 0, Dec 0</b><br><span style="font-size:12px;">celestial equator on the meridian</span></td>
+      <td style="padding:4px 8px;">reported alt 0&deg;, az 270&deg; &mdash; the western horizon</td>
+      <td style="padding:4px 8px;">now alt 49.8&deg;, az 180&deg; &mdash; due south</td></tr>
+  <tr><td style="padding:4px 8px;"><b>RA 0, Dec = latitude</b><br><span style="font-size:12px;">the zenith</span></td>
+      <td style="padding:4px 8px;">reported alt 24.6&deg;</td>
+      <td style="padding:4px 8px;">now alt 90&deg;</td></tr>
+  <tr><td style="padding:4px 8px;"><b>RA 90, Dec 0</b></td>
+      <td style="padding:4px 8px;">reported alt &minus;49.8&deg; &mdash; below the ground</td>
+      <td style="padding:4px 8px;">now alt 0&deg;, az 270&deg;</td></tr>
+</table>
+<p>Only declination 90 ever looked right, because hour angle does not matter at the pole &mdash; which is the default pointing, and is very likely why this survived so long.</p>
+<p><strong>The presets were wrong too, in a different way.</strong> They set the field as though it held hours: <em>6h East</em> wrote &minus;5.5 where the field wants degrees, so it moved the telescope about 22 minutes, not six hours. East and west landed within a few degrees of each other. They now set &plusmn;90&deg;, and give a properly symmetric az 74.5&deg; and 285.5&deg;. <em>Meridian</em> now actually points at the meridian.</p>
+<p><strong>The roll-off-roof tool had the same fault with the opposite sign</strong> &mdash; it subtracted six hours where the dome tool added them. Both now read the field as written. Its presets were set in hours too: <em>East, low</em> wrote &minus;3 into a field that wants degrees, moving the telescope twelve minutes rather than three hours. They now set &plusmn;45&deg; and give a symmetric az 104&deg; and 256&deg;.</p>
+
+<p>The field and slider range went from &plusmn;80&deg; to &plusmn;120&deg;, so eight hours either side is reachable rather than five and a third.</p>
+<p><strong>The 3D view was consistent with the wrong figure and is now consistent with the right one</strong>, checked at three declinations on both pier sides &mdash; the model's own optical axis agrees with the reported altitude and azimuth to a tenth of a degree.</p></div>
+
+<div class="card"><div class="eyebrow">v8.03.002</div>
 <p><strong>The pier-strike check no longer disappears on the far side of a flip.</strong> On one pier side the counterweight often sits entirely above the pier top, where nothing can reach it. The check returned no reading for that, and the line simply vanished from the setup check &mdash; which looked like a failure rather than a result.</p>
 <p>It now says so: <em>&ldquo;The counterweight stays above the pier top at this pointing, so nothing can reach it.&rdquo;</em> The swept volume also no longer treats a missing reading as a clash.</p>
 <p><strong>On the telescope appearing to turn over when you switch to west:</strong> that is correct, and it is what a real German equatorial does. Checked at declinations 90, 45 and 20 &mdash; the pointing is identical on both sides and matches the reported altitude and azimuth exactly, while the tube and counterweight swap sides of the pier and the tube rolls 180&deg; about its own axis. That roll is the reason a meridian flip rotates your field of view and needs re-framing.</p>
