@@ -142,7 +142,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v8.03.000</span>
+  <span class="nav-version">v8.03.002</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -283,6 +283,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Seeing the swept volume</h2>
 <p><strong>Show swept volume</strong> in the 3D view draws the space the telescope and counterweight sweep through as they turn. It is the shape the clearance figures describe, so you can see it against the walls or the dome shell rather than working from the numbers alone.</p>
 <p>It draws blue when everything clears and <strong>red when something fouls the pier</strong>, matching the pier-strike line in the setup check.</p>
+
+<h2>Why the telescope turns over on the other pier side</h2>
+<p>Switching pier side rotates the mount through the pole: the tube and the counterweight change sides, and the tube rolls 180&deg; about its own axis. It looks upside down because it is &mdash; that is what a German equatorial does, and it is why a meridian flip rotates your field of view and needs re-framing.</p>
+<p>The pointing does not change. What does change is the <strong>required dome azimuth</strong>, because the optical axis sits off the dome centre: the same target needs the shutter in a different place depending on which side the telescope is on. That difference is the reason this tool exists.</p>
 
 <h2>Pier strike</h2>
 <p>The setup check reports whether the counterweight clears the pier as the mount turns, and by how much. A margin under about six inches is flagged as worth confirming on the real thing. On a harmonic mount, which carries no counterweight, the same line reports the back of the tube instead &mdash; that is what comes closest to the pier on those.</p>

@@ -576,7 +576,7 @@
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.03.000</span>
+  <span class="chip">v8.03.002</span>
 </div>
 
 <div class="stage">
@@ -1257,7 +1257,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.03.000</span>
+    flex-shrink:0;">v8.03.002</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1616,8 +1616,8 @@ const IN_TO_MM = 25.4;
 
 // All non-OTA mm field IDs
 const DOME_MM_FIELD_IDS = [
-  'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW','directNS','directEW','directUD',
-  'shutterWidth','wallHeight','gemRaw','gemDirect','domeDiameter','decHoriz'
+  'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW',
+  'shutterWidth','wallHeight','gemRaw','domeDiameter','decHoriz'
 ];
 
 function unitLabel(){ return useImperial ? 'in' : 'mm'; }
@@ -1836,8 +1836,10 @@ function setEntryMode(m, seed){
      ;
     const toField = mm => useImperial ? (mm / IN_TO_MM) : mm;
     const put = (id, mm) => {
+      // These four mirror NINA's own fields, which are always millimetres, so no
+      // conversion here regardless of what the rest of the form is showing.
       const el = document.getElementById(id);
-      if(el) el.value = toField(mm).toFixed(useImperial ? 2 : 0);
+      if(el) el.value = mm.toFixed(2);
     };
     put('directNS', w.ns);
     put('directEW', w.ew);
@@ -1897,10 +1899,10 @@ function compute(){
   let ns, ew, ud, gem, lateral;
 
   if(entryMode === 'direct'){
-    ns = numMmDome('directNS');
-    ew = numMmDome('directEW');
-    ud = numMmDome('directUD');
-    gem = mountType === 'GEM' ? numMmDome('gemDirect') : 0;
+    ns = num('directNS');
+    ew = num('directEW');
+    ud = num('directUD');
+    gem = mountType === 'GEM' ? num('gemDirect') : 0;
     lateral = computeSignedLateral();
   } else {
     const hDome = numMmDome('hDome');
@@ -3581,10 +3583,13 @@ function selectedAltAxisMm(defaultMm){
 const MOUNT_FIELD_SET = {
   head: inches => { const e=document.getElementById('mountHeadHeight');
                     if(e){ e.value = (useImperial ? inches : inches*25.4).toFixed(2); } },
+  // gemRaw is something you measure, so it follows the unit on screen. gemDirect
+  // mirrors NINA's own GEM Axis Length and is always millimetres - writing it in
+  // display units overwrote loaded setups with an inch figure labelled mm.
   gem:  inches => { const e=document.getElementById('gemRaw');
                     if(e){ e.value = (useImperial ? inches : inches*25.4).toFixed(2); }
                     const d=document.getElementById('gemDirect');
-                    if(d){ d.value = (useImperial ? inches : inches*25.4).toFixed(2); } },
+                    if(d){ d.value = (inches*25.4).toFixed(2); } },
 };
 
 
@@ -3829,7 +3834,7 @@ function updateSweptVolume(){
       m.showSweptVolume(on);
       if(on && typeof m.markClash === 'function'){
         const s = pierStrikeCheck();
-        m.markClash(!!(s && s.mm < 0));
+        m.markClash(!!(s && s.mm !== null && s.mm < 0));
       }
     } catch(e){ /* model rebuilding */ }
   });
@@ -3843,8 +3848,17 @@ function pierStrikeCheck(){
   if(typeof fn !== 'function') return null;
   let d;
   try { d = fn.call(m); } catch(e){ return null; }
-  if(d === null || d === undefined || !isFinite(d)) return null;
-  return { mm: d, what: harmonic ? 'the back of the tube' : 'the counterweight' };
+  const what = harmonic ? 'the back of the tube' : 'the counterweight';
+  // null means nothing dips below the pier top at this pointing, which is a
+  // result rather than an absence - on the far side of a meridian flip the
+  // counterweight is often raised, and the line simply disappearing looked like
+  // the check had failed.
+  if(d === null || d === undefined || !isFinite(d)){
+    const hasShaft = m.params && m.params.counterweightShaft > 0;
+    if(harmonic || hasShaft) return { mm: null, clearOfPier: true, what: what };
+    return null;
+  }
+  return { mm: d, what: what };
 }
 
 function updateSetupCheck(){
@@ -3927,7 +3941,11 @@ function updateSetupCheck(){
 
   // 5. does anything hit the pier on the way round?
   const strike = pierStrikeCheck();
-  if(strike){
+  if(strike && strike.clearOfPier){
+    rows.push([OK, 'Pier strike',
+      strike.what.charAt(0).toUpperCase() + strike.what.slice(1) +
+      ' stays above the pier top at this pointing, so nothing can reach it.']);
+  } else if(strike){
     const s = strike.mm;
     rows.push([s < 0 ? BAD : (s < 40 ? WARN : OK), 'Pier strike',
       s < 0
@@ -5069,8 +5087,8 @@ function drawScope(originV, dirNorm, hitV, otaMesh, ringMesh, rayLine, marker, t
 function getGeometryInputs(){
   const mountType = document.getElementById('btnGEM').classList.contains('active') ? 'GEM' : 'AltAz';
   const off = entryMode === 'direct' ? {
-    ns: numMmDome('directNS'), ew: numMmDome('directEW'), ud: numMmDome('directUD'),
-    gem: mountType==='GEM' ? numMmDome('gemDirect') : 0,
+    ns: num('directNS'), ew: num('directEW'), ud: num('directUD'),
+    gem: mountType==='GEM' ? num('gemDirect') : 0,
     lateral: 0,
     decHoriz: mountType==='AltAz' ? numAltAzAxis() : 0
   } : {
@@ -5275,12 +5293,12 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
   // axis length entirely.
   const _gemInForce = inMeasureMode
     ? (numMmDome('gemRaw'))
-    : numMmDome('gemDirect');
+    : num('gemDirect');
   _lastGemInForce = _gemInForce;
   const _headDraw = mountHdMm > 0 ? mountHdMm : 280;
   const _pivotAboveFloor = inMeasureMode
     ? (pierMm + mountHdMm)
-    : (numMmDome('hDome') + numMmDome('directUD'));
+    : (numMmDome('hDome') + num('directUD'));
   const _pierDraw = Math.max(_pivotAboveFloor - _headDraw, 0);
   const _havePier = _pierDraw > 0;
   {
@@ -5623,6 +5641,10 @@ function saveSetup(){
   data._pointingMode = pointingMode;
   data._horizonMode = horizonMode;
   data._useImperial = useImperial;   // without this every value is misread by 25.4x
+  // From this version the four fields mirroring NINA's own inputs are always in
+  // millimetres, like NINA. Older files stored them in whatever unit was on
+  // screen, so the flag lets a load tell the two apart instead of guessing.
+  data._ninaFieldsMm = true;
   if(typeof getViewHeight === 'function') data._viewHeight = getViewHeight();
   if(horizonSourceName) data._horizonSource = horizonSourceName;
   data._meta = { tool: 'NINA Dome Geometry Workbench', savedAt: new Date().toISOString() };
@@ -5657,6 +5679,12 @@ function loadSetupFromFile(file){
       const el = document.getElementById('domeDiameter');
       if(el) el.value = wasDiameter ? data.radius : (parseFloat(data.radius) * 2);
     }
+    // No automatic conversion for older files. Before this version these four
+    // fields were not consistently one unit - the offsets were labelled mm while
+    // the GEM axis followed the toggle - so any blanket rule corrupts half of
+    // them. Values load as written; if an offset is implausible the setup check
+    // says so plainly, which is better than a silent guess.
+
     // Units before values. setUnitSystem() converts whatever is in the fields, so
     // running it afterwards multiplied the freshly loaded numbers by 25.4 - the
     // switch has to happen while the defaults are still there.
@@ -5861,10 +5889,10 @@ function computeSkyCoverage(){
 function computeLiveDomeAim(){
   const mountType = document.getElementById('btnGEM').classList.contains('active') ? 'GEM' : 'AltAz';
   const off = entryMode === 'direct' ? {
-    ns: numMmDome('directNS'),
-    ew: numMmDome('directEW'),
-    ud: numMmDome('directUD'),
-    gem: mountType==='GEM' ? numMmDome('gemDirect') : 0,
+    ns: num('directNS'),
+    ew: num('directEW'),
+    ud: num('directUD'),
+    gem: mountType==='GEM' ? num('gemDirect') : 0,
     lateral: computeSignedLateral(),
     decHoriz: mountType==='AltAz' ? numAltAzAxis() : 0
   } : {
