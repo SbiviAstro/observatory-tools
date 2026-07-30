@@ -565,7 +565,6 @@
     <a href="ror-calculator.html">Roll-Off-Roof</a>
     <a href="ror-manual.html">Manual</a>
     <a href="help.html">Help</a>
-    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </nav>
   <span class="spacer"></span>
   <button class="preset-btn" id="btnUnitMetric">Metric</button>
@@ -573,7 +572,7 @@
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.04.000</span>
+  <span class="chip">v8.02.002</span>
 </div>
 
 <div class="stage">
@@ -1272,7 +1271,7 @@
         <div id="haDecFields">
           <div class="row">
             <div><label>Right Ascension (RA)</label></div>
-            <div class="field"><input type="number" id="ha" value="0" min="-120" max="120" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="ha" value="0" min="-80" max="80" step="1"><span class="unit">°</span></div>
           </div>
           
           <div class="row">
@@ -1282,8 +1281,8 @@
           
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
             <button class="preset-btn" data-ha="0" data-dec="60">Meridian, high</button>
-            <button class="preset-btn" data-ha="-45" data-dec="20">East, low</button>
-            <button class="preset-btn" data-ha="45" data-dec="20">West, low</button>
+            <button class="preset-btn" data-ha="-3" data-dec="20">East, low</button>
+            <button class="preset-btn" data-ha="3" data-dec="20">West, low</button>
           </div>
         </div>
 
@@ -1327,7 +1326,7 @@
           <div><label>Pier side</label></div>
           <div class="field"><select id="pierSide"><option value="East">East</option><option value="West">West</option></select></div>
         </div>
-    <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-120" max="120" step="1" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
+    <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-80" max="80" step="1" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
     <div class="answer" id="answerStrip">
       <div id="statusBanner" class="status-banner status-ok">
     <span id="statusIcon">✓</span> <span id="statusText">Valid pointing — clear of the walls, roof, and local horizon.</span>
@@ -1402,7 +1401,7 @@
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.04.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.02.002</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -1773,9 +1772,7 @@ function otaTotalLength(){ return num('otaLength') + Math.max(0, num('dewShield'
 // Everything downstream (sky position, clearance, sweep, 3D mount) uses this
 // single conversion, so the picture and the numbers cannot drift apart.
 function raAxisDeg(){ return num('ha'); }
-// Degrees of hour angle, zero on the meridian. This subtracted six hours where
-// the dome tool added them - both wrong, in opposite directions.
-function haHours(){ return raAxisDeg() / 15; }
+function haHours(){ return -6 + raAxisDeg() / 15; }
 
 // Effective pointing for the 3D model. In Alt/Az pointing mode the alt/az fields
 // are authoritative and the RA field is stale, so the model must convert from
