@@ -172,7 +172,33 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.02.002 — Current</div>
+<div class="card"><div class="eyebrow">v8.03.002 — Current</div>
+<p><strong>The pier-strike check no longer disappears on the far side of a flip.</strong> On one pier side the counterweight often sits entirely above the pier top, where nothing can reach it. The check returned no reading for that, and the line simply vanished from the setup check &mdash; which looked like a failure rather than a result.</p>
+<p>It now says so: <em>&ldquo;The counterweight stays above the pier top at this pointing, so nothing can reach it.&rdquo;</em> The swept volume also no longer treats a missing reading as a clash.</p>
+<p><strong>On the telescope appearing to turn over when you switch to west:</strong> that is correct, and it is what a real German equatorial does. Checked at declinations 90, 45 and 20 &mdash; the pointing is identical on both sides and matches the reported altitude and azimuth exactly, while the tube and counterweight swap sides of the pier and the tube rolls 180&deg; about its own axis. That roll is the reason a meridian flip rotates your field of view and needs re-framing.</p>
+<p>The dome azimuth differs between the two sides &mdash; 313&deg; against 329&deg; on the same target &mdash; which is the whole reason this tool exists: with the optical axis offset from the dome centre, where the shutter must sit depends on which side the telescope is on.</p></div>
+
+<div class="card"><div class="eyebrow">v8.03.001</div>
+<p><strong>The NINA input fields are millimetres, always.</strong> Ticking <em>I already have my NINA values</em> in imperial mode asked for inches &mdash; while you were copying millimetres out of NINA. The card's own note has always said these figures ignore the unit toggle; the outputs did, the inputs did not.</p>
+<p>All four now behave the same way: the three offsets and the GEM axis are entered in millimetres, labelled millimetres, and unaffected by the Metric/Imperial buttons. Type 500 and NINA gets 500, whatever the rest of the form is showing.</p>
+<p><strong>The mount library was overwriting them.</strong> Selecting a mount wrote its declination-axis figure into both the measured field and the NINA field, converting to whatever unit was on screen &mdash; so a loaded setup had its NINA GEM axis replaced by an inch value wearing a millimetre label. The measured field still follows the unit toggle, because it is something you go and measure; the NINA field does not.</p>
+<p><strong>A Contact link was added to both calculators' navigation.</strong> Every other page had one; these never did, which read as a broken link rather than a missing one.</p>
+<p><strong>No automatic conversion for older files.</strong> Before this release these four fields were not consistently one unit &mdash; the offsets were labelled millimetres while the GEM axis followed the toggle &mdash; so any blanket rule would corrupt half of them. Values load as written, and new files record which convention they use. If an old setup shows an implausible offset, the GEM axis is the one to check: multiply an inch figure by 25.4.</p></div>
+
+<div class="card"><div class="eyebrow">v8.03.000</div>
+<p><strong>Four faults found by loading a real saved setup.</strong> A file from a working dome exposed problems that no synthetic test had: two of them lost data outright.</p>
+
+<p><strong>1. Entered NINA offsets were destroyed on load.</strong> Switching into direct-entry mode seeds those fields from the measured geometry so the setup does not jump &mdash; but loading a saved file also triggers that switch, so it overwrote the values it had just restored. Offsets of 500, 145 and &minus;500 came back as 0, 0 and 9.6. The seeding now happens only when <em>you</em> switch modes.</p>
+
+<p><strong>2. The unit system was never saved.</strong> A setup written in millimetres reopened as inches, and every dimension was out by a factor of 25.4. Files now record it, and it is applied <em>before</em> the values &mdash; ordering matters, because switching units converts whatever is in the fields.</p>
+
+<p><strong>3. The NINA card's offset fields were mislabelled.</strong> They are held in whatever unit is on screen, but the card printed a fixed &ldquo;mm&rdquo; that the unit switcher could not see. In imperial mode the label said millimetres while the tool read inches &mdash; which is how the file in question came to hold its dome in inches and its offsets in millimetres at the same time. The labels now follow the toggle.</p>
+
+<p><strong>4. The mount-position check contradicted itself.</strong> It measured the offset from the wall distances, which mean nothing in direct-entry mode, so it reported &ldquo;0.0&Prime; off the dome centre&rdquo; on the same line as &ldquo;the shutter fails to clear across 24% of the observable sky&rdquo;. It now reads the offsets actually in force: 20.5&Prime;, which agrees with the coverage figure beside it.</p>
+
+<p>Also: switching into direct-entry mode now carries the lateral offset and azimuth tolerance across, which it had been leaving behind &mdash; a dual-saddle sideways offset silently became zero.</p></div>
+
+<div class="card"><div class="eyebrow">v8.02.002</div>
 <p><strong>The resize handle is amber at rest and turns green while you drag it.</strong> It used to sit in the same grey as every other divider, so it had to be found before it could be used; amber makes it a control rather than a border.</p>
 <p>Green while dragging gives the state its own colour, so you can see the handle is live without watching the numbers move. It brightens on hover and on keyboard focus, and returns to amber when you let go.</p>
 <p>Verified through all four states on both tools: amber at rest, brighter amber on hover, green while held, amber again on release.</p></div>
