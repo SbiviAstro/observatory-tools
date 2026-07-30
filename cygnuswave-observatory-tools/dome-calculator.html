@@ -568,6 +568,7 @@
     <a href="ror-calculator.html">Roll-Off-Roof</a>
     <a href="dome-manual.html">Manual</a>
     <a href="help.html">Help</a>
+    <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </nav>
   <span class="spacer"></span>
   <button class="preset-btn" id="btnUnitMetric">Metric</button>
@@ -575,7 +576,7 @@
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.02.002</span>
+  <span class="chip">v8.03.000</span>
 </div>
 
 <div class="stage">
@@ -591,11 +592,11 @@
   <div class="nina-grid">
     <button class="nv" data-k="type"><span class="nk">Mount type</span><span class="nval" id="outMountType">&mdash;</span></button>
     <div class="nv nv-set" data-k="ns"><span class="nk">+N / &minus;S</span>
-      <span class="nval" id="outNS">&mdash;</span><span class="nin"><input type="number" id="directNS" value="3"><em>mm</em></span></div>
+      <span class="nval" id="outNS">&mdash;</span><span class="nin"><input type="number" id="directNS" value="3"><span class="unit">mm</span></span></div>
     <div class="nv nv-set" data-k="ew"><span class="nk">+E / &minus;W</span>
-      <span class="nval" id="outEW">&mdash;</span><span class="nin"><input type="number" id="directEW" value="0"><em>mm</em></span></div>
+      <span class="nval" id="outEW">&mdash;</span><span class="nin"><input type="number" id="directEW" value="0"><span class="unit">mm</span></span></div>
     <div class="nv nv-set" data-k="ud"><span class="nk">+Up / &minus;Down</span>
-      <span class="nval" id="outUD">&mdash;</span><span class="nin"><input type="number" id="directUD" value="11"><em>mm</em></span></div>
+      <span class="nval" id="outUD">&mdash;</span><span class="nin"><input type="number" id="directUD" value="11"><span class="unit">mm</span></span></div>
     <div class="nv nv-set" data-k="rad"><span class="nk">Dome radius</span>
       <span class="nval" id="outRadius">&mdash;</span>
       <span class="nin"><input type="number" id="ninaRadius" step="0.1"><em>mm</em></span></div>
@@ -1256,7 +1257,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.02.002</span>
+    flex-shrink:0;">v8.03.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1821,11 +1822,14 @@ function setMountType(t){
 let entryMode = 'measure';
 document.getElementById('btnModeMeasure').addEventListener('click', () => setEntryMode('measure'));
 document.getElementById('btnModeDirect').addEventListener('click', () => setEntryMode('direct'));
-function setEntryMode(m){
+function setEntryMode(m, seed){
+  // seed defaults to true: a click should carry the geometry across, but loading
+  // a saved setup must not - the values have just been restored from the file.
+  if(seed === undefined) seed = true;
   // Seed the direct-entry fields from the measured geometry so switching modes
   // does not change the setup. Without this the direct fields kept their own
   // defaults and the offsets jumped on the way across.
-  if(typeof entryMode !== 'undefined' && m !== entryMode && m === 'direct'){
+  if(seed && typeof entryMode !== 'undefined' && m !== entryMode && m === 'direct'){
     const w = getNsEwFromWalls();
     const ud = (numMmDome('pierHeight') + numMmDome('mountHeadHeight')) - numMmDome('hDome');
     const gem = numMmDome('gemRaw')
@@ -1839,6 +1843,17 @@ function setEntryMode(m){
     put('directEW', w.ew);
     put('directUD', ud);
     if(mountType === 'GEM') put('gemDirect', gem);
+    // Lateral offset and azimuth tolerance were omitted, so a dual-saddle
+    // sideways offset silently became zero on the way into direct mode.
+    const dual = document.getElementById('hasDualSaddle');
+    if(dual && dual.checked){
+      // computeRawLateral() already reports in the displayed unit, and entryMode
+      // is still the old value here, so it reads the measured pair.
+      const el = document.getElementById('lateralDirect');
+      if(el) el.value = computeRawLateral().toFixed(2);
+    }
+    const tol = document.getElementById('rotatorRes'), tolD = document.getElementById('azTolDirect');
+    if(tol && tolD) tolD.value = tol.value;
   }
   entryMode = m;
   document.getElementById('btnModeMeasure').classList.toggle('active', m==='measure');
@@ -3877,16 +3892,21 @@ function updateSetupCheck(){
   rows.push([wc, 'Wall height', wt]);
 
   // 4. how far off centre the mount sits, and whether the sky still clears
-  const ns = Math.abs(numMmDome('distS')-numMmDome('distN'))/2;
-  const ew = Math.abs(numMmDome('distW')-numMmDome('distE'))/2;
-  const off = Math.sqrt(ns*ns + ew*ew);
+  // Read from the geometry in force, not the wall measurements: those only mean
+  // anything in measure mode, so a setup using entered NINA offsets reported
+  // "0.0 off the dome centre" while the coverage figure beside it - which does
+  // use the real offsets - said a quarter of the sky was lost.
+  let ns = 0, ew = 0;
   let cov = null;
   try {
     const inputs = getGeometryInputs();
+    ns = Math.abs(inputs.off.ns);
+    ew = Math.abs(inputs.off.ew);
     const pts = sweepSky(document.getElementById('pierSide').value || 'East', inputs)
       .filter(p => !p.belowHorizon);
     if(pts.length) cov = 100 * pts.filter(p=>p.clear).length / pts.length;
   } catch(e){ cov = null; }
+  const off = Math.sqrt(ns*ns + ew*ew);
   const offFrac = radius>0 ? off/radius : 0;
   let mc, mt;
   if(cov !== null && cov < 92){
@@ -5602,6 +5622,7 @@ function saveSetup(){
   data._selectedMount = selectedMountId;
   data._pointingMode = pointingMode;
   data._horizonMode = horizonMode;
+  data._useImperial = useImperial;   // without this every value is misread by 25.4x
   if(typeof getViewHeight === 'function') data._viewHeight = getViewHeight();
   if(horizonSourceName) data._horizonSource = horizonSourceName;
   data._meta = { tool: 'NINA Dome Geometry Workbench', savedAt: new Date().toISOString() };
@@ -5636,6 +5657,13 @@ function loadSetupFromFile(file){
       const el = document.getElementById('domeDiameter');
       if(el) el.value = wasDiameter ? data.radius : (parseFloat(data.radius) * 2);
     }
+    // Units before values. setUnitSystem() converts whatever is in the fields, so
+    // running it afterwards multiplied the freshly loaded numbers by 25.4 - the
+    // switch has to happen while the defaults are still there.
+    if(typeof data._useImperial === 'boolean' && data._useImperial !== useImperial){
+      setUnitSystem(data._useImperial);
+    }
+
     SAVE_FIELD_IDS.forEach(id => {
       if(!(id in data)) return;
       const el = document.getElementById(id);
@@ -5655,7 +5683,7 @@ function loadSetupFromFile(file){
       applyMountPreset(false);
     }
     if(data._mountType) setMountType(data._mountType);
-    if(data._entryMode) setEntryMode(data._entryMode);
+    if(data._entryMode) setEntryMode(data._entryMode, false);   // keep the saved offsets
     if(data._pointingMode) setPointingMode(data._pointingMode);
     if(data._viewHeight && typeof setViewHeight === 'function') setViewHeight(data._viewHeight);
     if(data._horizonMode) setHorizonMode(data._horizonMode);
