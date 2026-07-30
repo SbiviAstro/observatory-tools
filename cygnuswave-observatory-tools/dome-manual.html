@@ -142,7 +142,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v8.00.000</span>
+  <span class="nav-version">v8.02.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -171,7 +171,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <li>Local terrain horizon layered on top of dome geometry</li>
   <li>Exportable horizon profile (.hrz)</li>
   <li><strong>Metric / Imperial toggle</strong> — defaults to imperial; all non-OTA fields convert in place with 1/16" fraction hints; OTA optics always in mm</li>
-  <li><strong>Three-column layout</strong> — data input left, telescope pointing centre, 3D preview right</li>
+  <li><strong>Three-column layout</strong> — data input left, telescope pointing centre, 3D view right</li>
   <li><strong>Four-wall measurement workflow</strong> (Step 1) — enter N/S/E/W wall-to-mount distances; NS/EW offset derived automatically as (distS−distN)/2 and (distW−distE)/2</li>
   <li><strong>Optical System card</strong> — guide scope, dual-saddle, and OTA dimensions grouped together</li>
   <li><strong>Sky Coverage</strong> as a full-width collapsible row above the three-column layout</li>
@@ -187,6 +187,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>On a smaller screen</h2>
 <p>The same page rearranges rather than hiding anything. On a tablet the rail moves above the 3D view instead of beside it; on a phone everything becomes a single column and the measurement fields, the reasoning and the sky notes each drop to one column of their own.</p>
 <p>Nothing is removed at any width, and there is no sideways scrolling &mdash; the page simply gets taller.</p>
+
+<h2>Resizing the 3D view</h2>
+<p>Drag the bar along the bottom edge of the 3D view to make it taller or shorter, trading height with the figures below it. <strong>Double-click</strong> the bar to go back to the default. With the bar focused, the arrow keys nudge it and <strong>Home</strong> resets it.</p>
+<p>Whatever height you settle on is saved with your setup. On a phone the control is hidden, since the layout stacks and the page scrolls instead.</p>
 
 <h2>Finding your way around</h2>
 <p>Everything sits on one screen; there is nothing to scroll past.</p>
@@ -208,13 +212,16 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p><strong>"I already have my NINA values"</strong> — type in the signed values directly.</p>
 
 <h2>Step 2 — Dome &amp; Rotator</h2>
-<p>Dome radius (center to rim), shutter width (straight-line, not arc), rotator precision / Azimuth Tolerance, and wall height (affects 3D preview only, not the NINA math).</p>
+<p>Dome radius (center to rim), shutter width (straight-line, not arc), rotator precision / Azimuth Tolerance, and wall height (affects 3D view only, not the NINA math).</p>
 
 <h2>Step 3 — Optical Axis Offset</h2>
 <p><strong>GEM</strong> — GEM Axis Length, measured with the mount slewed 90° from the meridian. <strong>Alt/Az or Fork</strong> — Dec Horizontal Offset. <strong>Dual saddle</strong> reveals the Lateral Axis Length field and lets you choose which OTA NINA tracks.</p>
 
 <h2>Step 4 — Telescope Pointing</h2>
 <p></p>
+
+<h2>Horizon profiles in saved setups</h2>
+<p>A measured horizon profile is saved with the rest of your setup, not just the flat limit. Loading that file brings back the profile, the custom mode, and the name of the <code>.hrz</code> file it came from &mdash; so the status line tells you which horizon was restored rather than just how many points it found.</p>
 
 <h2>Local Horizon</h2>
 <p>Flat minimum altitude, or a full custom profile loaded from a <code>.hrz</code> file (same format as Stellarium). Shown in the 3D view as a wireframe skyline.</p>
@@ -266,7 +273,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Whichever reaches further &mdash; telescope or counterweight &mdash; sets the swept radius, and the clearance line tells you which one it is.</p>
 
 <h2>Tube rings</h2>
-<p>What sweeps past a wall or a shutter edge is the widest part of the tube, which is normally the <strong>rings and dovetail</strong> rather than the tube itself. Enter that measurement as the <strong>OTA outer diameter</strong>. Left at 0 it is estimated at 1.3&times; the clear aperture, which suits a closed tube in rings but is only a guess. The 3D preview draws the rings at whichever figure is in force, so if they look wrong against your tube, that is the cue to measure.</p>
+<p>What sweeps past a wall or a shutter edge is the widest part of the tube, which is normally the <strong>rings and dovetail</strong> rather than the tube itself. Enter that measurement as the <strong>OTA outer diameter</strong>. Left at 0 it is estimated at 1.3&times; the clear aperture, which suits a closed tube in rings but is only a guess. The 3D view draws the rings at whichever figure is in force, so if they look wrong against your tube, that is the cue to measure.</p>
 <p>Rings matter a second time. They raise the tube above the saddle, so the optical axis sits further from the declination axis than the mount's own published figure. A library preset gives dimension C for the bare mount; measure C to the optical axis you actually image through and enter that instead.</p>
 
 <h2>Saving your own mount</h2>
@@ -274,7 +281,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p><strong>Export my mounts</strong> writes them to a file you can keep or pass to someone else; <strong>Import mounts</strong> reads one back. Anyone who owns a mount the manufacturer does not publish figures for can measure it once and share it.</p>
 
 <h2>Seeing the swept volume</h2>
-<p><strong>Show swept volume</strong> in the 3D preview draws the space the telescope and counterweight sweep through as they turn. It is the shape the clearance figures describe, so you can see it against the walls or the dome shell rather than working from the numbers alone.</p>
+<p><strong>Show swept volume</strong> in the 3D view draws the space the telescope and counterweight sweep through as they turn. It is the shape the clearance figures describe, so you can see it against the walls or the dome shell rather than working from the numbers alone.</p>
 <p>It draws blue when everything clears and <strong>red when something fouls the pier</strong>, matching the pier-strike line in the setup check.</p>
 
 <h2>Pier strike</h2>
@@ -315,7 +322,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>With <strong>dual saddle</strong> enabled, both tubes are drawn side by side, separated by the lateral axis length you enter. The ghost aperture circles projected on the dome surface, the shutter clearance checks and the hit markers all continue to work for each tube independently.</p>
 <p>The pier base always rests on the floor; changing the pier height, diameter or mount-head height rebuilds the model to match.</p>
 
-<h2>3D Preview</h2>
+<h2>3D view</h2>
 <p>Drag to orbit, scroll to zoom. The shutter turns red whenever it doesn't clear. Toggle the local horizon and celestial equator from the preview header.</p>
 
 <h2>NINA · Options → Dome panel</h2>
@@ -326,7 +333,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
   <li>The status banner is the fastest sanity check — green means done, otherwise it tells you exactly which problem to fix.</li>
   <li>Run Sky Coverage before your first real night out, especially with a dual-saddle setup.</li>
   <li>Save your setup once it's dialed in.</li>
-  <li>Wall height only affects the 3D preview, not the NINA math.</li>
+  <li>Wall height only affects the 3D view, not the NINA math.</li>
 </ul>
 
 <footer>

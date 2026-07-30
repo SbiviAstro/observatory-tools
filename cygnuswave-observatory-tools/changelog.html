@@ -172,7 +172,45 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.00.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.02.000 — Current</div>
+<p><strong>The 3D view now holds a proportion of the window rather than taking whatever is left.</strong> The dome opens at 60% of the window height and the roll-off-roof tool at 56% &mdash; the framing each was designed around.</p>
+<p>Previously the view was set to absorb the remainder, so its size depended entirely on how tall the results card happened to be. On an 1100&nbsp;pixel window that left it at 44%, and it shrank further as the card grew. The figures below now take what is left and scroll, which is the right way round: the card can be any length without squeezing the model.</p>
+<p>Holds its proportion from 900 to 1800&nbsp;pixels, and the drag handle still overrides it &mdash; double-click returns to the default.</p></div>
+
+<div class="card"><div class="eyebrow">v8.01.001</div>
+<p><strong>The roll-off-roof tool now opens with a taller 3D view</strong> &mdash; 56% of the window against the dome's 483&nbsp;pixels. Its model is a wide, flat building rather than a hemisphere, and it reads better with the extra room.</p>
+<p>Set as a proportion rather than a fixed height, so it holds at 56% whether the window is 900 or 1800&nbsp;pixels tall: 504, 616, 784 and 1008&nbsp;pixels respectively. The drag handle still overrides it, and your choice is still saved with the setup.</p>
+<p>Getting there needed two corrections. Left to grow, the view stayed at its floor however tall the window became, because the results card was set to grow as well and took the surplus. Given a basis but allowed to shrink, it collapsed the other way at common window sizes. It now holds its share and the card yields, which is the right way round when the model is the thing you are reading.</p></div>
+
+<div class="card"><div class="eyebrow">v8.01.000</div>
+<p><strong>The 3D view can be resized by dragging its bottom edge.</strong> How much room the model deserves against the figures below it depends on what you are doing, so it is now a choice rather than a fixed ratio.</p>
+<ul style="margin:0 0 0 18px; padding:0; line-height:1.8;">
+  <li>Drag the bar under the view. It runs from 160&nbsp;pixels up to whatever leaves room for the controls.</li>
+  <li><b>Double-click</b> it to return to the default, or press <b>Home</b> with it focused.</li>
+  <li><b>Arrow keys</b> nudge it 12&nbsp;pixels, or 48 with Shift &mdash; a divider that only answers to a mouse is no use with a keyboard.</li>
+  <li>The height you choose is <b>saved with your setup</b>.</li>
+  <li>Hidden on a phone, where the layout stacks and the page scrolls instead.</li>
+</ul>
+<p><strong>Two faults surfaced building it.</strong> Setting a height on the view did nothing, because it is a flex item with shrinking enabled &mdash; the layout squeezed it back to whatever the column had spare, so dragging down made it <em>smaller</em> and then stuck. Pinning the flex basis is what makes a chosen height hold.</p>
+<p>And the roll-off-roof tool had <strong>no resize handler on its 3D view at all</strong>. Its canvas had been fixed at whatever size the container was on first paint, so it stretched after any window resize and ignored the new handle entirely. The dome had one; this tool never did.</p></div>
+
+<div class="card"><div class="eyebrow">v8.00.003</div>
+<p><strong>A saved setup now names the horizon file its profile came from.</strong> The profile data itself was already being saved and restored correctly &mdash; the trouble was telling. Loading a setup reported &ldquo;8 points parsed&rdquo;, which gives no clue that the horizon you measured is the one that came back.</p>
+<p>It now reads: <em>&ldquo;Restored &lsquo;my-horizon.hrz&rsquo; &mdash; 8 points from your saved setup&rdquo;</em>. The filename is remembered when you load a profile and carried in the saved file alongside it.</p>
+<p>For the record, since it is easy to doubt: a custom horizon survives Save Setup and Load Setup on both tools, verified through the buttons themselves rather than in simulation &mdash; profile data, the custom/flat mode, and the interpolated horizon altitude all come back identical.</p></div>
+
+<div class="card"><div class="eyebrow">v8.00.002</div>
+<p><strong>The 3D view is 15% taller</strong> &mdash; from 420 to 483&nbsp;pixels, with its ceiling raised from 58 to 67&nbsp;percent of the window. It now stands two and a half times the height of the sky-coverage plots below it, which is the balance this layout was meant to have.</p>
+<p>Phones are unaffected: stacked, the view keeps its own 280&nbsp;pixel height and the page still scrolls to the end on every device checked.</p>
+<p>Also settled a naming inconsistency. That area had been called the 3D preview, the 3D window and the viewport in different places; it is <strong>the 3D view</strong> throughout.</p></div>
+
+<div class="card"><div class="eyebrow">v8.00.001</div>
+<p><strong>Fixed: the page could not be scrolled on a phone.</strong> Below 900&nbsp;pixels the layout stacked correctly, but <code>html</code> and <code>body</code> were pinned to 100% height with the stage set to shrink &mdash; so the document reported itself as one screen tall while holding nearly three screens of content. Everything past the first screen was simply unreachable, with no scrollbar to find it.</p>
+<p>On a stacked layout the page itself now scrolls. Verified on iPhone 13, iPhone SE, Pixel 5, iPad Mini and Galaxy S9+: scrolls to the end, the foot of the card is reachable, tapping opens a step and typing recomputes.</p>
+<p><strong>The NINA card is two columns on a phone again</strong>, not one. Eight values stacked singly put half a screen of figures ahead of everything else; two columns brings the rail from 734 to 510&nbsp;pixels and the 3D view to under one screen away.</p>
+<p><strong>Why the earlier testing missed it.</strong> The responsive checks resized the viewport but did not emulate a device, and they tested for horizontal overflow rather than vertical reachability. At desktop widths the right-hand column is the scrolling element, so the card was reachable; stacked, that column is no longer the scroller and nothing else was. Device profiles and an explicit scroll-to-the-end check are now part of the suite.</p></div>
+
+<div class="card"><div class="eyebrow">v8.00.000</div>
 <p><strong>Both calculators rebuilt around a single screen.</strong> This is the first major version because it replaces the interface wholesale &mdash; the arithmetic, the mount library and every saved setup carry across untouched, but nothing is where it was.</p>
 
 <p><strong>What changed.</strong> The three-column page of expanding cards is gone. In its place:</p>

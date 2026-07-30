@@ -247,8 +247,12 @@
   /* Bounded rather than simply filling: on a tall window the canvas grew far
      past the model and left it floating in empty space. Capped, the frame stays
      in proportion to what is in it. */
-  .viewport { flex:1 1 auto; position:relative; min-height:420px;
-    max-height:58vh; background:#0d1016; }
+  /* A preferred height rather than "whatever the card leaves". At flex:1 1 auto
+     the view only ever got the remainder, which put it at 44% of the window; the
+     figures below now take what is left and scroll, and the model leads at the
+     proportion it was designed for. Shrinkable on a short window. */
+  .viewport { flex:0 0 60vh; position:relative; min-height:300px;
+    max-height:60vh; background:#0d1016; }
   .viewport #threeContainer { position:absolute; inset:0; width:100%; height:100%; }
   .viewport .overlay { position:absolute; left:12px; top:10px; z-index:5;
     display:flex; gap:14px; flex-wrap:wrap; align-items:center;
@@ -456,6 +460,23 @@
   .step-body h2, .step-body h3 { display:none; }
   .step-body .step-note:first-of-type { margin-top:0; }
 
+
+  /* ---- resize handle ------------------------------------------------------
+     A grab bar on the bottom edge of the 3D view. How much room the model
+     deserves against the figures below it depends on what you are doing, so it
+     is a choice rather than a fixed ratio. */
+  .view-resize { flex:0 0 9px; cursor:ns-resize; position:relative;
+    background:var(--panel); border-bottom:1px solid var(--line); }
+  .view-resize::before { content:''; position:absolute; left:50%; top:50%;
+    transform:translate(-50%,-50%); width:44px; height:3px; border-radius:2px;
+    background:var(--line); transition:background .12s; }
+  .view-resize:hover::before, .view-resize:focus-visible::before,
+  .view-resize.dragging::before { background:var(--amber); }
+  .view-resize:focus-visible { outline:1px solid var(--amber); outline-offset:-1px; }
+  .view-resize.dragging { background:var(--panel-2); }
+  /* nothing to drag when the layout is stacked and the page scrolls instead */
+  @media (max-width: 900px) { .view-resize { display:none; } }
+
   /* ---- responsive ---------------------------------------------------------
      Three shapes rather than one that stretches: side by side on a desktop,
      stacked on a tablet, and a single column on a phone with the controls
@@ -469,7 +490,15 @@
   }
 
   @media (max-width: 900px) {
-    .stage { flex-direction:column; }
+    /* Stacked, the page itself has to scroll. html and body pinned to 100% with
+       the stage set to shrink meant the document reported itself as one screen
+       tall while holding nearly three screens of content - everything below the
+       fold was simply unreachable on a phone, with no scrollbar to find it. */
+    html, body { height:auto; min-height:100%; overflow-x:hidden; }
+    body.app { min-height:100vh; }
+    .stage { flex-direction:column; flex:0 0 auto; min-height:0; }
+    .view  { overflow-y:visible; min-height:0; }
+    .rail  { overflow:visible; }
     .rail  { flex:0 0 auto; max-width:none; max-height:none;
              border-right:none; border-bottom:1px solid var(--line); }
     .steps { overflow-y:visible; }
@@ -495,7 +524,10 @@
     .viewport { min-height:280px; }
     .viewkey { max-width:calc(100% - 24px); }
     .rail { flex-basis:auto; }
-    .nina-grid { grid-template-columns:1fr; }
+    .nina-grid { grid-template-columns:1fr 1fr; }
+    .nv { padding:6px 9px; }
+    .nk { font-size:9.5px; }
+    .nval { font-size:13px; }
     .formulas-panel { margin:10px 12px 14px; }
   }
 
@@ -535,7 +567,7 @@
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.00.000</span>
+  <span class="chip">v8.02.000</span>
 </div>
 
 <div class="stage">
@@ -1057,6 +1089,8 @@
       </details>
       <div class="hint">Drag to orbit · scroll to zoom</div>
     </div>
+    <div class="view-resize" id="viewResize" role="separator" aria-orientation="horizontal"
+         aria-label="Resize the 3D view" tabindex="0" title="Drag to resize the 3D view"></div>
     <div class="aim">
 <h2>Telescope Pointing</h2>
         <p class="step-note">Drives the live azimuth calculation and the 3D preview, using the exact same math NINA runs internally.</p>
@@ -1213,7 +1247,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.00.000</span>
+    flex-shrink:0;">v8.02.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -2019,6 +2053,8 @@ function setPointingMode(m){
   compute();
 }
 
+// Filename a custom horizon was loaded from, carried in saved setups.
+let horizonSourceName = '';
 let horizonMode = 'flat';
 document.getElementById('btnHorizonFlat').addEventListener('click', () => setHorizonMode('flat'));
 document.getElementById('btnHorizonCustom').addEventListener('click', () => setHorizonMode('custom'));
@@ -2039,6 +2075,8 @@ document.getElementById('horizonCsvFile').addEventListener('change', function(){
   const reader = new FileReader();
   reader.onload = function(e){
     document.getElementById('horizonCustomData').value = e.target.result;
+      // Remembered so a saved setup can name the file its horizon came from.
+      horizonSourceName = file.name;
     const count = parseHorizonProfile(e.target.result).length;
     document.getElementById('horizonCsvStatus').textContent = count > 0
       ? `Loaded "${file.name}" — ${count} point${count===1?'':'s'}`
@@ -5555,6 +5593,8 @@ function saveSetup(){
   data._selectedMount = selectedMountId;
   data._pointingMode = pointingMode;
   data._horizonMode = horizonMode;
+  if(typeof getViewHeight === 'function') data._viewHeight = getViewHeight();
+  if(horizonSourceName) data._horizonSource = horizonSourceName;
   data._meta = { tool: 'NINA Dome Geometry Workbench', savedAt: new Date().toISOString() };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -5608,7 +5648,18 @@ function loadSetupFromFile(file){
     if(data._mountType) setMountType(data._mountType);
     if(data._entryMode) setEntryMode(data._entryMode);
     if(data._pointingMode) setPointingMode(data._pointingMode);
+    if(data._viewHeight && typeof setViewHeight === 'function') setViewHeight(data._viewHeight);
     if(data._horizonMode) setHorizonMode(data._horizonMode);
+    if(data._horizonSource) horizonSourceName = data._horizonSource;
+    // Name the source when there is one: "8 points parsed" gives no clue that
+    // the profile you measured is the one that came back.
+    if(data._horizonMode === 'custom'){
+      const n = parseHorizonProfile(document.getElementById('horizonCustomData').value).length;
+      const el = document.getElementById('horizonCsvStatus');
+      if(el && n > 0) el.textContent = horizonSourceName
+        ? `Restored "${horizonSourceName}" — ${n} point${n===1?'':'s'} from your saved setup`
+        : `Restored ${n} point${n===1?'':'s'} from your saved setup`;
+    }
 
     // Sliders mirror their number-input counterparts and need an explicit sync.
     const syncPairs = [['ha','haSlider'], ['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
@@ -6139,6 +6190,74 @@ const NINA_HELP = {
       return r; };
   }
   setTimeout(() => { if(window.updateStepSummaries) window.updateStepSummaries(); }, 200);
+})();
+
+// ---- resizing the 3D view --------------------------------------------------
+// Drag the bar under the view to trade height between the model and the figures
+// below it. The height is held inline so it overrides the stylesheet's range,
+// and is saved with the setup so the choice survives a reload.
+(function(){
+  const bar = document.getElementById('viewResize');
+  const view = document.querySelector('.viewport');
+  if(!bar || !view) return;
+
+  const MIN = 160;
+  const maxH = () => Math.max(MIN, window.innerHeight - 260);
+  const apply = px => {
+    const h = Math.round(Math.min(maxH(), Math.max(MIN, px)));
+    // The view is a flex item with shrink enabled, so setting height alone did
+    // nothing - flexbox squeezed it back to whatever the column had spare, which
+    // is why dragging down made it smaller and then stuck. Pinning the basis and
+    // disabling shrink is what makes the chosen height hold.
+    view.style.flex = '0 0 ' + h + 'px';
+    view.style.height = h + 'px';
+    view.style.maxHeight = 'none';   // the drag beats the responsive ceiling
+    view.style.minHeight = '0';
+    window.dispatchEvent(new Event('resize'));
+    return h;
+  };
+  window.setViewHeight = apply;
+  window.getViewHeight = () => Math.round(view.getBoundingClientRect().height);
+
+  let active = false;
+  // Measured from the view's own top edge each time rather than accumulated from
+  // where the drag began. The column this sits in scrolls, so a running total
+  // drifted the moment the layout shifted underneath the pointer - dragging down
+  // could shrink the view, and it would then stick.
+  const onMove = e => {
+    if(!active) return;
+    e.preventDefault();
+    apply(e.clientY - view.getBoundingClientRect().top);
+  };
+  const onUp = () => {
+    if(!active) return;
+    active = false;
+    bar.classList.remove('dragging');
+    document.body.style.userSelect = '';
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+  };
+  bar.addEventListener('pointerdown', e => {
+    active = true;
+    bar.classList.add('dragging');
+    document.body.style.userSelect = 'none';   // no text selection mid-drag
+    bar.setPointerCapture && bar.setPointerCapture(e.pointerId);
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    e.preventDefault();
+  });
+  // a separator that only responds to a mouse is no use with a keyboard
+  bar.addEventListener('keydown', e => {
+    const step = e.shiftKey ? 48 : 12;
+    if(e.key === 'ArrowUp'){ apply(view.getBoundingClientRect().height - step); e.preventDefault(); }
+    if(e.key === 'ArrowDown'){ apply(view.getBoundingClientRect().height + step); e.preventDefault(); }
+    if(e.key === 'Home'){ view.style.flex=''; view.style.height=''; view.style.maxHeight=''; view.style.minHeight='';
+                          window.dispatchEvent(new Event('resize')); e.preventDefault(); }
+  });
+  bar.addEventListener('dblclick', () => {
+    view.style.flex=''; view.style.height=''; view.style.maxHeight=''; view.style.minHeight='';
+    window.dispatchEvent(new Event('resize'));
+  });
 })();
 </script>
 </body>
