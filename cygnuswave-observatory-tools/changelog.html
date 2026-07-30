@@ -172,7 +172,17 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.02.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.02.002 — Current</div>
+<p><strong>The resize handle is amber at rest and turns green while you drag it.</strong> It used to sit in the same grey as every other divider, so it had to be found before it could be used; amber makes it a control rather than a border.</p>
+<p>Green while dragging gives the state its own colour, so you can see the handle is live without watching the numbers move. It brightens on hover and on keyboard focus, and returns to amber when you let go.</p>
+<p>Verified through all four states on both tools: amber at rest, brighter amber on hover, green while held, amber again on release.</p></div>
+
+<div class="card"><div class="eyebrow">v8.02.001</div>
+<p><strong>A clearer handle for resizing the 3D view.</strong> It was a plain horizontal line, which is a common enough divider but says nothing about what it does &mdash; not that it can be grabbed, and not which way it moves.</p>
+<p>It is now a grip bar with a chevron above and below it: the bar reads as something to take hold of, the chevrons say up and down. Both parts turn amber on hover or keyboard focus, and the tooltip spells out the rest &mdash; <em>drag up or down to resize, double-click to reset</em>.</p>
+<p>The target grew from 9 to 16&nbsp;pixels tall while the drawn icon stays 14, so it is easier to hit without looking heavier.</p></div>
+
+<div class="card"><div class="eyebrow">v8.02.000</div>
 <p><strong>The 3D view now holds a proportion of the window rather than taking whatever is left.</strong> The dome opens at 60% of the window height and the roll-off-roof tool at 56% &mdash; the framing each was designed around.</p>
 <p>Previously the view was set to absorb the remainder, so its size depended entirely on how tall the results card happened to be. On an 1100&nbsp;pixel window that left it at 44%, and it shrank further as the card grew. The figures below now take what is left and scroll, which is the right way round: the card can be any length without squeezing the model.</p>
 <p>Holds its proportion from 900 to 1800&nbsp;pixels, and the drag handle still overrides it &mdash; double-click returns to the default.</p></div>

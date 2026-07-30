@@ -462,13 +462,21 @@
      A grab bar on the bottom edge of the 3D view. How much room the model
      deserves against the figures below it depends on what you are doing, so it
      is a choice rather than a fixed ratio. */
-  .view-resize { flex:0 0 9px; cursor:ns-resize; position:relative;
+  /* A grip bar says it can be grabbed; the chevrons above and below say which
+     way it moves. The plain line it replaced did neither. */
+  .view-resize { flex:0 0 16px; cursor:ns-resize; position:relative;
+    display:flex; align-items:center; justify-content:center;
     background:var(--panel); border-bottom:1px solid var(--line); }
-  .view-resize::before { content:''; position:absolute; left:50%; top:50%;
-    transform:translate(-50%,-50%); width:44px; height:3px; border-radius:2px;
-    background:var(--line); transition:background .12s; }
-  .view-resize:hover::before, .view-resize:focus-visible::before,
-  .view-resize.dragging::before { background:var(--amber); }
+  .view-resize svg { width:40px; height:14px; display:block; overflow:visible; }
+  /* Amber at rest so it is visible without being hunted for, green while you are
+     actually dragging - a state change you can see without watching the numbers. */
+  .view-resize .gr { fill:var(--amber); transition:fill .12s; }
+  .view-resize .ch { fill:none; stroke:var(--amber); stroke-width:1.5;
+    stroke-linecap:round; stroke-linejoin:round; transition:stroke .12s; }
+  .view-resize:hover .gr, .view-resize:focus-visible .gr { fill:#e07a4f; }
+  .view-resize:hover .ch, .view-resize:focus-visible .ch { stroke:#e07a4f; }
+  .view-resize.dragging .gr { fill:var(--green); }
+  .view-resize.dragging .ch { stroke:var(--green); }
   .view-resize:focus-visible { outline:1px solid var(--amber); outline-offset:-1px; }
   .view-resize.dragging { background:var(--panel-2); }
   /* nothing to drag when the layout is stacked and the page scrolls instead */
@@ -564,7 +572,7 @@
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.02.000</span>
+  <span class="chip">v8.02.002</span>
 </div>
 
 <div class="stage">
@@ -1233,7 +1241,8 @@
       <div class="hint">Drag to orbit · scroll to zoom</div>
     </div>
     <div class="view-resize" id="viewResize" role="separator" aria-orientation="horizontal"
-         aria-label="Resize the 3D view" tabindex="0" title="Drag to resize the 3D view"></div>
+         aria-label="Resize the 3D view" tabindex="0"
+         title="Drag up or down to resize the 3D view — double-click to reset"><svg viewBox="0 0 40 14" aria-hidden="true"><path class="ch" d="M16 4 L20 1 L24 4"/><rect class="gr" x="8" y="6.1" width="24" height="1.8" rx="0.9"/><path class="ch" d="M16 10 L20 13 L24 10"/></svg></div>
     <div class="aim">
 <h2>Telescope Pointing</h2>
         <p class="step-note">Drives the live obstruction calculation, 3D preview, and sky coverage sweep. Select which telescope you are pointing.</p>
@@ -1392,7 +1401,7 @@
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.02.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.02.002</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
