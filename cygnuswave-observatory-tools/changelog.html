@@ -172,7 +172,37 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.04.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.05.001 — Current</div>
+
+<p><strong>The roof follows the building&rsquo;s shape.</strong> On a custom footprint the roof panel was drawn as a plain rectangle regardless of the walls, so an angled corner left it floating clear of the building it is meant to cover. It is now cut to the footprint: a square plan gives a square panel, and swinging a wall to 50&deg; stretches the panel with it, 7491&thinsp;mm against the walls&rsquo; 7491&thinsp;mm. It still slides and closes as before.</p>
+<p>This is the flat-roof case. A peaked or wedge roof on a custom footprint is still drawn as a prism across the roll-off wall &mdash; correct in height and span, but not yet cut to an irregular plan.</p>
+<p><strong>Fixed: the custom wall shape was unusable.</strong> Three faults together made the default custom building <b>50.8 metres</b> across instead of two.</p>
+<ul>
+  <li>The angle and distance boxes share one field, and the unit relabeller took the first unit span it found &mdash; the angle&rsquo;s degree symbol &mdash; so the angle read &ldquo;in&rdquo; in imperial and &ldquo;mm&rdquo; in metric.</li>
+  <li>The distance box was labelled &ldquo;mm&rdquo; but holds a value in whatever unit is on screen, so its 2000 default was read as 2000 inches.</li>
+  <li>Which put every wall 50.8 m from the mount, with the building drawn as a speck in the distance and the obstruction figures meaningless.</li>
+</ul>
+<p>The angle now keeps its degree symbol whatever the units, the distance follows the unit toggle, and the default is 2 m &mdash; 78.7&Prime; in imperial, 1999 mm in metric.</p>
+<p><strong>Every build now carries a stamp.</strong> The version number says what changed; a four-character hash of the file&rsquo;s own content says which build you have. Three separate builds had all called themselves v8.05.000 before this existed, so the number alone did not identify a file &mdash; if you downloaded twice you could have two different tools claiming the same version. The stamp changes whenever the file does, whether or not the version number moves with it, and it is generated at build time rather than typed.</p>
+
+<p>The wall-type work &mdash; flat, raked and drop-down walls &mdash; has been set aside as a lab build rather than shipped. It calculates and draws correctly, but it changes the sky-coverage figures for anyone with a sloped-wall building, and it deserves more testing against real observatories before it lands.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.05.000</div>
+
+
+<p><strong>Will the roof close over the mount?</strong> A new check answers the question the rest of the tool does not: with the roof rolled back on, does the mount clear it where you park it? <em>Usable height above wall top</em> is how far into the roof structure the mount may reach &mdash; zero by default, which is what a standard truss leaves, and rising to the whole roof rise if you have open rafters and a ridge beam. It is drawn in the 3D as a blue volume sitting on the wall top, following the roof so it tapers to nothing at the eaves rather than being a flat block that overstates the room under a sloped roof. All three shapes are handled: a flat roof offers at most its own thickness, a gable tapers to nothing at both eaves, and a wedge runs from nothing on the low side to full height on the high side.</p>
+<p>The tool works out the roof&rsquo;s rise above the wall from your span and pitch and shows it beside the field as a ceiling &mdash; anything entered above it is pulled back on the spot, so the figure on screen is always the figure in use. A flat roof accepts no more than its own thickness; switching roof shape re-checks what is already there. It deliberately does <em>not</em> try to calculate how high a tie beam may safely go: that depends on span, timber grade, connections and local loadings, and a plausible-looking guess would be worse than no number at all.</p>
+<p><em>Close the roof</em> on the pointing bar slides the roof on to show you. If the mount would foul it, the roof stops short and turns red rather than driving through. Clear the obstruction while it is stopped and it recovers its colour and completes the close on its own. Opening is animated the same way.</p>
+
+<p><strong>The usable space is drawn as a volume that follows the roof</strong>, not a flat block. On a gable it tapers to nothing at both eaves; on a wedge it runs from nothing on the low side to full height on the high; on a flat roof it is a thin slab of the roof&rsquo;s own thickness. Where your structure runs out before the roof does, the top goes flat at that height instead.</p>
+
+<p><strong>Closing and opening are both animated.</strong> <em>Close the roof</em> slides it on over about a second and a half; if the mount would foul it, the roof stops short rather than driving through, and the button offers to reopen, which slides it back out at the same pace.</p>
+
+<p><strong>The contact page is back in the bundle</strong>, with a working form key, and the twenty-two Contact links across the site point at it again rather than at the email fallback that stood in while the page was pulled.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.04.000</div>
 
 <p><strong>Fixed: the hour-angle field was six hours out.</strong> This is the most consequential error the tools have carried, because the required dome azimuth depends on it &mdash; every figure produced for a target away from the pole was for the wrong part of the sky. If you took NINA settings from an earlier version at a non-polar pointing, they are worth checking again.</p>
 <p>The field is labelled <em>0 = on the meridian</em> and the calculation added six hours to it. Against cases anyone can verify by hand:</p>
@@ -196,6 +226,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p><strong>The RA slider has a curved response.</strong> Linear, the whole meridian crossing was about three pixels wide: the region you most need to sit in was the hardest to land on, and a pixel of jitter carried the mount across it. The slider now holds a position mapped through a square curve &mdash; roughly a fifth of a degree per pixel at the meridian against 1.2 before, with the full travel unchanged.</p>
 
 <p><strong>The status banner names the limit that is actually binding.</strong> A pointing below your local horizon also fails the shutter test, because the telescope is aimed at the ground &mdash; and the shutter message was checked first, so the dome was blamed for a limit you had set. It now reads <em>&ldquo;below your local horizon (minimum observation altitude 15&deg;)&rdquo;</em> with the aperture clearance still healthy.</p>
+
 
 <p><strong>The roll-off-roof sky plot takes the building&rsquo;s shape.</strong> The outline is drawn in the wall colour and the sky the building blocks is subdued, so the observable region reads as the footprint rather than as a circle with a faint blob inside.</p>
 

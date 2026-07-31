@@ -317,6 +317,14 @@
   .flip-prompt .fp-btn:hover { color:var(--text); border-color:var(--amber); }
 
 
+
+  /* Its own class, not preset-btn: every .preset-btn shares a click handler that
+     recomputes, which rebuilt the scene and snapped the roof home before the
+     opening animation could run. */
+  .roof-btn { padding:4px 10px; font-size:12px; cursor:pointer; font-family:inherit;
+    color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line);
+    border-radius:5px; margin-right:8px; white-space:nowrap; }
+  .roof-btn:hover { color:var(--text); border-color:var(--amber); }
   .ap-parks { display:flex; align-items:center; gap:5px; flex:0 0 auto; }
   .ap-parks-label { font-size:11px; letter-spacing:.05em; text-transform:uppercase;
     color:var(--text-dim); margin-right:2px; white-space:nowrap; }
@@ -589,7 +597,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.04.000</span>
+  <span class="chip">v8.05.001<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;c781</span></span>
 </div>
 
 <div class="stage">
@@ -599,7 +607,7 @@
       <div class="step" data-step="building">
         <button class="step-head" type="button">
           <span class="step-num">1</span>
-          <span class="step-name">Building & roof</span>
+          <span class="step-name">Building</span>
           <span class="step-sum"></span>
         </button>
         <div class="step-body">
@@ -690,12 +698,16 @@
           <div><label>Roof travel distance</label><span class="hint">how far the roof slides past that wall</span></div>
           <div class="field"><input type="number" id="roofTravel" value="165"><span class="unit">cm</span><span class="frac-hint" id="hint_roofTravel" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
-        <div class="mount-type-toggle">
+        
+            
+            
+            <div class="mount-type-toggle">
           <button id="btnRoofFlat" class="active">Flat roof</button>
           <button id="btnRoofPeak">Peaked (gable)</button>
           <button id="btnRoofWedge">Wedge (mono-slope)</button>
         </div>
-        <div id="roofFlatFields">
+            <div class="row"><div><label>Usable height above wall top</label><span class="hint">How far into the roof structure the mount may reach. A standard truss with its bottom chord across the wall top gives <b>zero</b>. A raised tie gives whatever it was raised by; rafters with a ridge beam give the whole rise. <span id="riseCeiling"></span><span id="usableClamped" style="display:none; color:var(--amber);"></span></span></div><div class="field"><input type="number" id="roofFraming" value="0" min="0" step="0.5"><span class="unit">cm</span></div></div>
+            <div id="roofFlatFields">
           <div class="row">
             <div><label>Parked roof height</label><span class="hint">usually close to wall height; taller if on a raised track</span></div>
             <div class="field"><input type="number" id="roofHeight" value="6"><span class="unit">cm</span><span class="frac-hint" id="hint_roofHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
@@ -1247,6 +1259,7 @@
         <ul id="threeLegendList" style=" margin:10px 0 0; padding-left:18px; font-size:12.5px; color:var(--text-dim); line-height:1.6;">
               <li><strong style="color:var(--text);">Walls</strong> — solid up to wall height, the building's actual footprint</li>
               <li><strong style="color:var(--text);">Parked roof box</strong> — the rolled-off roof's obstruction, past whichever wall it slides beyond</li>
+                <li><strong style="color:#8fb8ea;">Usable roof space (blue)</strong> &mdash; the room above the wall top that the roof structure leaves; it follows the pitch, so it tapers to nothing at the eaves. Zero for a standard truss</li>
               <li><strong style="color:var(--text);">N / E / S / W</strong> — cardinal directions at the walls</li>
               <li><strong style="color:var(--text);">Small bar</strong> — OTA</li>
               <li><strong style="color:var(--text);">Amber line</strong> — optical axis</li>
@@ -1321,7 +1334,8 @@
           </div>
         </div>
 
-                  <div class="ap-parks">
+                  <button type="button" class="roof-btn" id="btnCloseRoof" title="Slide the roof back on and see whether the mount clears it">Close the roof</button>
+            <div class="ap-parks">
             <span class="ap-parks-label">AP park</span>
             <button class="preset-btn" data-park="1" title="Scope level on the west side facing north; counterweight level, due east">1</button>
             <button class="preset-btn" data-park="2" title="Scope level on top facing east; counterweight down">2</button>
@@ -1426,7 +1440,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.04.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.05.001</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -1998,7 +2012,7 @@ function getRorNsEwFromWalls(){
 
 const CM_FIELD_IDS = [
   'bWidth','bLength','wallHeight','mountHeight','distN','distS','distE','distW',
-  'roofTravel','roofHeight','eaveHeight','roofPitchRise','roofPitchRun',
+  'roofTravel','roofHeight','roofFraming','eaveHeight','roofPitchRise','roofPitchRun',
   'wedgeLowHeight','wedgeHighHeight',
   'gemAxis','decHoriz',
   'scope1NS','scope1EW','scope1MountH',
@@ -2083,7 +2097,12 @@ function refreshUnitLabels(){
   for(let i = 0; i < 6; i++){
     const el = document.getElementById(`wallDist${i}`);
     if(!el) continue;
-    const span = el.parentElement.querySelector('.unit') || el.nextElementSibling;
+    // The angle and the distance share one .field parent, so querySelector on it
+    // returned the angle's degree symbol and relabelled that instead - the angle
+    // read "in" in imperial and "mm" in metric. The distance's own span is the
+    // element immediately after it.
+    const span = el.nextElementSibling && el.nextElementSibling.classList.contains('unit')
+               ? el.nextElementSibling : null;
     if(span) span.textContent = lblMm;
   }
 }
@@ -2192,7 +2211,10 @@ function roofHeightAt(perpCoordMm, building){
 // azDeg (0=N, 90=E, 180=S, 270=W). One boundary — whichever wall the roof
 // rolls off past — is pushed outward by the roof's travel distance, modeling
 // the parked roof as an obstruction of its own rather than an open gap.
-function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
+
+
+
+  function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
   if(building.customWalls){
     // Push the roll-off wall's boundary outward by the roof's travel
     // distance before intersecting — otherwise the "roof zone" is detected
@@ -2495,8 +2517,8 @@ function buildWallRows(){
     row.innerHTML = `
       <div><label>Wall ${i+1}</label></div>
       <div class="field">
-        <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit">°</span>
-        <input type="number" id="wallDist${i}" value="${DEFAULT_WALLS[i].dist}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
+        <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit-fixed">°</span>
+        <input type="number" id="wallDist${i}" value="${(DEFAULT_WALLS[i].dist / (useImperial ? IN_TO_MM : 10)).toFixed(1)}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
       </div>`;
     container.appendChild(row);
     row.querySelectorAll('input').forEach(el => el.addEventListener('input', compute));
@@ -3594,6 +3616,24 @@ function rorSetupCheck(){
     rows.push([WARN, 'Close to the pier',
       'The assembly passes within ' + fmt(intr.mm) + ' of the pier at this pointing. '
       + 'Check it against the real hardware before pouring anything.']);
+  }
+  const fit = (typeof roofFitCheck === 'function') ? roofFitCheck() : null;
+  if(fit){
+    const where = fit.assumed
+      ? ' Taken as the top of the wall, which is what a standard truss leaves. If your '
+        + 'roof has a raised tie or open rafters, enter the usable height above the wall.'
+      : '';
+    if(fit.gapMm < 0){
+      rows.push([BAD, 'Roof will not close',
+        'In this position the mount stands ' + fmt(-fit.gapMm) + ' above what the closed '
+        + 'roof leaves. Park it lower, raise the walls, or open up the roof structure.' + where]);
+    } else if(fit.gapMm < 150){
+      rows.push([WARN, 'Tight under the closed roof',
+        'Only ' + fmt(fit.gapMm) + ' between the mount and the underside with the roof on.' + where]);
+    } else {
+      rows.push([OK, 'Fits under the closed roof',
+        fmt(fit.gapMm) + ' of headroom in this position.' + where]);
+    }
   }
   const strike = pierStrikeCheck();
   if(strike){
@@ -5778,6 +5818,16 @@ function initThree(){
   scene.add(roofBox);
   const roofEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)), new THREE.LineBasicMaterial({ color:0xd9a066 }));
   scene.add(roofEdges);
+  const roofFramingBox = new THREE.Mesh(
+    new THREE.BoxGeometry(1,1,1),
+    new THREE.MeshStandardMaterial({ color: 0x5b8fd6, transparent:true, opacity:0.45, side: THREE.DoubleSide })
+  );
+  roofFramingBox.visible = false;
+  scene.add(roofFramingBox);
+  const roofFramingEdges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1)),
+    new THREE.LineBasicMaterial({ color:0x8fb8ea }));
+  roofFramingEdges.visible = false;
+  scene.add(roofFramingEdges);
 
   const ota = new THREE.Mesh(new THREE.CylinderGeometry(0.035,0.045,0.34,16), new THREE.MeshStandardMaterial({ color:0xc8623f, roughness:0.5, metalness:0.2 }));
   const ray = new THREE.Mesh(new THREE.CylinderGeometry(0.008,0.008,1,10), new THREE.MeshBasicMaterial({ color:0xd9a066 }));
@@ -5903,9 +5953,10 @@ function initThree(){
   function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
   animate();
 
-  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, ota, ray, mountMarker,
+  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, roofFramingBox, roofFramingEdges, ota, ray, mountMarker,
             rorPierGroup, rorPier, rorFlange, rorMountHead, rorRaPivot, swingSpheres,
     cardinalN, cardinalE, cardinalS, cardinalW, meridianLine, poleMarker, skyHorizonLine, horizonBand };
+    window.__three = three;   // so the roof-closing animation can reach the roof mesh
 }
 
 // Wireframe sphere per enabled telescope, centered on the mount pivot at
@@ -6078,6 +6129,7 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
   const halfNS = building.length*sceneScale/2, halfEW = building.width*sceneScale/2;
   const wallHmm = building.wallHeight*sceneScale;
   const floorY = 0;
+    window.__floorY = floorY;
   const wallH  = building.wallHeight * sceneScale;  // wall top Y in scene space
 
   three.walls.geometry.dispose();
@@ -6146,16 +6198,26 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
         three.roofBox.position.copy(roofPos).setY(floorY + loH);
         three.roofEdges.position.copy(three.roofBox.position);
       } else {
+        // Flat roof on a custom footprint: the panel is the footprint's own
+        // shape, shifted out along the roll direction by the travel. A rectangle
+        // here ignored angled corners entirely and floated clear of the walls.
         const roofH = building.roofHeight*sceneScale;
-        three.roofBox.geometry = new THREE.BoxGeometry(1,1,1);
-        three.roofEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
-        three.roofBox.scale.set(roofSpan, roofH, travel);
-        three.roofBox.position.copy(roofPos).setY(floorY + wallH + roofH/2);
-        three.roofEdges.scale.copy(three.roofBox.scale);
+        // Recomputed here: the wall block's vertices are in another scope.
+        const roofVerts = polygonVertices(building.walls)
+          .map(v => new THREE.Vector3(v.y*sceneScale, 0, v.x*sceneScale));
+        const slabGeo = buildPolygonSlabGeometry(roofVerts, roofH);
+        three.roofBox.geometry = slabGeo;
+        three.roofEdges.geometry = new THREE.EdgesGeometry(slabGeo);
+        three.roofBox.scale.set(1,1,1); three.roofEdges.scale.set(1,1,1);
+        three.roofBox.position.copy(normal.clone().multiplyScalar(travel)).setY(floorY + wallH);
         three.roofEdges.position.copy(three.roofBox.position);
+        three.roofBox.quaternion.identity();
+        three.roofEdges.quaternion.identity();
       }
-      three.roofBox.quaternion.copy(quat);
-      three.roofEdges.quaternion.copy(quat);
+      // The prisms are built in the wall's local frame and need the rotation; the
+      // polygon slab is already in world axes, so it must not be rotated again.
+      if(building.roofShape !== 'flat') three.roofBox.quaternion.copy(quat);
+      if(building.roofShape !== 'flat') three.roofEdges.quaternion.copy(quat);
     }
     three.roofBox.visible = travel > 0.001 && !!wall;
     three.roofEdges.visible = travel > 0.001 && !!wall;
@@ -6458,6 +6520,39 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
 // whole mesh up by eaveH to place the eave at its true height.
 // Vertical wall geometry from a closed loop of floor-level vertices: one
 // quad (two triangles) per edge, from floor (y=0) up to wallHeight.
+
+// Four walls whose tops follow whatever the wall type says: level, cut to a
+// rake, or one side dropped. Each corner post takes the taller of the two walls
+// meeting there, so a rake reads as a slope rather than a step.
+
+
+
+
+// A roll-off roof has to cover the building, so on a custom footprint it takes
+// the footprint's shape rather than a rectangle. Built flat at the origin and
+// then slid along the roll direction, the same as the box it replaces.
+function buildPolygonSlabGeometry(verts3D, thickness){
+  const n = verts3D.length;
+  const positions = [];
+  const push = (a,b,c2) => positions.push(...a, ...b, ...c2);
+  const lo = v => [v.x, 0, v.z], hi = v => [v.x, thickness, v.z];
+  // top and bottom faces, fanned from the first vertex
+  for(let i = 1; i < n - 1; i++){
+    push(hi(verts3D[0]), hi(verts3D[i]), hi(verts3D[i+1]));
+    push(lo(verts3D[0]), lo(verts3D[i+1]), lo(verts3D[i]));
+  }
+  // and the edge band
+  for(let i = 0; i < n; i++){
+    const a = verts3D[i], b = verts3D[(i+1) % n];
+    push(lo(a), lo(b), hi(a));
+    push(hi(a), lo(b), hi(b));
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
 function buildPolygonWallGeometry(verts3D, wallHeight){
   const positions = [];
   const n = verts3D.length;
@@ -6488,7 +6583,54 @@ function buildPolygonFloorGeometry(verts3D){
   geo.computeVertexNormals();
   return geo;
 }
-function buildGablePrismGeometry(perpSpan, eaveH, ridgeH, alongLen, travelAxisIsX){
+
+// The usable space follows the roof, not a box. Below the wall top it is bounded
+// flat; above it, by whichever is lower — the height the structure leaves, or the
+// roof line itself. On a pitched roof that means a full-height band through the
+// middle tapering to nothing at the eaves, which is the shape you actually have.
+function buildUsableSpaceGeometry(perpSpan, alongLen, usableH, riseAtFn, travelAxisIsX){
+  const hs = perpSpan/2, halfLen = alongLen/2;
+  const STEPS = 24;
+  // cross-section: along the wall top, then back along the ceiling
+  const section = [];
+  for(let i = 0; i <= STEPS; i++){
+    const x = -hs + (perpSpan * i / STEPS);
+    section.push([x, 0]);
+  }
+  for(let i = STEPS; i >= 0; i--){
+    const x = -hs + (perpSpan * i / STEPS);
+    section.push([x, Math.max(0, Math.min(usableH, riseAtFn(x)))]);
+  }
+  const vAt = (travelCoord, perpCoord, y) =>
+    travelAxisIsX ? [travelCoord, y, perpCoord] : [perpCoord, y, travelCoord];
+  const positions = [];
+  const n = section.length;
+  const push = (a,b,cc) => positions.push(...a, ...b, ...cc);
+  // two end caps, fanned from the first point
+  for(let i = 1; i < n - 1; i++){
+    push(vAt(-halfLen, section[0][0], section[0][1]),
+         vAt(-halfLen, section[i][0], section[i][1]),
+         vAt(-halfLen, section[i+1][0], section[i+1][1]));
+    push(vAt( halfLen, section[0][0], section[0][1]),
+         vAt( halfLen, section[i+1][0], section[i+1][1]),
+         vAt( halfLen, section[i][0], section[i][1]));
+  }
+  // and the skin between them
+  for(let i = 0; i < n; i++){
+    const j = (i + 1) % n;
+    const a = vAt(-halfLen, section[i][0], section[i][1]);
+    const b = vAt( halfLen, section[i][0], section[i][1]);
+    const cc= vAt( halfLen, section[j][0], section[j][1]);
+    const d = vAt(-halfLen, section[j][0], section[j][1]);
+    push(a,b,cc); push(a,cc,d);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  return geo;
+}
+
+  function buildGablePrismGeometry(perpSpan, eaveH, ridgeH, alongLen, travelAxisIsX){
   const hs = perpSpan/2, halfLen = alongLen/2, apexY = ridgeH - eaveH;
   function vAt(travelCoord, perpCoord, y){
     return travelAxisIsX ? [travelCoord, y, perpCoord] : [perpCoord, y, travelCoord];
@@ -6646,6 +6788,7 @@ function compute(){
     : `⚠ Blocked by: ${finalObstruction.blockedBy || 'obstruction'} — needs at least ${finalObstruction.altDeg.toFixed(1)}° altitude here.`;
 
   const sceneScale = 1.6 / Math.max(building.width, building.length, 1000);
+    window.__sceneScale = sceneScale;   // scene units per millimetre, for the roof-fit check
   if(!three) initThree();
   updateThreeScene(mx, my, ps.mountH, building, otaOrient.origin, otaOrient.direction, sceneScale, clear, ps.otaLen, ps.otaAp);
 
@@ -6661,6 +6804,10 @@ function compute(){
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
   if(typeof updateSweptVolume === 'function') updateSweptVolume();
   if(window.__keepReachable) window.__keepReachable();
+  if(typeof syncRoofFraming === 'function') syncRoofFraming();
+  if(typeof clampUsableField === 'function') clampUsableField();
+  if(window.__recheckBlockedRoof) window.__recheckBlockedRoof();
+  if(typeof updateRiseCeiling === 'function') updateRiseCeiling();
 }
 
 function updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing){
@@ -7170,6 +7317,335 @@ const SUMMARY = {
   }
   window.__keepReachable = keepReachable;
 })();
+
+// ---- will the mount fit under a closed roof? --------------------------------
+// Everything else in this tool assumes the roof is off, because that is when you
+// observe. This is the other question: with the roof rolled back on, does the
+// mount clear it in the position you leave it parked in?
+//
+// The underside is not the roof surface. Rafters or a truss hang below it, and
+// that depth is the margin that decides the answer. Left blank, the underside is
+// taken as the top of the wall - which is the usual flat-roof case and errs
+// toward saying it fits, so the figure is worth entering if it is close.
+// How far above the wall top the mount may reach into the roof structure. Zero by
+// default: that is a standard truss, whose bottom chord runs straight across at
+// the wall top and leaves nothing.
+function usableRoofHeightMm(){
+  const e = document.getElementById('roofFraming');
+  if(!e || e.value === '' || e.value === null) return 0;
+  const v = parseFloat(e.value);
+  const asked = isFinite(v) && v > 0 ? v * (useImperial ? IN_TO_MM : 10) : 0;
+  // Clamped here rather than only where it is used. The cap was previously
+  // applied downstream, so this returned whatever had been typed - correct in
+  // the answer, wrong for anything else that asked.
+  const ceiling = maxRoofRiseAboveWall();
+  return Math.min(asked, ceiling);
+}
+
+// Keep the field itself honest: a figure the roof cannot offer is pulled back to
+// what it can, so the number on screen is the number in use.
+function clampUsableField(){
+  const e = document.getElementById('roofFraming');
+  const note = document.getElementById('usableClamped');
+  if(!e) return;
+  const ceiling = maxRoofRiseAboveWall();
+  const inUnits = ceiling / (useImperial ? IN_TO_MM : 10);
+  e.max = (Math.round(inUnits * 10) / 10).toString();
+  const v = parseFloat(e.value);
+  const over = isFinite(v) && v > inUnits + 1e-6;
+  if(over) e.value = (Math.round(inUnits * 10) / 10).toString();
+  if(note){
+    note.style.display = over ? 'inline' : 'none';
+    note.textContent = over
+      ? ' \u2014 pulled back to ' + e.value + (useImperial ? '\u2033' : ' cm')
+        + ', which is all this roof offers.'
+      : '';
+  }
+}
+
+// The rise of the roof above the wall top at a point across the span. This is
+// pure trigonometry - half the span times the pitch - and it is the ceiling on
+// what any structure could leave you, never a promise that you have it.
+function roofRiseAboveWallAt(perpMm, building){
+  const b = building || getBuildingConfig();
+  // The three shapes store their heights differently, which is why this used to
+  // work for a gable and return nothing for the other two. A peaked roof keeps
+  // absolute ridge and eave heights; a flat roof and a wedge keep their own
+  // heights, measured from where they sit on the wall.
+  if(b.roofShape === 'flat'){
+    // A flat roof gives you its own thickness at most, and only if the mount can
+    // reach between the joists. Usually nothing, which is why the default is nil.
+    return Math.max(0, b.roofHeight || 0);
+  }
+  if(b.roofShape === 'wedge'){
+    const halfSpan = (b.rollDir === 'N' || b.rollDir === 'S') ? b.width/2 : b.length/2;
+    const t = Math.max(0, Math.min(1, (perpMm / Math.max(halfSpan, 1) + 1) / 2));
+    const lo = b.wedgeFlip ? b.wedgeHighHeight : b.wedgeLowHeight;
+    const hi = b.wedgeFlip ? b.wedgeLowHeight  : b.wedgeHighHeight;
+    return Math.max(0, lo + (hi - lo) * t);
+  }
+  return Math.max(0, roofHeightAt(perpMm, b) - b.wallHeight);
+}
+// The most the roof rises anywhere across its span. For a gable that is the
+// ridge, at the centre; for a wedge it is the high side, at one edge - so taking
+// the centre value capped a wedge at its midpoint and drew a volume that stopped
+// short of the high side by half the slope.
+function maxRoofRiseAboveWall(building){
+  const b = building || getBuildingConfig();
+  const halfSpan = (b.rollDir === 'N' || b.rollDir === 'S') ? b.width/2 : b.length/2;
+  let best = 0;
+  for(let i = 0; i <= 24; i++){
+    const x = -halfSpan + (2 * halfSpan * i / 24);
+    best = Math.max(best, roofRiseAboveWallAt(x, b));
+  }
+  return best;
+}
+
+
+// Height of the closed roof's underside above the floor, at a position measured
+// across the span from the centre line.
+function closedRoofUndersideAt(perpMm, building){
+  const b = building || getBuildingConfig();
+  // Measured up from the wall top, not down from the roof surface. A closed roof
+  // rests on the walls, and whether anything above that line is available to the
+  // mount depends on what carries the roof - not on the roof's outer shape.
+  // Whatever is claimed, it cannot exceed the rise the pitch actually provides.
+  const ceiling = roofRiseAboveWallAt(perpMm, b);
+  return b.wallHeight + Math.min(usableRoofHeightMm(), ceiling || 0);
+}
+
+// The highest point of everything that turns with the mount, and where it sits
+// across the roof span.
+function mountEnvelope(){
+  const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+  if(!m || !m.group) return null;
+  try {
+    m.group.updateMatrixWorld(true);
+    let top = -Infinity, atPerp = 0;
+    m.group.traverse(o => {
+      if(!o.isMesh || !o.geometry) return;
+      // Hardware only. The mount group also carries indicators - an aim marker,
+      // the pointing ray, aperture rings - and the highest thing in it turned out
+      // to be an invisible marker sphere, which made every park report the same
+      // clearance. Indicators use a basic material; real parts use a standard one.
+      if(!o.visible) return;
+      if(o.material && o.material.type === 'MeshBasicMaterial') return;
+      if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+      const bb = o.geometry.boundingBox;
+      for(let i = 0; i < 8; i++){
+        const v = new THREE.Vector3(i&1 ? bb.max.x : bb.min.x,
+                                    i&2 ? bb.max.y : bb.min.y,
+                                    i&4 ? bb.max.z : bb.min.z);
+        v.applyMatrix4(o.matrixWorld);
+        if(v.y > top){ top = v.y; atPerp = v.z; }
+      }
+    });
+    if(!isFinite(top)) return null;
+    // scene units back to millimetres above the floor
+    // sceneScale and floorY live inside the 3D module's closure, so they are
+    // published on window when the scene is built rather than guessed at.
+    const s = window.__sceneScale;
+    const f = (typeof window.__floorY === 'number') ? window.__floorY : 0;
+    if(!s || !(s > 0)) return null;
+    return { topMm: (top - f) / s, perpMm: atPerp / s };
+  } catch(e){ return null; }
+}
+
+// The answer for the pose the mount is in now.
+function roofFitCheck(){
+  const env = mountEnvelope();
+  if(!env) return null;
+  const b = getBuildingConfig();
+  const under = closedRoofUndersideAt(env.perpMm, b);
+  return { topMm: env.topMm, undersideMm: under, gapMm: under - env.topMm,
+           usableMm: usableRoofHeightMm(), ceilingMm: roofRiseAboveWallAt(env.perpMm, b),
+           assumed: usableRoofHeightMm() === 0 };
+}
+
+// ---- closing the roof -------------------------------------------------------
+// The fit check answers in numbers; this answers by eye. The roof slides back
+// along its travel and stops where the mount would foul it, which is a good deal
+// more convincing than a figure when the answer is no.
+(function(){
+  const CLOSE_MS = 1600;
+  let running = false;
+  function roofParts(){
+    const t = (typeof window.__three === 'object') ? window.__three : null;
+    return t && t.roofBox ? t : null;
+  }
+
+  // Colour the roof by the answer: it goes red where it stops if the mount is in
+  // the way, and back to its normal colour when reopened. The figure in the setup
+  // check says the same thing, but not while you are watching the 3D.
+  const ROOF_OK   = 0xb5713f, ROOF_OK_EDGE   = 0xd9a066;
+  const ROOF_BAD  = 0xd0453a, ROOF_BAD_EDGE  = 0xff8a7a;
+  function paintRoof(blocked){
+    const t = roofParts();
+    if(!t) return;
+    if(t.roofBox.material)   t.roofBox.material.color.setHex(blocked ? ROOF_BAD : ROOF_OK);
+    if(t.roofEdges.material) t.roofEdges.material.color.setHex(blocked ? ROOF_BAD_EDGE : ROOF_OK_EDGE);
+  }
+  // Where the roof sits when parked, remembered on the way in so the way out can
+  // be animated rather than snapped back by a rebuild.
+  let parkedBox = null, parkedEdg = null;
+
+  function slide(toBox, toEdg, stopAt, done){
+    const t = roofParts();
+    if(!t || running){ done && done(); return; }
+    const fromBox = t.roofBox.position.clone();
+    const fromEdg = t.roofEdges.position.clone();
+    const t0 = performance.now();
+    running = true;
+    (function frame(now){
+      const raw = Math.min(1, (now - t0) / CLOSE_MS);
+      const e = raw < 0.5 ? 2*raw*raw : 1 - Math.pow(-2*raw + 2, 2)/2;   // ease in and out
+      const k = Math.min(e, stopAt);
+      t.roofBox.position.lerpVectors(fromBox, toBox, k);
+      t.roofEdges.position.lerpVectors(fromEdg, toEdg, k);
+      if(raw < 1) requestAnimationFrame(frame);
+      else { running = false; done && done(); }
+    })(t0);
+  }
+
+  function closeRoof(){
+    const t = roofParts();
+    if(!t || running) return;
+    const fit = (typeof roofFitCheck === 'function') ? roofFitCheck() : null;
+    parkedBox = t.roofBox.position.clone();
+    parkedEdg = t.roofEdges.position.clone();
+    // Closed means centred over the building: the parked offset runs back to zero,
+    // keeping the height it already has.
+    const endBox = new THREE.Vector3(0, parkedBox.y, 0);
+    const endEdg = new THREE.Vector3(0, parkedEdg.y, 0);
+    // If it will not fit, stop short of the mount rather than driving through it.
+    const blocked = !!(fit && fit.gapMm < 0);
+    slide(endBox, endEdg, blocked ? 0.55 : 1, () => {
+      paintRoof(blocked);
+      const btn = document.getElementById('btnCloseRoof');
+      if(btn) btn.textContent = blocked ? 'Blocked — reopen' : 'Reopen the roof';
+    });
+  }
+
+
+  // If the obstruction is cleared while the roof is sitting blocked - a shorter
+  // tube, a different park, a taller wall - the red was left standing and the
+  // roof stayed stopped, both of them saying something no longer true.
+  function recheckBlocked(){
+    const btn = document.getElementById('btnCloseRoof');
+    if(!btn || running || !/Blocked/.test(btn.textContent)) return;
+    const fit = (typeof roofFitCheck === 'function') ? roofFitCheck() : null;
+    if(!fit || fit.gapMm < 0) return;              // still blocked, leave it
+    const t = roofParts();
+    if(!t) return;
+    paintRoof(false);
+    btn.textContent = 'Reopen the roof';
+    // and let it finish the journey it was stopped part-way through
+    slide(new THREE.Vector3(0, t.roofBox.position.y, 0),
+          new THREE.Vector3(0, t.roofEdges.position.y, 0), 1, null);
+  }
+  window.__recheckBlockedRoof = recheckBlocked;
+
+  function reopen(){
+    const t = roofParts();
+    if(!t || running) return;
+    const btn = document.getElementById('btnCloseRoof');
+    if(!parkedBox){
+      // No remembered position: fall back to a rebuild rather than guess.
+      paintRoof(false);
+      if(typeof compute === 'function') compute();
+      if(btn) btn.textContent = 'Close the roof';
+      return;
+    }
+    slide(parkedBox.clone(), parkedEdg.clone(), 1, () => {
+      paintRoof(false);
+      if(btn) btn.textContent = 'Close the roof';
+      // Hand back to the model so a later rebuild starts from the truth.
+      if(typeof compute === 'function') compute();
+      if(typeof syncRoofFraming === 'function') syncRoofFraming();
+    });
+  }
+  document.addEventListener('click', ev => {
+    const btn = ev.target.closest && ev.target.closest('#btnCloseRoof');
+    if(!btn) return;
+    if(/Reopen|Blocked/.test(btn.textContent)) reopen(); else closeRoof();
+  });
+})();
+
+// ---- the framing, shown in blue ---------------------------------------------
+// The clearance that matters is to the underside of the rafters, not the roof
+// surface, and that difference is easy to forget when looking at a drawing. The
+// blue slab is the depth you entered, hanging where it actually hangs.
+function syncRoofFraming(){
+  const t = window.__three;
+  const s = window.__sceneScale;
+  const f = (typeof window.__floorY === 'number') ? window.__floorY : 0;
+  if(!t || !t.roofFramingBox || !s) return;
+  const b = getBuildingConfig();
+  const ceiling = maxRoofRiseAboveWall(b);
+  const usable = Math.min(usableRoofHeightMm(), ceiling || 0);
+  const show = usable > 0;
+  t.roofFramingBox.visible = show;
+  t.roofFramingEdges.visible = show;
+  if(!show) return;
+  // A band sitting on the wall top, as tall as the structure leaves. This is the
+  // room the mount may use above the walls - the opposite of the depth hanging
+  // below the roof that this used to draw.
+  const wallY = f + b.wallHeight * s;
+  const alongX = (b.rollDir === 'N' || b.rollDir === 'S');
+  const perpSpan = (alongX ? b.width : b.length) * s;
+  const alongLen = (alongX ? b.length : b.width) * s;
+  // the ceiling at any point across the span, in scene units
+  const riseAt = xScene => roofRiseAboveWallAt(xScene / s, b) * s;
+  const geo = buildUsableSpaceGeometry(perpSpan, alongLen, usable * s, riseAt, alongX);
+  if(t.roofFramingBox.geometry) t.roofFramingBox.geometry.dispose();
+  if(t.roofFramingEdges.geometry) t.roofFramingEdges.geometry.dispose();
+  t.roofFramingBox.geometry = geo;
+  t.roofFramingEdges.geometry = new THREE.EdgesGeometry(geo);
+  t.roofFramingBox.quaternion.identity();
+  t.roofFramingEdges.quaternion.identity();
+  t.roofFramingBox.scale.set(1,1,1);
+  t.roofFramingEdges.scale.set(1,1,1);
+  t.roofFramingBox.position.set(0, wallY, 0);
+  t.roofFramingEdges.position.copy(t.roofFramingBox.position);
+}
+
+(function(){
+  const e = document.getElementById('roofFraming');
+  if(e) e.addEventListener('input', () => {
+    if(typeof clampUsableField === 'function') clampUsableField();
+    if(typeof compute === 'function') compute();
+    if(typeof syncRoofFraming === 'function') syncRoofFraming();
+  });
+  setTimeout(() => { if(typeof syncRoofFraming === 'function') syncRoofFraming(); }, 600);
+})();
+
+// The most any structure on this roof could leave, shown beside the field so the
+// number entered can be judged against it.
+function updateRiseCeiling(){
+  const el = document.getElementById('riseCeiling');
+  if(!el) return;
+  const b = getBuildingConfig();
+  const fmtMm = v => useImperial ? (v / IN_TO_MM).toFixed(1) + '\u2033' : Math.round(v) + ' mm';
+  if(b.roofShape === 'flat'){
+    const th = roofRiseAboveWallAt(0, b);
+    el.innerHTML = 'A flat roof rests on the walls, so this is normally zero \u2014 at most its own '
+                 + 'thickness of <b>' + fmtMm(th) + '</b>, and only if the mount can reach between '
+                 + 'the joists.';
+    return;
+  }
+  if(b.roofShape === 'wedge'){
+    const lo = roofRiseAboveWallAt(-1e9, b), hi = roofRiseAboveWallAt(1e9, b);
+    el.innerHTML = 'This roof rises from <b>' + fmtMm(Math.min(lo,hi)) + '</b> on the low side to <b>'
+                 + fmtMm(Math.max(lo,hi)) + '</b> on the high side \u2014 that is the ceiling, not a promise.';
+    return;
+  }
+  const ridge = maxRoofRiseAboveWall(b);
+  // fmt() lives in another scope here, so the figure is formatted locally.
+  const txt = fmtMm(ridge);
+  el.innerHTML = 'This roof rises <b>' + txt + '</b> above the wall top at the ridge — '
+               + 'that is the ceiling, not a promise.';
+}
+
 </script>
 </body>
 </html>
