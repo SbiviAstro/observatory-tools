@@ -172,7 +172,37 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.03.002 — Current</div>
+<div class="card"><div class="eyebrow">v8.04.000 — Current</div>
+
+<p><strong>Fixed: the hour-angle field was six hours out.</strong> This is the most consequential error the tools have carried, because the required dome azimuth depends on it &mdash; every figure produced for a target away from the pole was for the wrong part of the sky. If you took NINA settings from an earlier version at a non-polar pointing, they are worth checking again.</p>
+<p>The field is labelled <em>0 = on the meridian</em> and the calculation added six hours to it. Against cases anyone can verify by hand:</p>
+<table style="width:100%; border-collapse:collapse; margin:10px 0; font-size:13.5px;">
+  <tr><td style="padding:4px 8px;"><b>RA 0, Dec 0</b><br><span style="font-size:12px;">celestial equator on the meridian</span></td>
+      <td style="padding:4px 8px;">reported altitude 0&deg;, azimuth 270&deg; &mdash; the western horizon</td>
+      <td style="padding:4px 8px;">now altitude 49.8&deg;, azimuth 180&deg; &mdash; due south</td></tr>
+  <tr><td style="padding:4px 8px;"><b>RA 0, Dec = latitude</b><br><span style="font-size:12px;">the zenith</span></td>
+      <td style="padding:4px 8px;">reported 24.6&deg;</td><td style="padding:4px 8px;">now 90&deg;</td></tr>
+</table>
+<p>Only declination 90 ever looked right, because hour angle does not matter at the pole &mdash; which is the opening pointing, and very likely why this survived so long. The roll-off-roof tool had the same fault with the opposite sign.</p>
+
+<p><strong>Astro-Physics park positions.</strong> Buttons for all five, taken from Astro-Physics&rsquo; own published sheet rather than from memory, and verified against their descriptions: scope level facing north with the shaft due east for Park 1, at the pole with the shaft down for Park 3, and so on. Parks 1, 4 and 5 depend on latitude, so they are computed rather than fixed. The pier side is not assumed either &mdash; the tool tries one, measures where the counterweight ends up, and takes the side matching the description, which sidesteps the East/West naming ambiguity between programs.</p>
+
+<p><strong>Southern declinations can be entered.</strong> The declination field started at 0, so no target south of the celestial equator could be set at all &mdash; at latitude 40 that is everything down to declination &minus;49.8&deg;, a good part of the observable sky. The arithmetic had always handled it; only the input blocked it.</p>
+
+<p><strong>The counterweight can no longer end up above the tube.</strong> At a given hour angle only one side of the pier is reachable; the other puts the mount through the pole with the weights in the air, which is not a pose a mount adopts. The side now follows the hour angle, and the change is animated over a second rather than snapping &mdash; sweeping the tube up and over rather than down past the pier.</p>
+
+<p><strong>A telescope that would strike the pier is reported.</strong> The existing check only ever watched the counterweight shaft. This one walks the whole moving assembly against the pier below the flange and says how far inside it reaches. That is a design fault &mdash; too long a tube, too wide a pier, too low a mount head &mdash; and finding it before the concrete is poured is the point of the tool, so it is reported rather than prevented.</p>
+
+<p><strong>The RA slider has a curved response.</strong> Linear, the whole meridian crossing was about three pixels wide: the region you most need to sit in was the hardest to land on, and a pixel of jitter carried the mount across it. The slider now holds a position mapped through a square curve &mdash; roughly a fifth of a degree per pixel at the meridian against 1.2 before, with the full travel unchanged.</p>
+
+<p><strong>The status banner names the limit that is actually binding.</strong> A pointing below your local horizon also fails the shutter test, because the telescope is aimed at the ground &mdash; and the shutter message was checked first, so the dome was blamed for a limit you had set. It now reads <em>&ldquo;below your local horizon (minimum observation altitude 15&deg;)&rdquo;</em> with the aperture clearance still healthy.</p>
+
+<p><strong>The roll-off-roof sky plot takes the building&rsquo;s shape.</strong> The outline is drawn in the wall colour and the sky the building blocks is subdued, so the observable region reads as the footprint rather than as a circle with a faint blob inside.</p>
+
+<p><strong>Measurement labels reworded.</strong> The four wall distances asked for the distance to the &ldquo;mount center&rdquo;, a point inside the casting that cannot be reached. Only the difference between opposite walls is used, so measuring to the near face of the pier gives an identical answer &mdash; the labels now say so. Mount head height genuinely does not cancel, and its note now points at the mount library rather than implying you should go and measure it.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.03.002</div>
 <p><strong>The pier-strike check no longer disappears on the far side of a flip.</strong> On one pier side the counterweight often sits entirely above the pier top, where nothing can reach it. The check returned no reading for that, and the line simply vanished from the setup check &mdash; which looked like a failure rather than a result.</p>
 <p>It now says so: <em>&ldquo;The counterweight stays above the pier top at this pointing, so nothing can reach it.&rdquo;</em> The swept volume also no longer treats a missing reading as a clash.</p>
 <p><strong>On the telescope appearing to turn over when you switch to west:</strong> that is correct, and it is what a real German equatorial does. Checked at declinations 90, 45 and 20 &mdash; the pointing is identical on both sides and matches the reported altitude and azimuth exactly, while the tube and counterweight swap sides of the pier and the tube rolls 180&deg; about its own axis. That roll is the reason a meridian flip rotates your field of view and needs re-framing.</p>

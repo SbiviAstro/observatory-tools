@@ -308,6 +308,20 @@
   .aim .jog-btn { font-size:15px; }
   .aim .preset-btn { padding:6px 12px; font-size:13px; }
   .aim .toggle-row { margin:0; }
+  .cw-auto { display:inline-flex; align-items:center; gap:5px; margin-left:9px;
+    font-size:12px; color:var(--text-dim); white-space:nowrap; cursor:pointer; }
+  .cw-auto input[type=number] { width:48px; margin:0 2px; }
+
+    font-family:inherit; color:var(--text-dim); background:var(--panel-2);
+    border:1px solid var(--line); border-radius:5px; }
+  .flip-prompt .fp-btn:hover { color:var(--text); border-color:var(--amber); }
+
+
+  .ap-parks { display:flex; align-items:center; gap:5px; flex:0 0 auto; }
+  .ap-parks-label { font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--text-dim); margin-right:2px; white-space:nowrap; }
+  .ap-parks .preset-btn { min-width:26px; padding:4px 7px; }
+
 
   /* No cap and no scrollbar: the card is as tall as what it has to say, and the
      3D view absorbs the difference. On a short window that leaves the model
@@ -547,6 +561,7 @@
 </head>
 <body class="app">
 
+
 <div class="appbar">
   <a class="brandmark" href="index.html" title="CygnusWave home">
     <svg viewBox="0 0 340 340" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -572,8 +587,9 @@
   <button class="preset-btn" id="btnUnitImperial">Imperial</button>
   <button class="preset-btn" id="btnSaveSetup">Save Setup</button>
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
+  <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.03.002</span>
+  <span class="chip">v8.04.000</span>
 </div>
 
 <div class="stage">
@@ -607,19 +623,19 @@
         </div>
         <p class="step-note" style="margin-top:6px; margin-bottom:10px;">Measure from each wall to directly below the mount's RA/Dec pivot on the floor.</p>
         <div class="row">
-          <div><label>North wall &rarr; mount center</label></div>
+          <div><label>North wall &rarr; mount</label><span class="hint">Measure to the <b>same feature on all four sides</b> &mdash; the near face of the pier is easiest. Only the difference between opposite walls is used, so measuring to the pier face rather than the unreachable centre gives an identical answer.</span></div>
           <div class="field"><input type="number" id="distN" value="78.5"><span class="unit">cm</span><span class="frac-hint" id="hint_distN" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
-          <div><label>South wall &rarr; mount center</label></div>
+          <div><label>South wall &rarr; mount</label></div>
           <div class="field"><input type="number" id="distS" value="78.5"><span class="unit">cm</span><span class="frac-hint" id="hint_distS" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
-          <div><label>East wall &rarr; mount center</label></div>
+          <div><label>East wall &rarr; mount</label></div>
           <div class="field"><input type="number" id="distE" value="78.5"><span class="unit">cm</span><span class="frac-hint" id="hint_distE" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="row">
-          <div><label>West wall &rarr; mount center</label></div>
+          <div><label>West wall &rarr; mount</label></div>
           <div class="field"><input type="number" id="distW" value="78.5"><span class="unit">cm</span><span class="frac-hint" id="hint_distW" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         <div class="card" style="background:var(--panel-2); border-color:var(--line); padding:10px 14px; margin-top:4px; margin-bottom:8px;">
@@ -753,7 +769,7 @@
           <div class="field"><input type="number" id="rorPierDiameter" value="8"><span class="unit">in</span><span class="frac-hint" id="hint_rorPierDiameter" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
         <div class="row">
-          <div><label>Mount head height</label><span class="hint">pier flange to RA/Dec pivot</span></div>
+          <div><label>Mount head height</label><span class="hint">Pier flange to the RA/Dec pivot. This one does <b>not</b> cancel &mdash; it sets the absolute axis height &mdash; and the pivot is inside the casting. Choose your mount from the list and this is filled from the maker's drawing; measure it only if yours is not listed.</span></div>
           <div class="field"><input type="number" id="rorMountHead" value="11"><span class="unit">in</span><span class="frac-hint" id="hint_rorMountHead" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
 
@@ -1272,12 +1288,12 @@
         <div id="haDecFields">
           <div class="row">
             <div><label>Right Ascension (RA)</label></div>
-            <div class="field"><input type="number" id="ha" value="0" min="-80" max="80" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="ha" value="0" min="-180" max="180" step="1"><span class="unit">°</span></div>
           </div>
           
           <div class="row">
             <div><label>Declination (Dec)</label></div>
-            <div class="field"><input type="number" id="dec" value="90" min="0" max="180" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="dec" value="90" min="-90" max="180" step="1"><span class="unit">°</span></div>
           </div>
           
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
@@ -1305,7 +1321,15 @@
           </div>
         </div>
 
-        <div class="jog-wrap">
+                  <div class="ap-parks">
+            <span class="ap-parks-label">AP park</span>
+            <button class="preset-btn" data-park="1" title="Scope level on the west side facing north; counterweight level, due east">1</button>
+            <button class="preset-btn" data-park="2" title="Scope level on top facing east; counterweight down">2</button>
+            <button class="preset-btn" data-park="3" title="Scope at the pole; counterweight down">3</button>
+            <button class="preset-btn" data-park="4" title="Scope level on the east side facing south; counterweight level, due west">4</button>
+            <button class="preset-btn" data-park="5" title="Scope level on the east side facing north; counterweight level, due west">5</button>
+          </div>
+          <div class="jog-wrap">
           <div class="jog-pad">
             <div></div><button class="jog-btn" id="jogUp">▲</button><div></div>
             <button class="jog-btn" id="jogLeft">◀</button><div class="jog-center">JOG</div><button class="jog-btn" id="jogRight">▶</button>
@@ -1327,7 +1351,7 @@
           <div><label>Pier side</label></div>
           <div class="field"><select id="pierSide"><option value="East">East</option><option value="West">West</option></select></div>
         </div>
-    <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-80" max="80" step="1" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="0" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
+    <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-100" max="100" step="0.5" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="-90" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
     <div class="answer" id="answerStrip">
       <div id="statusBanner" class="status-banner status-ok">
     <span id="statusIcon">✓</span> <span id="statusText">Valid pointing — clear of the walls, roof, and local horizon.</span>
@@ -1402,8 +1426,8 @@
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.03.002</span>
-</div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.04.000</span>
+</div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
         ⚠ Pointing was pulled up to clear the walls/roof/horizon at this azimuth.
@@ -1773,7 +1797,29 @@ function otaTotalLength(){ return num('otaLength') + Math.max(0, num('dewShield'
 // Everything downstream (sky position, clearance, sweep, 3D mount) uses this
 // single conversion, so the picture and the numbers cannot drift apart.
 function raAxisDeg(){ return num('ha'); }
-function haHours(){ return -6 + raAxisDeg() / 15; }
+
+// ---- RA slider response ----------------------------------------------------
+// Linear, the whole meridian crossing was about three pixels wide - the region
+// you most want to sit in was the hardest to land on, and a pixel of jitter
+// carried the mount across it. The slider now holds a position rather than an
+// angle, and maps it through a square curve: fine in the middle, coarse at the
+// ends, full travel unchanged.
+//
+//   position -100..100  ->  hour angle = sign x (position/100)^2 x 180
+//
+// which gives roughly a twentieth of a degree per pixel at the meridian against
+// 1.2 before, and about five degrees per pixel out at the limits where that is
+// all anyone needs.
+function haFromSlider(pos){
+  const x = Math.max(-100, Math.min(100, parseFloat(pos) || 0)) / 100;
+  return Math.round(Math.sign(x) * x * x * 180 * 10) / 10;
+}
+function sliderFromHa(ha){
+  const v = Math.max(-180, Math.min(180, parseFloat(ha) || 0));
+  return Math.round(Math.sign(v) * Math.sqrt(Math.abs(v) / 180) * 200) / 2;
+}
+
+function haHours(){ return raAxisDeg() / 15; }
 
 // Effective pointing for the 3D model. In Alt/Az pointing mode the alt/az fields
 // are authoritative and the RA field is stale, so the model must convert from
@@ -3058,8 +3104,8 @@ document.getElementById('horizonMinAlt').addEventListener('input', function(){
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
 document.getElementById('lat').addEventListener('input', clampDecToVisible);
 
-document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = this.value; compute(); });
-document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = this.value; });
+document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = haFromSlider(this.value); compute(); });
+document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = sliderFromHa(this.value); });
 
 function clampDecToVisible(){
   // No longer clamps. Dec below (lat - 90) never rises at this site, but the
@@ -3138,7 +3184,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if(btn.dataset.ha !== undefined){
       document.getElementById('ha').value = btn.dataset.ha;
-      document.getElementById('haSlider').value = btn.dataset.ha;
+      document.getElementById('haSlider').value = sliderFromHa(btn.dataset.ha);
       document.getElementById('dec').value = btn.dataset.dec;
       document.getElementById('decSlider').value = btn.dataset.dec;
       clampDecToVisible();
@@ -3159,7 +3205,10 @@ function resolvePierSide(){
 function syncPierSideDisplay(resolved){
   const sel = document.getElementById('pierSide');
   sel.value = resolved;
-  sel.disabled = false;
+  // Was unconditionally false, which ran on every recompute and quietly
+    // undid the freeze - the one control left usable while the mount was
+    // supposed to be stopped, and the one that would have moved it.
+    sel.disabled = false;
 }
 
 let skyCoverageExpanded = false;
@@ -3289,6 +3338,7 @@ function loadSetupFromFile(file){
     if(data._pointingMode) setPointingMode(data._pointingMode);
     if(data._viewHeight && typeof setViewHeight === 'function') setViewHeight(data._viewHeight);
     if(data._horizonMode) setHorizonMode(data._horizonMode);
+    setTimeout(() => { if(window.__meridianSettle) window.__meridianSettle(); }, 120);
     if(data._horizonSource) horizonSourceName = data._horizonSource;
     // Name the source when there is one: "8 points parsed" gives no clue that
     // the profile you measured is the one that came back.
@@ -3354,9 +3404,11 @@ function renderSkyPlot(points, building){
   const _ps = getPointingScope();
   const OUTLINE_STEP = 4; // degrees
   const outlinePts = [];
+  const outlineAlt = [];
   for(let az = 0; az < 360; az += OUTLINE_STEP){
     const wr = wallRoofObstructionAlt(az, _ps.mx, _ps.my, _ps.mountH, building);
     const altDeg = Math.max(0, Math.min(89, wr.altDeg));
+    outlineAlt.push(altDeg);
     const t = (1 - altDeg/90) * R;
     const azRad = az * Math.PI/180;
     outlinePts.push({
@@ -3367,9 +3419,12 @@ function renderSkyPlot(points, building){
   // Draw the filled building footprint area (everything inside the horizon = observable sky)
   const fillPath = document.createElementNS(ns,'polygon');
   fillPath.setAttribute('points', outlinePts.map(p => `${p.x},${p.y}`).join(' '));
-  fillPath.setAttribute('fill','rgba(30,45,60,0.35)');
-  fillPath.setAttribute('stroke','#5a7090');
-  fillPath.setAttribute('stroke-width','1.5');
+  // The building is the subject of this plot, so it is drawn in the wall colour
+  // and heavily enough to read as a shape rather than as a faint guide.
+  fillPath.setAttribute('fill','rgba(181,113,63,0.10)');
+  fillPath.setAttribute('stroke','#b5713f');
+  fillPath.setAttribute('stroke-width','2.4');
+  fillPath.setAttribute('stroke-linejoin','round');
   svg.appendChild(fillPath);
 
   // ── Reference circle (full 0° horizon) ──
@@ -3406,14 +3461,24 @@ function renderSkyPlot(points, building){
   });
 
   // ── Sky coverage dots ──
+  // Outside the building outline the sky is behind a wall or the parked roof.
+  // Those points stay - losing them would hide what the building costs you -
+  // but they are drawn back so the eye reads the outline as the edge.
+  const outlineAltAt = az => {
+    const a = ((az % 360) + 360) % 360;
+    const i = Math.round(a / OUTLINE_STEP) % outlineAlt.length;
+    return outlineAlt[i];
+  };
   for(const p of points){
     const t = (1 - p.alt/90);
     const azRad = p.az * Math.PI/180;
     const x = cx + R*t*Math.sin(azRad), y = cy - R*t*Math.cos(azRad);
+    const outside = p.alt < outlineAltAt(p.az) - 0.5;
     const dot = document.createElementNS(ns,'circle');
-    dot.setAttribute('cx', x.toFixed(1)); dot.setAttribute('cy', y.toFixed(1)); dot.setAttribute('r', 4.0);
+    dot.setAttribute('cx', x.toFixed(1)); dot.setAttribute('cy', y.toFixed(1));
+    dot.setAttribute('r', outside ? 2.6 : 4.0);
     dot.setAttribute('fill', p.belowHorizon ? '#b5713f' : (p.clear ? '#7fd88f' : '#e0685c'));
-    dot.setAttribute('opacity', p.belowHorizon ? '0.5' : '0.9');
+    dot.setAttribute('opacity', outside ? '0.28' : (p.belowHorizon ? '0.5' : '0.9'));
     svg.appendChild(dot);
   }
 }
@@ -3448,6 +3513,8 @@ function updateSweptVolume(){
     } catch(e){ /* model rebuilding */ }
   });
 }
+
+
 
 function pierStrikeCheck(){
   const m = (typeof gemMount !== 'undefined') ? gemMount : null;
@@ -3517,6 +3584,17 @@ function rorSetupCheck(){
         : ' The walls still limit you fairly evenly.')]);
 
   // Does anything strike the pier as the mount turns?
+  const intr = (typeof pierIntrusion === 'function') ? pierIntrusion() : null;
+  if(intr && intr.mm < 0){
+    rows.push([BAD, 'Telescope strikes the pier',
+      'At this pointing the assembly passes ' + fmt(-intr.mm) + ' inside the pier. '
+      + 'A real mount cannot reach here: the tube is too long, the pier too wide, or '
+      + 'the mount head too low. Raise the mount, narrow the pier, or shorten the tube.']);
+  } else if(intr && intr.mm < 50){
+    rows.push([WARN, 'Close to the pier',
+      'The assembly passes within ' + fmt(intr.mm) + ' of the pier at this pointing. '
+      + 'Check it against the real hardware before pouring anything.']);
+  }
   const strike = pierStrikeCheck();
   if(strike){
     const s = strike.mm;
@@ -6582,6 +6660,7 @@ function compute(){
   if(typeof rorSetupCheck === 'function') rorSetupCheck();
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
   if(typeof updateSweptVolume === 'function') updateSweptVolume();
+  if(window.__keepReachable) window.__keepReachable();
 }
 
 function updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing){
@@ -6600,12 +6679,15 @@ function updateStatusBanner(geomBad, clear, horizonClamped, decClamped, swing){
     banner.classList.add('status-bad'); icon.textContent='✗';
     const hit = swing.pairs.find(p => !p.clears);
     text.textContent = `${hit.a} and ${hit.b} swing circles overlap — see the Swing Clearance panel.`;
+  } else if(horizonClamped || decClamped){
+    // Named before the generic "blocked". A pointing below the horizon limit is
+    // also blocked by everything else, so the generic message won and left you
+    // hunting for an obstruction that was really a limit you had set.
+    banner.classList.add('status-warn'); icon.textContent='⚠';
+    text.textContent = horizonClamped ? 'Pointing was adjusted to clear the walls/roof/horizon.' : 'Declination was adjusted to stay within what\u2019s observable at this latitude.';
   } else if(!clear){
     banner.classList.add('status-bad'); icon.textContent='✗';
     text.textContent = 'Current pointing is blocked — see Live Pointing for details.';
-  } else if(horizonClamped || decClamped){
-    banner.classList.add('status-warn'); icon.textContent='⚠';
-    text.textContent = horizonClamped ? 'Pointing was adjusted to clear the walls/roof/horizon.' : 'Declination was adjusted to stay within what\u2019s observable at this latitude.';
   } else {
     banner.classList.add('status-ok'); icon.textContent='✓';
     text.textContent = 'Valid pointing — clear of the walls, roof, and local horizon.';
@@ -6864,6 +6946,229 @@ const SUMMARY = {
     view.style.flex=''; view.style.height=''; view.style.maxHeight=''; view.style.minHeight='';
     window.dispatchEvent(new Event('resize'));
   });
+})();
+
+// ---- Astro-Physics park positions ------------------------------------------
+// Taken from Astro-Physics' own "Park Positions - Northern & Southern
+// Hemispheres" sheet. Two of the five depend on latitude, so they are computed
+// rather than fixed: Park 1 and 5 sit at declination (90 - latitude), Park 4 at
+// the negative of that. Northern hemisphere; the southern set is mirrored and
+// is not wired up here.
+(function(){
+  const PARKS = {
+    '1': lat => ({ ha: 180, dec:  90 - lat, cwAz:  90 }),   // CW level, due east
+    '2': ()  => ({ ha: -90, dec:   0,       cwDown: true }),
+    '3': ()  => ({ ha: -90, dec:  90,       cwDown: true }),
+    '4': lat => ({ ha:   0, dec:-(90 - lat), cwAz: 270 }),  // CW level, due west
+    '5': lat => ({ ha: 180, dec:  90 - lat, cwAz: 270 })
+  };
+  const set = (id, v) => { const e = document.getElementById(id);
+    if(e){ e.value = v; e.dispatchEvent(new Event('input', { bubbles:true })); } };
+
+  // Which pier side puts the counterweight where AP describes it? Rather than
+  // assume a naming convention, try one and measure the model.
+  function chooseSide(want){
+    const sel = document.getElementById('pierSide');
+    if(!sel || typeof gemMount === 'undefined' || !gemMount) return;
+    for(const side of ['East','West']){
+      // Set and recompute directly. Dispatching an input event here would wake
+      // the keep-weights-down rule mid-search and the two would fight over the
+      // side, which is why the parks and the auto rule undid each other.
+      sel.value = side;
+      if(typeof compute === 'function') compute();
+      gemMount.group.updateMatrixWorld(true);
+      // The library draws the counterweight at -cwSide along the declination
+      // axis, and cwSide is itself -1 when the axis length is negative. Using
+      // cwSide directly inverted the direction, so Parks 2 and 3 picked the side
+      // with the weights in the air and the tube hanging underneath.
+      const cwSide = (gemMount.params.gemAxisLength < 0) ? -1 : 1;
+      const ax = new THREE.Vector3(0,0,1)
+        .transformDirection(gemMount.decGroup.matrixWorld).normalize()
+        .multiplyScalar(-cwSide);
+      if(want.cwDown){ if(ax.y < -0.2) return; }
+      else {
+        const az = ((Math.atan2(ax.z, ax.x) * 180 / Math.PI) + 360) % 360;
+        if(Math.abs(((az - want.cwAz + 540) % 360) - 180) < 45) return;
+      }
+    }
+  }
+
+  document.querySelectorAll('[data-park]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const p = PARKS[btn.dataset.park];
+      if(!p) return;
+      const want = p(num('lat'));
+      // Hold the side rule off for the whole application. A park names an exact
+      // pose; letting the rule animate a swap in the middle of the side search
+      // leaves the mount somewhere else entirely.
+      window.__parkSearching = true;
+      try {
+        set('ha', want.ha);
+        set('dec', +want.dec.toFixed(1));
+        chooseSide(want);
+        if(typeof compute === 'function') compute();
+      } finally {
+        window.__parkSearching = false;
+      }
+    });
+  });
+})();
+
+
+// ---- physical constraints --------------------------------------------------
+// Two things a real mount cannot do, handled differently because they mean
+// different things.
+//
+//   The counterweight cannot point upwards. At a given hour angle only one side
+//   of the pier is reachable; the other puts the mount through the pole with the
+//   weights in the air. That is not a design fault, it is simply not where the
+//   mount would be - so the side follows the hour angle and the pose never
+//   appears. No prompt, no pause: the side is not really a free choice.
+//
+//   The telescope cannot pass through the pier. That one IS a design fault - a
+//   tube too long, a pier too fat, a mount head too low - and it is exactly what
+//   this tool exists to find, so it is reported rather than prevented.
+(function(){
+  const LEVEL = 1;          // degrees of shaft rise treated as horizontal
+  let working = false;
+
+  function shaftRise(){
+    const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+    if(!m || m.mountType === 'harmonic' || !m.params || !(m.params.counterweightShaft > 0)) return -90;
+    try {
+      m.group.updateMatrixWorld(true);
+      const cwSide = (m.params.gemAxisLength < 0) ? -1 : 1;
+      const dir = new THREE.Vector3(0,0,1)
+        .transformDirection(m.decGroup.matrixWorld).normalize().multiplyScalar(-cwSide);
+      return Math.asin(Math.max(-1, Math.min(1, dir.y))) * 180 / Math.PI;
+    } catch(e){ return -90; }
+  }
+  window.shaftRise = shaftRise;
+
+  // Nearest approach of anything on the moving assembly to the pier, measured
+  // below the pier top and in the pier's own frame. Negative means it is inside.
+  function pierIntrusion(){
+    const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+    if(!m || !m.decGroup || !m.frame) return null;
+    try {
+      m.group.updateMatrixWorld(true);
+      const pierR   = (m.params.pierDiameter || 0) / 2;
+      const flangeZ = -(m.params.mountHeadHeight || 0);
+      if(pierR <= 0) return null;
+      let worst = null, what = '';
+      m.decGroup.traverse(o => {
+        if(!o.isMesh || !o.geometry) return;
+        if(!o.geometry.boundingBox) o.geometry.computeBoundingBox();
+        const bb = o.geometry.boundingBox;
+        for(let i = 0; i < 8; i++){
+          const v = new THREE.Vector3(i&1 ? bb.max.x : bb.min.x,
+                                      i&2 ? bb.max.y : bb.min.y,
+                                      i&4 ? bb.max.z : bb.min.z);
+          v.applyMatrix4(o.matrixWorld);
+          m.frame.worldToLocal(v);
+          if(v.z > flangeZ) continue;            // above the pier top
+          const gap = Math.hypot(v.x, v.y) - pierR;
+          if(worst === null || gap < worst){ worst = gap; what = o.name || ''; }
+        }
+      });
+      return worst === null ? null : { mm: worst, what: what };
+    } catch(e){ return null; }
+  }
+  window.pierIntrusion = pierIntrusion;
+
+
+  // ---- the swap, taken at a mount's pace --------------------------------
+  // Snapping between the two poses tells you nothing about the path. This walks
+  // both rotors across over a second, and picks the direction that carries the
+  // tube up and over rather than down past the pier - a flip is 180 degrees, so
+  // both ways are the same length and the arithmetic alone would choose either.
+  const FLIP_MS = 1000;
+  const shortest = d => { while(d > Math.PI) d -= 2*Math.PI;
+                          while(d < -Math.PI) d += 2*Math.PI; return d; };
+  const rotors = () => {
+    const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+    return m && m.raRotor ? { ra: m.raRotor.rotation.z, dec: m.decRotor.rotation.z } : null;
+  };
+  // Height of the tube above the counterweight if the rotors were set here.
+  function clearanceAt(m, ra, dec){
+    const keepRa = m.raRotor.rotation.z, keepDec = m.decRotor.rotation.z;
+    m.raRotor.rotation.z = ra; m.decRotor.rotation.z = dec;
+    m.group.updateMatrixWorld(true);
+    const pivot  = new THREE.Vector3(0,0,0).applyMatrix4(m.decGroup.matrixWorld);
+    const cwSide = (m.params.gemAxisLength < 0) ? -1 : 1;
+    const dir    = new THREE.Vector3(0,0,1).transformDirection(m.decGroup.matrixWorld)
+                     .normalize().multiplyScalar(-cwSide);
+    const gap = m.opticalAxis().origin.y
+              - (pivot.y + dir.y * m.params.counterweightShaft * 0.0013);
+    m.raRotor.rotation.z = keepRa; m.decRotor.rotation.z = keepDec;
+    m.group.updateMatrixWorld(true);
+    return gap;
+  }
+  function animateSwap(from, to, done){
+    const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+    if(!m || !m.raRotor || !from || !to){ done && done(); return; }
+    // Remember where the mount was pointed when the swap began. If that changes
+    // the animation is stale: every recompute writes the rotors from the model
+    // while the animation writes them from the interpolation, and the two fight
+    // - which reads as the mount juddering back and forth as you drag.
+    const startedAt = (typeof raAxisDeg === 'function') ? raAxisDeg() : null;
+    const startedDec = (typeof num === 'function') ? num('dec') : null;
+    let dRa  = shortest(to.ra  - from.ra);
+    const dDec = shortest(to.dec - from.dec);
+    try {
+      const other = dRa > 0 ? dRa - 2*Math.PI : dRa + 2*Math.PI;
+      if(clearanceAt(m, from.ra + other/2, from.dec + dDec/2)
+       > clearanceAt(m, from.ra + dRa/2,   from.dec + dDec/2)) dRa = other;
+    } catch(e){ /* keep the shorter way if the probe fails */ }
+    const t0 = performance.now();
+    (function frame(now){
+      // Abandon the moment the pointing moves: the model is authoritative and
+      // the user is driving. Snapping is better than two writers disagreeing.
+      const movedRa  = startedAt !== null && typeof raAxisDeg === 'function'
+                       && Math.abs(raAxisDeg() - startedAt) > 0.001;
+      const movedDec = startedDec !== null && typeof num === 'function'
+                       && Math.abs(num('dec') - startedDec) > 0.001;
+      if(movedRa || movedDec){
+        // Hand the rotors back to the model, otherwise they are left at whatever
+        // half-way angle the interpolation had reached until something else
+        // happens to recompute them.
+        done && done();
+        setTimeout(() => { if(typeof compute === 'function') compute(); }, 0);
+        return;
+      }
+      const t = Math.min(1, (now - t0) / FLIP_MS);
+      const e = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2)/2;   // ease in and out
+      m.raRotor.rotation.z  = from.ra  + dRa  * e;
+      m.decRotor.rotation.z = from.dec + dDec * e;
+      m.group.updateMatrixWorld(true);
+      if(t < 1) requestAnimationFrame(frame); else done && done();
+    })(t0);
+  }
+
+  // Keep the mount on the side it could actually be on.
+  function keepReachable(){
+    const sel = document.getElementById('pierSide');
+    if(!sel || working || window.__parkSearching) return;
+    if(shaftRise() <= LEVEL) return;
+    const target = (sel.value === 'East') ? 'West' : 'East';
+    working = true;
+    setTimeout(() => {                    // out of compute(), so the model settles
+      const before = rotors();
+      sel.value = target;
+      sel.dispatchEvent(new Event('input', { bubbles:true }));
+      const after = rotors();
+      if(before && after){
+        // Put the rotors back and walk them across, rather than letting the
+        // recompute leave them at the far end straight away.
+        gemMount.raRotor.rotation.z  = before.ra;
+        gemMount.decRotor.rotation.z = before.dec;
+        animateSwap(before, after, () => { working = false; });
+      } else {
+        working = false;
+      }
+    }, 0);
+  }
+  window.__keepReachable = keepReachable;
 })();
 </script>
 </body>

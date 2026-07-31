@@ -142,7 +142,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="faq.html">FAQ</a>
     <a href="mailto:help@cygnuswave.io?subject=CygnusWave%20Observatory%20Tools">Contact</a>
   </div>
-  <span class="nav-version">v8.03.002</span>
+  <span class="nav-version">v8.04.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -191,6 +191,17 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <h2>Resizing the 3D view</h2>
 <p>Drag the grip along the bottom edge of the 3D view &mdash; the chevrons above and below it show which way it moves, and it turns green while you are dragging to make it taller or shorter, trading height with the figures below it. <strong>Double-click</strong> the bar to go back to the default. With the bar focused, the arrow keys nudge it and <strong>Home</strong> resets it.</p>
 <p>Whatever height you settle on is saved with your setup. On a phone the control is hidden, since the layout stacks and the page scrolls instead.</p>
+
+<h2>Astro-Physics park positions</h2>
+<p>The five park positions Astro-Physics define are on the pointing bar as <strong>AP PARK 1&ndash;5</strong>. They are taken from Astro-Physics&rsquo; own published sheet, and three of them depend on your latitude, so they are computed rather than fixed.</p>
+<p>Two points worth knowing. Astro-Physics describe Parks 2 and 3 as having the <em>&ldquo;RA axis vertical&rdquo;</em>, but a German equatorial&rsquo;s counterweight shaft can only reach <strong>90&deg; minus your latitude</strong> below horizontal &mdash; 49.8&deg; at latitude 40, and less further north. It is only truly vertical at the equator, and their photographs are taken at their own latitude. And Astro-Physics now consider <strong>Park 1 obsolete</strong>, recommending Park 4 in its place and Park 5 where the position must be accurately levelled.</p>
+
+<h2>The hour-angle field</h2>
+<p>The RA field is <strong>degrees of hour angle, zero on the meridian</strong>, positive to the west. Fifteen degrees is one hour. The slider is deliberately fine near the meridian and coarse towards the ends, so the crossing is easy to sit in.</p>
+<p>Two checks you can make by eye: with the field at 0 and declination equal to your latitude the telescope should read altitude 90&deg;, and with the field at 0 and declination 0 it should read due south at an altitude of 90&deg; minus your latitude.</p>
+
+<h2>Which side of the pier</h2>
+<p>The pier side is not really a free choice. At a given hour angle only one side is reachable; the other puts the mount through the pole with the counterweight above the tube, which is not a pose a mount adopts. The side therefore follows the hour angle, and the change is animated so you can see which way the tube sweeps.</p>
 
 <h2>Finding your way around</h2>
 <p>Everything sits on one screen; there is nothing to scroll past.</p>
