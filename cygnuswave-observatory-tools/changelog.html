@@ -172,7 +172,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.05.001 — Current</div>
+<div class="card"><div class="eyebrow">v8.06.000 — Current</div>
 
 <p><strong>The default site latitude is now 39&deg;</strong>, a round figure rather than one that reads as somebody&rsquo;s actual site. Enter your own before taking any numbers from the tool: latitude sets where the pole sits, so every altitude, the park positions and the whole sky-coverage figure depend on it.</p>
 <p><strong>The roof follows the building&rsquo;s shape.</strong> On a custom footprint the roof panel was drawn as a plain rectangle regardless of the walls, so an angled corner left it floating clear of the building it is meant to cover. It is now cut to the footprint: a square plan gives a square panel, and swinging a wall to 50&deg; stretches the panel with it, 7491&thinsp;mm against the walls&rsquo; 7491&thinsp;mm. It still slides and closes as before.</p>
@@ -187,6 +187,10 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p><strong>Every build now carries a stamp.</strong> The version number says what changed; a four-character hash of the file&rsquo;s own content says which build you have. Three separate builds had all called themselves v8.05.000 before this existed, so the number alone did not identify a file &mdash; if you downloaded twice you could have two different tools claiming the same version. The stamp changes whenever the file does, whether or not the version number moves with it, and it is generated at build time rather than typed.</p>
 
 <p>The wall-type work &mdash; flat, raked and drop-down walls &mdash; has been set aside as a lab build rather than shipped. It calculates and draws correctly, but it changes the sky-coverage figures for anyone with a sloped-wall building, and it deserves more testing against real observatories before it lands.</p>
+
+<p><strong>The unit buttons say which system you are in.</strong> Both were grey, so the only way to tell metric from imperial was to read a value and infer it. The one in force is now amber like every other active control; the one you could switch to is yellow.</p>
+
+<p><strong>Reset to Defaults is green.</strong> It sat in amber beside Save and Load, reading as one more action in the same row when it is the one that discards everything. Green sets it apart, in both the dark and light themes.</p>
 </div>
 
 <div class="card"><div class="eyebrow">v8.05.000</div>
@@ -435,7 +439,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p><strong>Fixed: a setting of your own was being reported as an obstruction.</strong> The field is called <em>Minimum observation altitude</em> &mdash; a preference about how low you are willing to observe. When a pointing fell below it, the warning said the view was &ldquo;obstructed by terrain or buildings&rdquo; and told you to check your horizon profile. There was nothing to check. Nothing was in the way.</p>
 <p>The two cases now read differently. Below your own limit: <em>&ldquo;below your minimum observation altitude of 10&deg;, not blocked by the dome &mdash; the geometry itself clears. That figure is a preference, not an obstruction.&rdquo;</em> Below a measured terrain profile, the wording about terrain stands, because then it is true.</p>
 <p><strong>The dome's default was also 20&deg; where the roll-off-roof tool used 10&deg;</strong> &mdash; the same setting, two different values. Twenty degrees is a defensible imaging habit but a strong claim to make on someone's behalf: it painted a wide band of perfectly reachable sky as blocked. Both now default to 10&deg;.</p>
-<p>On the reported case &mdash; RA 0, Dec 156 at latitude 40.2&deg;, which points at 15.2&deg; altitude &mdash; the shutter now reads as clearing, because it does.</p>
+<p>On the reported case &mdash; a pointing at 15.2&deg; altitude, which at latitude 39&deg; is declination &minus;35.8&deg; on the meridian &mdash; the shutter now reads as clearing, because it does. <em>(The original note gave this as RA 0, Dec 156; that was the hour-angle fault since corrected in v8.04.000, which put the field six hours out. The altitude, and the point being made, are unchanged.)</em></p>
 <p>The field carries a note saying it is your own limit rather than an obstruction. <strong>If you had deliberately set 20&deg;, set it again</strong>; the change only moves the default.</p></div>
 
 <div class="card"><div class="eyebrow">v7.29.001</div>
@@ -724,7 +728,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <div class="card"><div class="eyebrow">v7.00.027</div>
 <p><strong>Mount diagram redrawn</strong> to resemble a real German equatorial &mdash; red RA and declination housings tilted to the site latitude, black saddle and dovetail, chrome counterweight shaft and weight, on a black azimuth plate and pier. The A, B, C and I dimensions are marked on it.</p>
 <p><strong>Generic and Measure-my-own are now separate options.</strong> <em>Generic equatorial</em> carries a plausible mid-size geometry (A&nbsp;5.5&Prime;, B&nbsp;11&Prime;, C&nbsp;8&Prime;, I&nbsp;20&Prime;) so the tool works sensibly out of the box without claiming to be anyone's particular mount. <em>Measure my own</em> is the entry you pick to type your own figures.</p>
-<p><strong>Dimensions are shown for every mount, not just your own.</strong> Selecting any equatorial fills the A/B/C/I boxes with that mount's geometry so it can be read against the diagram. They are read-only for library entries and become editable only under Measure my own, where they drive the model directly &mdash; including the latitude relationship, so A&nbsp;7&Prime; with B&nbsp;13&Prime; at 40.2&deg; gives a 15.39&Prime; declination-axis height.</p></div>
+<p><strong>Dimensions are shown for every mount, not just your own.</strong> Selecting any equatorial fills the A/B/C/I boxes with that mount's geometry so it can be read against the diagram. They are read-only for library entries and become editable only under Measure my own, where they drive the model directly &mdash; including the latitude relationship, so A&nbsp;7&Prime; with B&nbsp;13&Prime; gives a 15.18&Prime; declination-axis height at latitude 39&deg;, or 15.39&Prime; at 40.2&deg;.</p></div>
 
 <div class="card"><div class="eyebrow">v7.00.026</div>
 <p><strong>Mount System now shows how the measurements are taken, and lets you enter your own.</strong> A labelled diagram sits in the card and switches with the mount type &mdash; an equatorial view showing the pier, polar axis, declination axis, tube and counterweight, and an alt/az view showing the base, altitude axis and tube.</p>
