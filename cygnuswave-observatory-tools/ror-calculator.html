@@ -621,7 +621,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.06.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;1b9e</span></span>
+  <span class="chip">v8.08.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;09c6</span></span>
 </div>
 
 <div class="stage">
@@ -739,9 +739,9 @@
         </div>
         <div id="roofPeakFields" style="display:none;">
           <div class="row">
-            <div><label>Roof pitch</label><span class="hint">rise:run — e.g. 1:6 means 1" rise per 6" run</span></div>
+            <div><label>Roof pitch</label><span class="hint">Rise:run &mdash; 1:6 means one of rise for every six of run. Or give the angle; the two stay in step, so use whichever your plans quote.</span></div>
             <div class="field" style="gap:6px;">
-              <input type="hidden" id="eaveHeight" value="94"><input type="number" id="roofPitchRise" value="1" min="0" style="width:60px;"><span style="color:var(--text-dim); padding:0 4px;">:</span><input type="number" id="roofPitchRun" value="6" min="1" style="width:60px;">
+              <input type="hidden" id="eaveHeight" value="94"><input type="number" id="roofPitchRise" value="1" min="0" style="width:56px;"><span style="color:var(--text-dim); padding:0 4px;">:</span><input type="number" id="roofPitchRun" value="6" min="1" style="width:56px;"><span style="color:var(--text-dim); padding:0 8px;">or</span><input type="number" id="roofPitchDeg" value="9.5" min="0" max="80" step="0.1" style="width:60px;"><span class="unit-fixed">&deg;</span>
             </div>
           </div>
           <div style="background:var(--panel-2); border:1px solid var(--line); border-radius:5px; padding:10px 14px; margin-top:8px;">
@@ -1464,7 +1464,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.06.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.08.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -2036,7 +2036,7 @@ function getRorNsEwFromWalls(){
 
 const CM_FIELD_IDS = [
   'bWidth','bLength','wallHeight','mountHeight','distN','distS','distE','distW',
-  'roofTravel','roofHeight','roofFraming','eaveHeight','roofPitchRise','roofPitchRun',
+  'roofTravel','roofHeight','roofFraming','eaveHeight','roofPitchRise','roofPitchRun','roofPitchDeg',
   'wedgeLowHeight','wedgeHighHeight',
   'gemAxis','decHoriz',
   'scope1NS','scope1EW','scope1MountH',
@@ -2044,8 +2044,10 @@ const CM_FIELD_IDS = [
   'scope3NS','scope3EW','scope3MountH','scope3GemAxis','scope3DecHoriz',
   'scope4NS','scope4EW','scope4MountH','scope4GemAxis','scope4DecHoriz',
   'minScopeGap',
-  'rorPierHeight','rorPierDiameter','rorMountHead'
-];
+  'rorPierHeight','rorPierDiameter','rorMountHead',
+  // The mount-diagram dimensions. This tool works in centimetres, so they
+  // belong with the other lengths rather than the millimetre-class fields.
+  'genA','genB','genC','genI','genH'];
 // "mm-class" non-OTA fields
 const MM_FIELD_IDS = ['customRoofSpan'];
 // wallDist fields are dynamically created — handled separately
@@ -3105,6 +3107,11 @@ function setRoofShape(shape){
   compute();
 }
 
+// Remembered so a restored setup can name the file its horizon came from. This
+// was never declared in the roll-off tool, so the assignment below threw and
+// took the whole save with it: the Save Setup button did nothing at all.
+let horizonSourceName = '';
+
 function setHorizonMode(m){
   horizonMode = m;
   document.getElementById('btnHorizonFlat').classList.toggle('active', m==='flat');
@@ -3318,7 +3325,7 @@ document.getElementById('btnResetDefaults').addEventListener('click', function()
 // ================= Save / load setup =================
 const SAVE_FIELD_IDS = [
   'bWidth','bLength','wallHeight','mountHeight','distN','distS','distE','distW',
-  'rollDir','roofTravel','roofHeight','eaveHeight','roofPitchRise','roofPitchRun',
+  'rollDir','roofTravel','roofHeight','eaveHeight','roofPitchRise','roofPitchRun','roofPitchDeg',
   'gemAxis','decHoriz','otaLength','otaAperture','dewShield','otaOffset','cwReach','otaOuterDia','hasDualSaddle','showSweep3D','mountCustomValues','genA','genB','genC','genI','genH','lateralDist','ota2Length','ota2Aperture','ota2OuterDia','ota2Offset',
   'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
@@ -3618,6 +3625,40 @@ function rorSetupCheck(){
     : 'Looking south the walls cut the sky off at ' + wallAlt.toFixed(1) + '\u00b0 while your terrain only reaches '
       + terrain.toFixed(1) + '\u00b0 \u2014 they are the binding limit. Lowering them, or raising the mount, buys back the difference.']);
 
+
+  // Wall height has two limits pulling opposite ways, so it is reported as a
+  // range rather than a single number: how low the walls may be and still house
+  // the mount, and how low they must be to stop taking sky. When those cross,
+  // the design cannot satisfy both and that is the thing worth saying.
+  const wh = (typeof wallHeightAdvice === 'function') ? wallHeightAdvice() : null;
+  if(wh && wh.floorMm != null && wh.ceilingMm != null){
+    const room = wh.ceilingMm - wh.floorMm;
+    const cur  = wh.currentMm;
+    const inRange = cur >= wh.floorMm && cur <= wh.ceilingMm;
+    if(room < 0){
+      rows.push([WARN, 'Wall height range',
+        'These cannot both be met. The walls need to be at least ' + fmt(wh.floorMm)
+        + ' to house the mount at park ' + wh.floorPark + ', but anything above '
+        + fmt(wh.ceilingMm) + ' starts taking sky your terrain was not already taking '
+        + '\u2014 a gap of ' + fmt(-room) + '. Raise the pier, shorten the tube, or accept '
+        + 'the loss.']);
+    } else if(inRange){
+      rows.push([OK, 'Wall height range',
+        'Anywhere from ' + fmt(wh.floorMm) + ' to ' + fmt(wh.ceilingMm) + ' works: tall '
+        + 'enough to house the mount at every park position, low enough to cost you no '
+        + 'sky. Yours are ' + fmt(cur) + '.']);
+    } else if(cur < wh.floorMm){
+      rows.push([BAD, 'Wall height range',
+        'At ' + fmt(cur) + ' the walls are lower than the ' + fmt(wh.floorMm) + ' needed to '
+        + 'house the mount at park ' + wh.floorPark + '. The roof will not close over it.']);
+    } else {
+      rows.push([WARN, 'Wall height range',
+        'At ' + fmt(cur) + ' the walls are higher than the ' + fmt(wh.ceilingMm) + ' your '
+        + 'terrain would allow, so they take ' + fmt(cur - wh.ceilingMm) + ' of sky nothing '
+        + 'else was taking. They could come down to ' + fmt(wh.floorMm) + ' and still house '
+        + 'the mount.']);
+    }
+  }
   // is the mount sensibly placed in the building?
   const w=getRorNsEwFromWalls();
   const offset=Math.sqrt(w.ns*w.ns + w.ew*w.ew);
@@ -3648,16 +3689,24 @@ function rorSetupCheck(){
       ? ' Taken as the top of the wall, which is what a standard truss leaves. If your '
         + 'roof has a raised tie or open rafters, enter the usable height above the wall.'
       : '';
+    const parkNow = (typeof currentParkName === 'function') ? currentParkName() : null;
+    const here = parkNow ? 'at AP park ' + parkNow : 'at the current pointing';
+    const worstPark = (typeof worstParkForRoof === 'function') ? worstParkForRoof() : null;
+    const alsoCheck = (worstPark && worstPark !== parkNow)
+      ? ' Park ' + worstPark + ' stands tallest of the five \u2014 check that one too.'
+      : (worstPark ? ' This is the tallest of the five parks, so what fits here fits at any of them.' : '');
     if(fit.gapMm < 0){
       rows.push([BAD, 'Roof will not close',
-        'In this position the mount stands ' + fmt(-fit.gapMm) + ' above what the closed '
-        + 'roof leaves. Park it lower, raise the walls, or open up the roof structure.' + where]);
+        'The mount stands ' + fmt(-fit.gapMm) + ' above what the closed roof leaves '
+        + here + '. Park it lower, raise the walls, or open up the roof structure.'
+        + where + alsoCheck]);
     } else if(fit.gapMm < 150){
       rows.push([WARN, 'Tight under the closed roof',
-        'Only ' + fmt(fit.gapMm) + ' between the mount and the underside with the roof on.' + where]);
+        'Only ' + fmt(fit.gapMm) + ' between the mount and the underside ' + here
+        + ' with the roof on.' + where + alsoCheck]);
     } else {
       rows.push([OK, 'Fits under the closed roof',
-        fmt(fit.gapMm) + ' of headroom in this position.' + where]);
+        fmt(fit.gapMm) + ' of headroom ' + here + '.' + where + alsoCheck]);
     }
   }
   const strike = pierStrikeCheck();
@@ -5014,7 +5063,16 @@ function setCustomNote(text, warn){
 }
 
 function genericDims(){
-  const g = id => { const e = document.getElementById(id); return e ? num(id) : 0; };
+      // The A/B/C/I/H boxes hold whatever unit is on screen, but everything
+      // downstream works in inches. Without this they were read as inches
+      // whatever the toggle said, so a metric user got a mount 25 times too big.
+      const g = id => {
+        const e = document.getElementById(id);
+        if(!e) return 0;
+        // This tool works in centimetres in metric mode, not millimetres like
+        // the dome one. Dividing by 25.4 here would be out by a factor of ten.
+        return useImperial ? num(id) : num(id) * CM_TO_MM / IN_TO_MM;   // cm -> in
+      };
   return { A:g('genA'), B:g('genB'), C:g('genC'), I:g('genI'), H:g('genH') };
 }
 function applyGenericDims(){
@@ -7135,6 +7193,10 @@ const SUMMARY = {
     '4': lat => ({ ha:   0, dec:-(90 - lat), cwAz: 270 }),  // CW level, due west
     '5': lat => ({ ha: 180, dec:  90 - lat, cwAz: 270 })
   };
+  // Published so the roof-fit row can name a park without keeping its own
+  // copy of the table. The duplicate it used before had lost the
+  // counterweight azimuth, so every Park 5 was reported as Park 1.
+  window.__PARKS = PARKS;
   const set = (id, v) => { const e = document.getElementById(id);
     if(e){ e.value = v; e.dispatchEvent(new Event('input', { bubbles:true })); } };
 
@@ -7687,6 +7749,214 @@ function paintUnitButtons(){
 
 // once at load, so the pair is coloured before anything is clicked
 if(typeof paintUnitButtons === 'function') paintUnitButtons();
+
+// ---- roof pitch: rise:run or degrees ---------------------------------------
+// Builders quote a roof either way and plans use both, so the tool takes both
+// and keeps them in step. Rise:run stays the stored form, because that is what
+// the ridge-height geometry reads; the angle is derived as atan(rise / run).
+(function(){
+  let syncing = false;
+  const el = id => document.getElementById(id);
+
+  function degFromRatio(){
+    const rise = parseFloat(el('roofPitchRise').value) || 0;
+    const run  = Math.max(parseFloat(el('roofPitchRun').value) || 0, 0.0001);
+    return Math.atan(rise / run) * 180 / Math.PI;
+  }
+  // Going the other way, express it as rise-over-12 - the form roofers use, and
+  // the one printed on plans. Solving for the rise against whatever run happened
+  // to be there gave ratios like 0.087:1, which is arithmetically right and
+  // reads like nothing anyone would put on a drawing.
+  function ratioFromDeg(){
+    const deg = Math.max(0, Math.min(80, parseFloat(el('roofPitchDeg').value) || 0));
+    const rise = Math.tan(deg * Math.PI / 180) * 12;
+    return { rise: Math.round(rise * 100) / 100, run: 12 };
+  }
+  function pushDegrees(){
+    if(syncing || !el('roofPitchDeg')) return;
+    syncing = true;
+    el('roofPitchDeg').value = (Math.round(degFromRatio() * 10) / 10).toString();
+    syncing = false;
+  }
+  function pushRatio(){
+    if(syncing) return;
+    syncing = true;
+    const r = ratioFromDeg();
+    el('roofPitchRise').value = r.rise.toString();
+    el('roofPitchRun').value  = r.run.toString();
+    syncing = false;
+  }
+  ['roofPitchRise','roofPitchRun'].forEach(id => {
+    const e = el(id);
+    if(e) e.addEventListener('input', () => { pushDegrees(); if(typeof compute === 'function') compute(); });
+  });
+  const d = el('roofPitchDeg');
+  if(d) d.addEventListener('input', () => { pushRatio(); if(typeof compute === 'function') compute(); });
+  pushDegrees();                       // so the angle matches the ratio at load
+  window.__syncRoofPitch = pushDegrees; // and after a setup is restored
+})();
+
+// ---- how tall do the walls need to be, and how tall can they afford to be? --
+// Two different questions that pull opposite ways, and the gap between the
+// answers is the room you have to design in.
+//
+//   floor   the walls must enclose the mount when it is parked, or the roof
+//           will not close over it. Set by the hardware.
+//   ceiling every millimetre of wall above your terrain line costs you sky that
+//           nothing else was taking. Set by the site.
+//
+// When the floor exceeds the ceiling the two cannot both be satisfied, and that
+// is worth saying plainly rather than reporting one and staying quiet.
+
+// The highest point of the mount at each park position, without disturbing
+// where the user has it pointed.
+// var rather than let: the setup check runs before this block is evaluated, and
+// a let in the temporal dead zone threw on every recompute.
+var _wallFloorBusy = false, _wallFloorCache = null;
+function wallFloorFromParks(){
+  // This drives compute() five times to sample the park poses, and the setup
+  // check that calls it runs inside compute() - so without a guard the page
+  // never finishes loading. Re-entry returns the last answer instead.
+  if(_wallFloorBusy) return _wallFloorCache;
+  const btns = document.querySelectorAll('[data-park]');
+  if(!btns.length || typeof mountEnvelope !== 'function') return null;
+  _wallFloorBusy = true;
+  const haEl = document.getElementById('ha'), decEl = document.getElementById('dec');
+  const sideEl = document.getElementById('pierSide');
+  if(!haEl || !decEl) return null;
+  const keep = { ha: haEl.value, dec: decEl.value, side: sideEl ? sideEl.value : null };
+  const lat = (typeof num === 'function') ? num('lat') : 0;
+  const PARK_POSE = {
+    '1': { ha: 180, dec:  90 - lat }, '2': { ha: -90, dec: 0 },
+    '3': { ha: -90, dec: 90 },        '4': { ha:   0, dec: -(90 - lat) },
+    '5': { ha: 180, dec:  90 - lat }
+  };
+  let worst = null;
+  try {
+    for(const [name, pose] of Object.entries(PARK_POSE)){
+      haEl.value = pose.ha; decEl.value = pose.dec.toFixed(1);
+      // Both pier sides. A park is the same pointing either side of the pier
+      // but a different arrangement of hardware, and the taller of the two is
+      // what the walls must clear. Sampling only the side that happened to be
+      // selected made the answer depend on where the user was when they looked:
+      // Park 3 read 1600mm from one side and 1715mm from the other.
+      for(const side of ['East','West']){
+        if(sideEl) sideEl.value = side;
+        if(typeof compute === 'function') compute();
+        const env = mountEnvelope();
+        if(env && (!worst || env.topMm > worst.mm)) worst = { mm: env.topMm, park: name };
+      }
+    }
+  } catch(e){ /* fall through and restore */ }
+  haEl.value = keep.ha; decEl.value = keep.dec;
+  if(sideEl && keep.side) sideEl.value = keep.side;
+  if(typeof compute === 'function') compute();
+  _wallFloorBusy = false;
+  _wallFloorCache = worst;
+  return worst;
+}
+
+// The wall height at which the walls stop taking sky your terrain was not
+// already taking. Below this they cost you nothing; above it, they bite.
+function wallCeilingFromTerrain(){
+  const b = getBuildingConfig();
+  const ps = getPointingScope();
+  if(!b || !ps) return null;
+  let lowest = null;                     // the tightest ceiling over all azimuths
+  for(let az = 0; az < 360; az += 15){
+    const terrain = (typeof horizonAltAt === 'function') ? horizonAltAt(az) : 0;
+    // horizontal distance from the mount out to the wall on this bearing
+    const hit = wallRoofObstructionAlt(az, ps.mx, ps.my, ps.mountH, b);
+    if(!hit || !isFinite(hit.distMm) || hit.distMm <= 0) continue;
+    // wall top that would sit exactly on the terrain line from the mount's eye
+    const h = ps.mountH + hit.distMm * Math.tan(terrain * Math.PI / 180);
+    if(lowest === null || h < lowest) lowest = h;
+  }
+  return lowest;
+}
+
+function wallHeightAdvice(){
+  const floor = wallFloorFromParks();
+  const ceiling = wallCeilingFromTerrain();
+  const b = getBuildingConfig();
+  return { floorMm: floor ? floor.mm : null, floorPark: floor ? floor.park : null,
+           ceilingMm: ceiling, currentMm: b ? b.wallHeight : null };
+}
+
+// Which park position the mount is standing in, if any. Parks 1 and 5 share the
+// same hour angle and declination and differ only in which way the counterweight
+// points, so pointing alone cannot separate them - a duplicated table that
+// checked only ha/dec reported every Park 5 as Park 1.
+function currentParkName(){
+  const PARKS = window.__PARKS;
+  if(!PARKS) return null;
+  const lat = (typeof num === 'function') ? num('lat') : 0;
+  const ha = num('ha'), dec = num('dec');
+  const side = (document.getElementById('pierSide') || {}).value;
+  let fallback = null;
+  for(const [name, fn] of Object.entries(PARKS)){
+    const p = fn(lat);
+    if(Math.abs(ha - p.ha) > 0.6 || Math.abs(dec - p.dec) > 0.6) continue;
+    // Where two parks share a pointing, the counterweight direction decides.
+    if(p.cwAz != null && typeof cwAzimuthNow === 'function'){
+      const az = cwAzimuthNow();
+      if(az != null && Math.abs(((az - p.cwAz + 540) % 360) - 180) < 45) return name;
+      fallback = fallback || name;
+      continue;
+    }
+    return name;
+  }
+  return fallback;
+}
+
+// Where the counterweight points, in degrees of azimuth, or null if the model
+// cannot say. Used only to tell parks apart, never to compute geometry.
+function cwAzimuthNow(){
+  const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+  if(!m || !m.decGroup || !m.params || !(m.params.counterweightShaft > 0)) return null;
+  try {
+    m.group.updateMatrixWorld(true);
+    const cwSide = (m.params.gemAxisLength < 0) ? -1 : 1;
+    const d = new THREE.Vector3(0,0,1)
+      .transformDirection(m.decGroup.matrixWorld).normalize().multiplyScalar(-cwSide);
+    // scene: +X north, +Z east
+    return (Math.atan2(d.z, d.x) * 180 / Math.PI + 360) % 360;
+  } catch(e){ return null; }
+}
+
+// var, not let. The setup check runs while the page is still being set up,
+// which is before execution reaches this line - and a let binding is
+// unusable until then, so the guard threw. var is hoisted and defined.
+var _worstParkBusy = false, _worstParkCache = null;
+
+// The park needing the most headroom - the one that decides whether the roof can
+// close at all. Measured directly rather than taken from the wall-floor sampler,
+// whose figure is the tallest point of the whole assembly including the
+// counterweight, which is not what the roof has to clear.
+function worstParkForRoof(){
+  const PARKS = window.__PARKS;
+  if(_worstParkBusy || !PARKS) return _worstParkCache;
+  const haEl = document.getElementById('ha'), decEl = document.getElementById('dec');
+  if(!haEl || !decEl || typeof roofFitCheck !== 'function') return null;
+  _worstParkBusy = true;
+  const keep = { ha: haEl.value, dec: decEl.value };
+  const lat = (typeof num === 'function') ? num('lat') : 0;
+  let worst = null;
+  try {
+    for(const [name, fn] of Object.entries(PARKS)){
+      const p = fn(lat);
+      haEl.value = p.ha; decEl.value = p.dec.toFixed(1);
+      if(typeof compute === 'function') compute();
+      const f = roofFitCheck();
+      if(f && (!worst || f.topMm > worst.top)) worst = { name, top: f.topMm };
+    }
+  } catch(e){ /* fall through and restore */ }
+  haEl.value = keep.ha; decEl.value = keep.dec;
+  if(typeof compute === 'function') compute();
+  _worstParkBusy = false;
+  _worstParkCache = worst ? worst.name : null;
+  return _worstParkCache;
+}
 </script>
 </body>
 </html>

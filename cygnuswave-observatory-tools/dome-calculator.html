@@ -616,7 +616,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.06.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;9778</span></span>
+  <span class="chip">v8.08.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;fccb</span></span>
 </div>
 
 <div class="stage">
@@ -1305,7 +1305,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.06.000</span>
+    flex-shrink:0;">v8.08.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1687,8 +1687,11 @@ const IN_TO_MM = 25.4;
 // All non-OTA mm field IDs
 const DOME_MM_FIELD_IDS = [
   'hDome','pierHeight','pierDiameter','mountHeadHeight','distN','distS','distE','distW',
-  'shutterWidth','wallHeight','gemRaw','domeDiameter','decHoriz'
-];
+  'shutterWidth','wallHeight','gemRaw','domeDiameter','decHoriz',
+    // The mount-diagram dimensions. Left out of this list, they kept an "in"
+    // label and their raw value through a switch to metric, so the boxes asked
+    // for inches while everything around them had changed.
+    'genA','genB','genC','genI','genH'];
 
 function unitLabel(){ return useImperial ? 'in' : 'mm'; }
 
@@ -1747,7 +1750,10 @@ function setUnitSystem(imperial){
     const el = document.getElementById(id);
     if(!el) return;
     const v = parseFloat(el.value);
-    if(!isNaN(v)) el.value = (v * factor).toFixed(imperial ? 4 : 0);
+    // One decimal in millimetres, not zero. Rounding to whole millimetres on
+    // every switch lost up to half a millimetre per field, so a setup that had
+    // been toggled between units no longer matched the one that had not.
+    if(!isNaN(v)) el.value = (v * factor).toFixed(imperial ? 4 : 1);
   });
   _convertingUnits = false;
   refreshDomeUnitLabels();
@@ -3662,8 +3668,13 @@ function selectedAltAxisMm(defaultMm){
 
 // Which fields a preset writes to in this tool.
 const MOUNT_FIELD_SET = {
+  // Two decimals of an inch is a quarter of a millimetre, so the imperial write
+  // was throwing away precision the metric one kept - the same mount entered
+  // each way disagreed by a few tenths. Four decimals in inches matches the
+  // resolution of two in millimetres.
   head: inches => { const e=document.getElementById('mountHeadHeight');
-                    if(e){ e.value = (useImperial ? inches : inches*25.4).toFixed(2); } },
+                    if(e){ e.value = useImperial ? inches.toFixed(4)
+                                                 : (inches*25.4).toFixed(2); } },
   // gemRaw is something you measure, so it follows the unit on screen. gemDirect
   // mirrors NINA's own GEM Axis Length and is always millimetres - writing it in
   // display units overwrote loaded setups with an inch figure labelled mm.
@@ -3792,7 +3803,14 @@ function setCustomNote(text, warn){
 }
 
 function genericDims(){
-  const g = id => { const e = document.getElementById(id); return e ? num(id) : 0; };
+      // The A/B/C/I/H boxes hold whatever unit is on screen, but everything
+      // downstream works in inches. Without this they were read as inches
+      // whatever the toggle said, so a metric user got a mount 25 times too big.
+      const g = id => {
+        const e = document.getElementById(id);
+        if(!e) return 0;
+        return useImperial ? num(id) : num(id) / IN_TO_MM;   // mm -> in
+      };
   return { A:g('genA'), B:g('genB'), C:g('genC'), I:g('genI'), H:g('genH') };
 }
 function applyGenericDims(){

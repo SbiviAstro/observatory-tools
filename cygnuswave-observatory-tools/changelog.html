@@ -172,7 +172,30 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.06.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.08.000 — Current</div>
+
+<p><strong>How tall should the walls be?</strong> The setup check now answers it as a range, because two limits pull opposite ways. The <em>floor</em> is your hardware: the walls must enclose the mount when parked, worked out by trying all five park positions and taking the tallest. The <em>ceiling</em> is your site: every inch above your terrain line takes sky nothing else was taking.</p>
+<p>Anywhere between the two works, and the check says which side you are on &mdash; how much sky tall walls are costing, or that the roof will not close over low ones. When the two cross, it says so plainly: on a 60&Prime; pier the mount needs 88&Prime; of wall while the terrain allows only 68&Prime;, a gap of 20&Prime; that no wall height satisfies. Better found before the footings go in.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.07.000</div>
+
+<p><strong>Roof pitch can be given in degrees.</strong> Builders quote a roof either way and plans use both, so the tool now takes rise:run or an angle and keeps the two in step. Type 4:12 and it shows 18.4&deg;; type 30&deg; and it writes 6.93:12 &mdash; rise-over-twelve, the form drawings use, rather than solving against whatever run happened to be there and producing something like 0.577:1. A ratio you type by hand is left exactly as entered.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.06.002</div>
+
+<p><strong>Fixed: the mount dimensions were always read as inches.</strong> The A/B/C/I/H boxes on the mount diagram kept an &ldquo;in&rdquo; label and their raw value through a switch to metric, and were then read as inches whatever the toggle said. Enter 140&nbsp;mm for the pier flange to RA pivot and the tool understood 140&nbsp;inches &mdash; a mount twenty-five times too tall, quietly wrong in every figure that followed.</p>
+<p>They now convert with the toggle, relabel with it, and are read in whatever unit is on screen. Both calculators were affected.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.06.001</div>
+
+<p><strong>Fixed: Save Setup did nothing in the roll-off-roof calculator.</strong> A variable holding the name of your horizon file was used but never declared, so the first assignment threw and took the whole save with it. The button appeared to work &mdash; no error, no file.</p>
+<p>The fault dates from v8.00.003, when horizon filenames were added to saved setups. The dome tool declared the variable; the roll-off tool did not, and nothing since had caught it, because the two tools were only ever tested for whether a setup <em>round-trips</em> &mdash; and a round-trip test that saves through the same broken path fails silently in both directions.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.06.000</div>
 
 <p><strong>The default site latitude is now 39&deg;</strong>, a round figure rather than one that reads as somebody&rsquo;s actual site. Enter your own before taking any numbers from the tool: latitude sets where the pole sits, so every altitude, the park positions and the whole sky-coverage figure depend on it.</p>
 <p><strong>The roof follows the building&rsquo;s shape.</strong> On a custom footprint the roof panel was drawn as a plain rectangle regardless of the walls, so an angled corner left it floating clear of the building it is meant to cover. It is now cut to the footprint: a square plan gives a square panel, and swinging a wall to 50&deg; stretches the panel with it, 7491&thinsp;mm against the walls&rsquo; 7491&thinsp;mm. It still slides and closes as before.</p>
