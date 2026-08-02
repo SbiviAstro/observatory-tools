@@ -172,10 +172,37 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.08.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.09.000 — Current</div>
+
+<p><strong>Fixed: the roll-off tool under-stated its obstruction limits.</strong> It did account for the width of the beam rather than just the centre ray, but by adding the aperture radius to the wall height &mdash; and that is not the same thing. The beam is tilted, so a vertical gap projects shorter across it: clearing the lower edge needs <em>r&thinsp;/&thinsp;cos(altitude)</em> of vertical room, not <em>r</em>.</p>
+<p>Solving <em>d&thinsp;sin(a) &minus; H&thinsp;cos(a) = r</em> gives the limit exactly, and that is what both the rectangular and custom-wall paths now use. The old form was optimistic by up to <b>2.8&deg;</b> where a wall is close and high &mdash; sky the tool said you had and you did not.</p>
+<p><strong>The aperture ring now decides whether the shutter is red.</strong> The old test compared the shutter&rsquo;s width against the aperture&rsquo;s diameter and nothing more, so it read the same clearance at every pointing &mdash; true of the door, silent about where the beam actually lands on it. The tool walks the ring itself now: every point on the aperture&rsquo;s outer edge is tested against the opening&rsquo;s angular width at that height, the ends of the shutter&rsquo;s travel, and your local horizon.</p>
+<p>It catches what the width alone could not. With a 20&Prime; shutter and a 500&nbsp;mm aperture the old figure said <em>+8&nbsp;mm, fits</em>; the ring crosses an edge, and the shutter is now red. The opening also narrows toward the apex, so the comparison is made against its width at the beam&rsquo;s own height rather than at the equator.</p>
+<p><strong>The ghost aperture is drawn as a dashed ring.</strong> It was a solid annulus, which reads as a piece of hardware &mdash; people were taking it for part of the telescope rather than for where the aperture lands on the dome shell. A broken line is the ordinary way of saying &ldquo;this is a projection&rdquo;. Sixteen dashes at just over half duty: enough to read as broken without dissolving into dots when the aperture is small on screen. Both the main and the second telescope use it. The roll-off tool gains the same ring, placed where the sightline crosses the wall top &mdash; the centre line can clear a wall while the lower edge of the aperture does not, and the axis alone never showed that. It uses eight coarser dashes, because it sits closer to the mount and draws smaller.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.08.002</div>
+
+<p><strong>Fixed: the roll-off tool held the mount height twice.</strong> <em>&ldquo;Mount RA/Dec intersection height above floor&rdquo;</em> is the same measurement as pier height plus mount head height, and nothing kept the two in step. They also fed different consumers: the intersection height drove the obstruction arithmetic &mdash; sky coverage, the wall-height range, swing clearance &mdash; while pier plus head drove the drawing.</p>
+<p>Raising the pier moved the picture and left every figure untouched. A 60&Prime; pier against a 47&Prime; intersection height put the two <b>838&nbsp;mm</b> apart, with no warning either way; the shipped defaults were already 11&nbsp;mm out. They are now locked: edit the pier or the head and the intersection height follows, edit the intersection height and the pier absorbs it &mdash; the head height comes from the mount library, so it is not the one to move. Choosing a mount re-derives the stack.</p>
+<p>This is the same fault the dome tool had between the dome centre and the wall springline, found by looking for it after that one was fixed.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.08.001</div>
+
+<p><strong>Fixed: the dome centre and the wall springline could disagree.</strong> The tool asked for both &mdash; <em>&ldquo;height of dome center above floor&rdquo;</em> and <em>&ldquo;wall height, floor to springline&rdquo;</em> &mdash; but on a dome they are the same height: the shell springs from the wall top and the sphere&rsquo;s centre sits there too. Nothing stopped a setup holding 59&Prime; and 36&Prime; at once, which describes a shell 610&nbsp;mm inside its own wall.</p>
+<p>The preview drew it without complaint, putting the mount <b>584&nbsp;mm</b> above where the offsets said it was, so the ghost aperture no longer met the telescope. The two fields are now locked: edit either and the other follows, and a setup saved with them out of step is reconciled to the wall height on load. The shipped defaults disagreed too &mdash; 38&Prime; against 36&Prime; &mdash; and now match.</p>
+<p>No reported figure changes. The NINA offsets were correct throughout; it was the drawing that was out.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.08.000</div>
 
 <p><strong>How tall should the walls be?</strong> The setup check now answers it as a range, because two limits pull opposite ways. The <em>floor</em> is your hardware: the walls must enclose the mount when parked, worked out by trying all five park positions and taking the tallest. The <em>ceiling</em> is your site: every inch above your terrain line takes sky nothing else was taking.</p>
 <p>Anywhere between the two works, and the check says which side you are on &mdash; how much sky tall walls are costing, or that the roof will not close over low ones. When the two cross, it says so plainly: on a 60&Prime; pier the mount needs 88&Prime; of wall while the terrain allows only 68&Prime;, a gap of 20&Prime; that no wall height satisfies. Better found before the footings go in.</p>
+
+<p><strong>The roof-fit check names the position.</strong> It reported headroom &ldquo;in this position&rdquo; without saying which, and the five parks differ by hundreds of millimetres. It now reads <em>&ldquo;31.0&Prime; of headroom at AP park 3&rdquo;</em>, and points at whichever park stands tallest, since that is the one that decides whether the roof can close at all.</p>
+
+<p><strong>Known issue:</strong> Park 1 and Park 5 currently produce the same pose. Astro-Physics define them differently &mdash; Park 1 has the counterweight due east, Park 5 due west &mdash; and the tool reaches Park 5&rsquo;s arrangement for both, so a mount sent to Park 1 is reported as being at Park 5. The pointing is right in each case and every other figure is unaffected; it is the counterweight direction that is not being set. Earlier checks missed this because the two parks share an altitude and azimuth.</p>
 </div>
 
 <div class="card"><div class="eyebrow">v8.07.000</div>

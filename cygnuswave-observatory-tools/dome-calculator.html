@@ -616,7 +616,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.08.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;fccb</span></span>
+  <span class="chip">v8.09.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;664e</span></span>
 </div>
 
 <div class="stage">
@@ -681,7 +681,7 @@
           <div class="field"><input type="number" id="azTolDirect" value="1" step="0.1"><span class="unit">°</span></div>
         </div>
         <div class="row" style="margin-top:12px;">
-          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
+          <div><label>Wall height, floor to springline</label><span class="hint">where the hemisphere shell actually starts, which is also the dome&rsquo;s centre of rotation &mdash; edit either and the other follows. The solid wall below it blocks low pointings, so this affects clearance as well as the preview</span></div>
           <div class="field"><input type="number" id="wallHeight" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_wallHeight" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
         </div>
     </div>
@@ -702,8 +702,8 @@
 
         <div id="step1Measure">
           <div class="row" style="margin-top:6px;">
-            <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, not the rim</span></div>
-            <div class="field"><input type="number" id="hDome" value="38"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
+            <div><label>Height of dome center above floor</label><span class="hint">geometric center of the sphere, which sits at the wall springline &mdash; the same measurement as the wall height below, so the two are locked together</span></div>
+            <div class="field"><input type="number" id="hDome" value="36"><span class="unit">mm</span><span class="frac-hint" id="hint_hDome" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
             <div><label>Pier height</label><span class="hint">floor to top of pier flange</span></div>
@@ -1305,7 +1305,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.08.000</span>
+    flex-shrink:0;">v8.09.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1760,6 +1760,13 @@ function setUnitSystem(imperial){
   document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
   document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
   if(typeof paintUnitButtons === 'function') paintUnitButtons();
+  if(window.__reconcileDomeHeights){
+    // Remembered rather than written straight to the banner: the compute() that
+    // follows a load rewrites that element, so the notice vanished before anyone
+    // could read it. The setup check picks it up instead.
+    const fix = window.__reconcileDomeHeights();
+    if(fix) window.__domeHeightFixed = fix;
+  }
   updateFracHints();
   compute();
 }
@@ -4052,6 +4059,14 @@ function updateSetupCheck(){
       'The assembly passes within ' + fmt(intr.mm) + ' of the pier at this pointing. '
       + 'Check it against the real hardware before pouring anything.']);
   }
+  if(window.__domeHeightFixed){
+    const f = window.__domeHeightFixed;
+    rows.push([WARN, 'Dome height reconciled',
+      'This setup held ' + f.was + ' for the dome centre and ' + f.now + ' for the wall '
+      + 'springline. They are one measurement \u2014 the shell springs from the wall top, '
+      + 'and the sphere\u2019s centre sits there too \u2014 so ' + f.now + ' has been used '
+      + 'for both. Check it against your dome and re-save.']);
+  }
   const strike = pierStrikeCheck();
   if(strike && strike.clearOfPier){
     rows.push([OK, 'Pier strike',
@@ -5123,9 +5138,87 @@ function buildShutterGeometry(phiCenter, halfWidth, R, thetaMax, segments){
   return geo;
 }
 
+
+// A ring drawn as separate arcs with gaps between them. The ghost aperture was a
+// solid annulus, which reads as a physical part of the telescope; people were
+// taking it for hardware rather than for where the aperture lands on the shell.
+// A broken line is the ordinary way of saying "this is a projection".
+function buildDashedRingGeometry(innerR, outerR, dashes, duty, stepsPerDash){
+  const positions = [];
+  const N = Math.max(4, dashes | 0);
+  const steps = Math.max(2, stepsPerDash | 0);
+  const span = (Math.PI * 2) / N;          // one dash plus its following gap
+  const arc  = span * Math.max(0.05, Math.min(0.95, duty));
+  for(let d = 0; d < N; d++){
+    const a0 = d * span;
+    for(let s = 0; s < steps; s++){
+      const t0 = a0 + arc * (s / steps);
+      const t1 = a0 + arc * ((s + 1) / steps);
+      const i0 = [Math.cos(t0) * innerR, Math.sin(t0) * innerR, 0];
+      const o0 = [Math.cos(t0) * outerR, Math.sin(t0) * outerR, 0];
+      const i1 = [Math.cos(t1) * innerR, Math.sin(t1) * innerR, 0];
+      const o1 = [Math.cos(t1) * outerR, Math.sin(t1) * outerR, 0];
+      positions.push(...i0, ...o0, ...i1);
+      positions.push(...i1, ...o0, ...o1);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+
+// Does the aperture footprint actually fit through the opening? The old test
+// compared the shutter's width against the aperture's diameter and nothing more,
+// so it read the same +402mm at every pointing - true of the door, silent about
+// where the beam lands on it. Near the ends of the shutter's travel, or close to
+// the local horizon, the ring can cross an edge while that width figure stays
+// comfortable.
+//
+// This walks the ring itself: every point on the aperture's outer edge, tested
+// against the shutter's angular half-width, the top and bottom of its travel,
+// and the horizon. Any point outside means the beam is clipped.
+function ringClearsOpening(ringMesh, shutterPhi, halfWidthWorld, domeR, phiTop, phiBottom, latDeg){
+  if(!ringMesh || !ringMesh.geometry || !ringMesh.geometry.attributes) return true;
+  try {
+    ringMesh.updateMatrixWorld(true);
+    const attr = ringMesh.geometry.attributes.position;
+    const p = new THREE.Vector3();
+    const halfAng = (domeR > 0) ? Math.asin(Math.max(-1, Math.min(1, halfWidthWorld / domeR))) : 0;
+    for(let i = 0; i < attr.count; i++){
+      p.fromBufferAttribute(attr, i).applyMatrix4(ringMesh.matrixWorld);
+      if(p.length() < 1e-6) continue;
+      // across the opening: angular distance from the shutter's meridian
+      const az = Math.atan2(p.z, p.x);
+      let d = az - shutterPhi;
+      while(d >  Math.PI) d -= Math.PI * 2;
+      while(d < -Math.PI) d += Math.PI * 2;
+      const colat = Math.acos(Math.max(-1, Math.min(1, p.y / p.length())));
+      // the opening narrows toward the apex, so compare against the width at
+      // this height rather than the width at the equator
+      const sinC = Math.max(Math.sin(colat), 1e-6);
+      if(Math.abs(d) * sinC > halfAng) return false;
+      // and along it: past either end of the shutter's travel
+      if(colat > phiBottom + 1e-3) return false;
+      // below the local horizon, which is not observable whatever the dome does
+      if(typeof horizonAltAt === 'function' && latDeg != null){
+        const altDeg = 90 - colat * 180 / Math.PI;
+        const azDeg  = ((Math.atan2(p.z, p.x) * 180 / Math.PI) + 360) % 360;
+        const limit  = horizonAltAt(azDeg);
+        if(isFinite(limit) && altDeg < limit) return false;
+      }
+    }
+    return true;
+  } catch(e){ return true; }
+}
+
 function updateGhostAperture(mesh, positionV, dirNorm, apertureRadiusWorld, domeRadiusWorld){
   mesh.geometry.dispose();
-  mesh.geometry = new THREE.RingGeometry(apertureRadiusWorld * 0.9, apertureRadiusWorld, 48);
+  // 16 dashes at 55% duty: enough to read as broken at a glance without
+  // dissolving into dots when the aperture is small on screen.
+  mesh.geometry = buildDashedRingGeometry(apertureRadiusWorld * 0.86,
+                                          apertureRadiusWorld, 16, 0.55, 3);
   mesh.position.copy(positionV);
   mesh.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,0,1), dirNorm));
   mesh.visible = true;
@@ -5674,7 +5767,13 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // either, even if the dome geometry itself is fine.
     const worstAperture = dualSaddleActive ? Math.max(otaApertureMm, ota2ApertureMm) : otaApertureMm;
     const clearance = shutterWidthMm - worstAperture;
-    const shutterFits = clearance >= 0 && (!dualSaddleActive || (ota1Clears && ota2Clears)) && !horizonClamped;
+    // The width test alone is not enough: it says nothing about where the beam
+  // lands. The ring is walked too, so an aperture crossing an edge of the
+  // opening or dipping below the horizon reddens the shutter.
+  const ringOK = ringClearsOpening(three.ghostAperture, phi, halfWidth,
+                                   R, 0, Math.PI/2 - 0.002, latDeg);
+  const shutterFits = clearance >= 0 && ringOK
+    && (!dualSaddleActive || (ota1Clears && ota2Clears)) && !horizonClamped;
     lastShutterFits = shutterFits;
 
     const geo = buildShutterGeometry(phi, halfWidth, R * 1.004, Math.PI/2 - 0.002, 24);
@@ -6676,6 +6775,44 @@ function paintUnitButtons(){
 
 // once at load, so the pair is coloured before anything is clicked
 if(typeof paintUnitButtons === 'function') paintUnitButtons();
+
+// ---- dome centre and springline are one measurement -------------------------
+// On a dome the shell springs from the wall top and the sphere's centre sits at
+// that same height - the centre of rotation IS the springline. The tool asked
+// for both, so a setup could hold 59in and 36in at once: geometrically that puts
+// the shell 610mm inside the wall, and the preview drew it without complaint,
+// throwing the mount 584mm out of place. They are now locked together: edit
+// either and the other follows.
+(function(){
+  let syncing = false;
+  function link(fromId, toId){
+    const from = document.getElementById(fromId), to = document.getElementById(toId);
+    if(!from || !to) return;
+    from.addEventListener('input', () => {
+      if(syncing) return;
+      syncing = true;
+      to.value = from.value;
+      syncing = false;
+      if(typeof compute === 'function') compute();
+    });
+  }
+  link('hDome', 'wallHeight');
+  link('wallHeight', 'hDome');
+
+  // A setup saved before they were locked can hold two different values. Take
+  // the wall height, whose label describes the measurement most plainly, and
+  // say so rather than silently changing what someone typed.
+  window.__reconcileDomeHeights = function(){
+    const h = document.getElementById('hDome'), w = document.getElementById('wallHeight');
+    if(!h || !w) return null;
+    const a = parseFloat(h.value), b = parseFloat(w.value);
+    if(!isFinite(a) || !isFinite(b) || Math.abs(a - b) < 0.01) return null;
+    syncing = true;
+    h.value = w.value;
+    syncing = false;
+    return { was: a, now: b };
+  };
+})();
 </script>
 </body>
 </html>

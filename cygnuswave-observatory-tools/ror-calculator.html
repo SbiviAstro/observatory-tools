@@ -346,7 +346,9 @@
      recomputes, which rebuilt the scene and snapped the roof home before the
      opening animation could run. */
   .roof-btn { padding:4px 10px; font-size:12px; cursor:pointer; font-family:inherit;
-    color:var(--text-dim); background:var(--panel-2); border:1px solid var(--line);
+    /* Amber like the other things that do something, rather than the dim grey of
+       a label. It moves the roof, so it should read as an action. */
+    color:var(--amber); background:var(--panel-2); border:1px solid var(--line);
     border-radius:5px; margin-right:8px; white-space:nowrap; }
   .roof-btn:hover { color:var(--text); border-color:var(--amber); }
   .ap-parks { display:flex; align-items:center; gap:5px; flex:0 0 auto; }
@@ -621,7 +623,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.08.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;09c6</span></span>
+  <span class="chip">v8.09.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;f73d</span></span>
 </div>
 
 <div class="stage">
@@ -1464,7 +1466,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.08.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.09.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -2264,8 +2266,19 @@ function roofHeightAt(perpCoordMm, building){
     }
     // Clear the whole beam, not just the centre ray: the bottom edge of the
     // light cone is what the wall top clips first.
-    const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
-    const altRad = Math.atan2(heightAboveMount, dist);
+    //
+    // Adding the aperture radius to the wall height is not the same thing. The
+    // beam is tilted, so a vertical gap projects shorter across it: clearing the
+    // lower edge needs r/cos(alt) of vertical room, not r. Solving
+    //     d.sin(a) - H.cos(a) = r
+    // gives the exact limit below, which the old form under-stated by nearly
+    // three degrees where the wall is close and high.
+    const H = structureHeight - mountHeightMm;
+    const r = rorApertureRadiusMm();
+    const hyp = Math.hypot(dist, H);
+    const altRad = (hyp > 1e-6 && r < hyp)
+      ? Math.atan2(H, dist) + Math.asin(r / hyp)
+      : Math.atan2(H + r, dist);   // degenerate: aperture wider than the reach
     return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist,
       blockedBy: isRoofWall ? 'Parked roof' : ('Wall ' + (wallIndex+1)) };
   }
@@ -2299,9 +2312,15 @@ function roofHeightAt(perpCoordMm, building){
   } else {
     structureHeight = building.wallHeight;
   }
-  // Clear the whole beam, not just the centre ray.
-  const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
-  const altRad = Math.atan2(heightAboveMount, dist);
+  // Clear the whole beam, not just the centre ray. Same exact form as the
+  // custom-wall branch: the beam is tilted, so clearing its lower edge needs
+  // r/cos(alt) of vertical room rather than r.
+  const _H = structureHeight - mountHeightMm;
+  const _r = rorApertureRadiusMm();
+  const _hyp = Math.hypot(dist, _H);
+  const altRad = (_hyp > 1e-6 && _r < _hyp)
+    ? Math.atan2(_H, dist) + Math.asin(_r / _hyp)
+    : Math.atan2(_H + _r, dist);
   return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist, blockedBy: (side === building.rollDir) ? 'Parked roof' : (side + ' wall') };
 }
 // Peaked/wedge-roof taper for custom wall shapes: same interpolation as the
@@ -4939,6 +4958,8 @@ function selectedAltAxisMm(defaultMm){
 
 const MOUNT_FIELD_SET = {
   head: inches => { const e=document.getElementById('rorMountHead');
+                    // re-derive the intersection height from the new stack
+                    setTimeout(() => { if(window.__syncMountStack) window.__syncMountStack(); }, 0);
                     if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
   gem:  inches => { const e=document.getElementById('gemAxis');
                     if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
@@ -6036,7 +6057,12 @@ function initThree(){
   function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
   animate();
 
-  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, roofFramingBox, roofFramingEdges, ota, ray, mountMarker,
+  const rorApertureRingMesh = new THREE.Mesh(new THREE.BufferGeometry(),
+    new THREE.MeshBasicMaterial({ color: 0xfff2df, transparent:true, opacity:0.85, side: THREE.DoubleSide }));
+  rorApertureRingMesh.visible = false;
+  scene.add(rorApertureRingMesh);
+  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, roofFramingBox, roofFramingEdges, ota, ray,
+    rorApertureRing: rorApertureRingMesh, mountMarker,
             rorPierGroup, rorPier, rorFlange, rorMountHead, rorRaPivot, swingSpheres,
     cardinalN, cardinalE, cardinalS, cardinalW, meridianLine, poleMarker, skyHorizonLine, horizonBand };
     window.__three = three;   // so the roof-closing animation can reach the roof mesh
@@ -6887,6 +6913,7 @@ function compute(){
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
   if(typeof updateSweptVolume === 'function') updateSweptVolume();
   if(window.__keepReachable) window.__keepReachable();
+  if(typeof rorApertureRing === 'function') rorApertureRing();
   if(typeof syncRoofFraming === 'function') syncRoofFraming();
   if(typeof clampUsableField === 'function') clampUsableField();
   if(window.__recheckBlockedRoof) window.__recheckBlockedRoof();
@@ -7956,6 +7983,118 @@ function worstParkForRoof(){
   _worstParkBusy = false;
   _worstParkCache = worst ? worst.name : null;
   return _worstParkCache;
+}
+
+// ---- the mount height is one measurement, expressed twice -------------------
+// "Mount RA/Dec intersection height above floor" is the same thing as pier
+// height plus mount head height. Nothing kept them in step, and they fed
+// different consumers: the intersection height drove the obstruction arithmetic
+// while pier+head drove the drawing. A 60in pier against a 47in intersection put
+// the picture 838mm above the numbers, with no warning either way.
+//
+// The relationship is derived, not symmetric, so the two directions differ:
+//   edit pier or head  -> the intersection height follows, unambiguously
+//   edit the intersection height -> the pier absorbs it, because the head height
+//                                   comes from the mount library and is not
+//                                   yours to choose
+(function(){
+  let syncing = false;
+  const el = id => document.getElementById(id);
+  const val = id => { const e = el(id); const v = e ? parseFloat(e.value) : NaN;
+                      return isFinite(v) ? v : 0; };
+
+  function pushFromStack(){
+    if(syncing) return;
+    const m = el('mountHeight');
+    if(!m) return;
+    syncing = true;
+    m.value = +(val('rorPierHeight') + val('rorMountHead')).toFixed(2);
+    syncing = false;
+  }
+  function pushToPier(){
+    if(syncing) return;
+    const p = el('rorPierHeight');
+    if(!p) return;
+    const pier = val('mountHeight') - val('rorMountHead');
+    syncing = true;
+    // A mount head taller than the intersection height would need a pier below
+    // the floor; clamp at zero and let the stack tell the truth instead.
+    p.value = +Math.max(pier, 0).toFixed(2);
+    syncing = false;
+  }
+
+  ['rorPierHeight','rorMountHead'].forEach(id => {
+    const e = el(id);
+    if(e) e.addEventListener('input', () => { pushFromStack(); if(typeof compute === 'function') compute(); });
+  });
+  const m = el('mountHeight');
+  if(m) m.addEventListener('input', () => { pushToPier(); if(typeof compute === 'function') compute(); });
+
+  // The mount library writes the head height directly, so the stack has to be
+  // re-derived after a mount is chosen as well as after a hand edit.
+  window.__syncMountStack = pushFromStack;
+  setTimeout(pushFromStack, 400);
+})();
+
+// A ring drawn as separate arcs with gaps, matching the dome tool. A solid
+// annulus reads as hardware; a broken line says "this is where the aperture
+// lands", which is what it means.
+function buildDashedRingGeometry(innerR, outerR, dashes, duty, stepsPerDash){
+  const positions = [];
+  const N = Math.max(4, dashes | 0), steps = Math.max(2, stepsPerDash | 0);
+  const span = (Math.PI * 2) / N;
+  const arc  = span * Math.max(0.05, Math.min(0.95, duty));
+  for(let d = 0; d < N; d++){
+    const a0 = d * span;
+    for(let s = 0; s < steps; s++){
+      const t0 = a0 + arc * (s / steps), t1 = a0 + arc * ((s + 1) / steps);
+      const i0=[Math.cos(t0)*innerR, Math.sin(t0)*innerR, 0], o0=[Math.cos(t0)*outerR, Math.sin(t0)*outerR, 0];
+      const i1=[Math.cos(t1)*innerR, Math.sin(t1)*innerR, 0], o1=[Math.cos(t1)*outerR, Math.sin(t1)*outerR, 0];
+      positions.push(...i0, ...o0, ...i1);
+      positions.push(...i1, ...o0, ...o1);
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  g.computeVertexNormals();
+  return g;
+}
+
+// Where the sightline leaves the building, and how much of the aperture is
+// still in the clear when it does. A roll-off roof has no shell to project on,
+// so the useful place for the ring is the plane of whatever is binding - the
+// wall top on most pointings. The centre line can clear a wall while the lower
+// edge of the aperture does not, and the axis alone never showed that.
+function rorApertureRing(){
+  const t = window.__three || (typeof three !== 'undefined' ? three : null);
+  const m = (typeof gemMount !== 'undefined') ? gemMount : null;
+  if(!t || !t.rorApertureRing || !m) return;
+  try {
+    const b = getBuildingConfig();
+    const s = window.__sceneScale;
+    const oa = m.opticalAxis();
+    const dir = oa.direction.clone().normalize();
+    // Rising sightlines only; level or downward never leaves the walls.
+    if(dir.y < 0.02 || !s || !b){ t.rorApertureRing.visible = false; return; }
+    const wallTopY = (b.wallHeight || 0) * s;
+    const dist = (wallTopY - oa.origin.y) / dir.y;
+    if(!(dist > 0)){ t.rorApertureRing.visible = false; return; }
+    const at = oa.origin.clone().addScaledVector(dir, dist);
+    const rad = Math.max(rorApertureRadiusMm(), 1) * s;
+    t.rorApertureRing.geometry.dispose();
+    // Eight dashes, not the dome's sixteen. The ring lands at the wall plane,
+    // close to the mount, so at default zoom it is about ten pixels across -
+    // sixteen dashes there are sub-pixel and blur into a smudge.
+    t.rorApertureRing.geometry = buildDashedRingGeometry(rad * 0.78, rad, 8, 0.6, 3);
+    // Nudge it a little further along the sightline. Sitting exactly in the wall
+    // plane it is coplanar with the wall mesh and renders nothing at all - the
+    // same trap the dome tool hit, where the ring vanished into the shell.
+    t.rorApertureRing.position.copy(at).addScaledVector(dir, rad * 0.6);
+    t.rorApertureRing.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), dir);
+    t.rorApertureRing.material.depthTest = false;   // always readable, never buried
+    t.rorApertureRing.renderOrder = 5;
+    t.rorApertureRing.visible = true;
+  } catch(e){ t.rorApertureRing.visible = false; }
 }
 </script>
 </body>
