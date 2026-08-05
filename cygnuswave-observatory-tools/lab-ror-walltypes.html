@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Roll-Off-Roof Observatory — CygnusWave</title>
+<title>Roll-Off-Roof Observatory — lab build (wall types)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
@@ -30,10 +30,6 @@
     --green: #3f7a35;
     --readout-bg: #faf8f2;
   }
-  html[data-theme="light"] #btnResetDefaults {
-    color:#2f5c28; border-color:#a8cf9e; background:rgba(63,122,53,0.10); }
-  html[data-theme="light"] #btnResetDefaults:hover {
-    color:#24471f; border-color:#3f7a35; background:rgba(63,122,53,0.18); }
   html[data-theme="light"] .status-banner.status-ok{ background:rgba(63,122,53,0.10); border-color:#a8cf9e; color:#2f5c28; }
   html[data-theme="light"] .status-banner.status-warn{ background:rgba(181,80,31,0.10); border-color:#e0b48f; color:#8a3c15; }
   html[data-theme="light"] .status-banner.status-bad{ background:rgba(196,60,50,0.10); border-color:#e3a49e; color:#9c2e24; }
@@ -69,26 +65,6 @@
   html[data-theme="light"] .mount-type-toggle button.active{ background: var(--amber); color:#fff6ee; }
   .preset-btn{ background: var(--panel-2); border:1px solid var(--line); color: var(--text-dim);
     padding: 7px 12px; border-radius: 4px; font-size: 12px; cursor:pointer; font-family: inherit; }
-  
-  /* The unit buttons carry their own colour so the current system reads at a
-     glance: the one in force is amber like every other active control, the one
-     you could switch to is yellow. Neither is grey, because "which units am I
-     in" is a question worth answering without hunting. */
-  #btnUnitMetric, #btnUnitImperial { font-weight:600; }
-  #btnUnitMetric.unit-on, #btnUnitImperial.unit-on {
-    color: var(--amber); border-color: var(--amber); background: rgba(200,98,63,0.12); }
-  #btnUnitMetric.unit-off, #btnUnitImperial.unit-off {
-    color: #d8b455; border-color: #6d5a2c; }
-  #btnUnitMetric.unit-off:hover, #btnUnitImperial.unit-off:hover {
-    color: #f0cf74; border-color: #d8b455; }
-
-  /* Reset stands apart from Save and Load: it discards everything. Green rather
-     than amber so it does not read as one more action in the same row, and
-     because it is the safe-to-press one - nothing is lost that was saved. */
-  #btnResetDefaults {
-    color: #9fe0ac; border-color: #3d5c42; background: rgba(127,216,143,0.10); font-weight:600; }
-  #btnResetDefaults:hover {
-    color: #c6f0cf; border-color: #7fd88f; background: rgba(127,216,143,0.18); }
   .preset-btn:hover{ border-color: var(--amber); color: var(--text); }
 
   /* Save / Load are the two actions people hunt for, so they carry the accent
@@ -591,35 +567,17 @@
     .answer-cols #skyCoverageBody > div:first-child > div[style*="240px"] {
       flex:0 0 132px !important; width:132px; }
   }
-
-  /* Lab builds sit behind their own menu rather than in the main run of links:
-     they are work in progress, and a reader should have to choose to go there. */
-  .nav-lab { position:relative; display:inline-block; }
-  /* Match the nav links exactly rather than inheriting the body font: a button
-     does not pick up the anchor styling, so it stood 16px against their 12.5 and
-     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
-     progress without shouting. */
-  .nav-lab-btn { background:none; border:none; cursor:pointer;
-    font-family:inherit; font-size:12.5px; padding:14px 8px;
-    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
-  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
-  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }
-  .nav-lab.open .nav-lab-caret { transform:rotate(180deg); }
-  .nav-lab-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px;
-    background:var(--panel); border:1px solid #6d5a2c; border-radius:6px; padding:5px;
-    min-width:160px; z-index:60; box-shadow:0 8px 26px #0009; }
-  .nav-lab.open .nav-lab-menu { display:block; }
-  .nav-lab-menu a { display:block; padding:7px 12px; border-radius:4px; white-space:nowrap; }
-  .nav-lab-menu a { color:#d8b455; }
-  .nav-lab-menu a:hover { background:var(--panel-2); color:#f0cf74; }
-  @media(max-width:680px){
-    .nav-lab { display:block; width:100%; }
-    .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
-    .nav-lab-menu { position:static; box-shadow:none; margin:0 0 6px; }
-  }
 </style>
 </head>
 <body class="app">
+<div style="background:#1f2d3a; border-bottom:2px solid #5b8fd6; color:var(--text);
+     padding:7px 16px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <strong style="color:#8fb8ea;">Lab build</strong>
+  <span>Wall types: flat, raked and drop-down walls. Parked here for further work &mdash;
+  not part of the shipped tools.</span>
+  <a href="index.html" class="lab-back-link" style="margin-left:auto; color:#8fb8ea; font-size:12px; white-space:nowrap;">&larr; back to the site</a>
+</div>
+
 
 
 <div class="appbar">
@@ -641,7 +599,6 @@
     <a href="ror-manual.html">Manual</a>
     <a href="help.html">Help</a>
     <a href="contact.html">Contact</a>
-        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome-verify.html">Dome Lab</a><a href="lab-ror-walltypes.html">ROR Lab</a></div></div>
   </nav>
   <span class="spacer"></span>
   <button class="preset-btn" id="btnUnitMetric">Metric</button>
@@ -650,7 +607,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.10.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;7157</span></span>
+  <span class="chip">lab · wall types</span>
 </div>
 
 <div class="stage">
@@ -752,8 +709,34 @@
           <div class="field"><input type="number" id="roofTravel" value="165"><span class="unit">cm</span><span class="frac-hint" id="hint_roofTravel" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span></div>
         </div>
         
-            
-            
+            <div class="row" style="margin-top:14px;">
+              <div><label>Wall type</label><span class="hint">What the walls do when the roof is off. The roof is only the panel that slides away &mdash; whatever the walls are, they stay.</span></div>
+              <div class="field"><select id="wallType">
+                <option value="flat" selected>Flat tops &mdash; all walls the same height</option>
+                <option value="raked">Raked tops &mdash; walls cut to the roof slope</option>
+                <option value="drop">One wall drops down</option>
+              </select></div>
+            </div>
+            <div id="wallRakedFields" style="display:none;">
+              <div class="row"><div><label>Low end height</label><span class="hint">floor to the top of the wall at the low end</span></div>
+                <div class="field"><input type="number" id="rakeLow" value="48"><span class="unit">cm</span></div></div>
+              <div class="row"><div><label>High end height</label><span class="hint">floor to the top of the wall at the high end</span></div>
+                <div class="field"><input type="number" id="rakeHigh" value="84"><span class="unit">cm</span></div></div>
+              <div class="row"><div><label>High end faces</label><span class="hint">the rake runs down from this side; the two walls between are cut on the slope</span></div>
+                <div class="field"><select id="rakeHighDir">
+                  <option value="0">North</option><option value="90">East</option>
+                  <option value="180" selected>South</option><option value="270">West</option>
+                </select></div></div>
+            </div>
+            <div id="wallDropFields" style="display:none;">
+              <div class="row"><div><label>Which wall drops</label></div>
+                <div class="field"><select id="dropWallDir">
+                  <option value="0">North</option><option value="90">East</option>
+                  <option value="180">South</option><option value="270" selected>West</option>
+                </select></div></div>
+              <div class="row"><div><label>Height when down</label><span class="hint">floor to the top of that wall with it lowered</span></div>
+                <div class="field"><input type="number" id="dropHeight" value="24"><span class="unit">cm</span></div></div>
+            </div>
             <div class="mount-type-toggle">
           <button id="btnRoofFlat" class="active">Flat roof</button>
           <button id="btnRoofPeak">Peaked (gable)</button>
@@ -1493,7 +1476,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.10.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.06.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -2127,7 +2110,6 @@ function setUnitSystem(imperial){
   // Update toggle button states
   document.getElementById('btnUnitMetric').classList.toggle('active', !useImperial);
   document.getElementById('btnUnitImperial').classList.toggle('active', useImperial);
-  if(typeof paintUnitButtons === 'function') paintUnitButtons();
 
   compute();
 }
@@ -2153,12 +2135,7 @@ function refreshUnitLabels(){
   for(let i = 0; i < 6; i++){
     const el = document.getElementById(`wallDist${i}`);
     if(!el) continue;
-    // The angle and the distance share one .field parent, so querySelector on it
-    // returned the angle's degree symbol and relabelled that instead - the angle
-    // read "in" in imperial and "mm" in metric. The distance's own span is the
-    // element immediately after it.
-    const span = el.nextElementSibling && el.nextElementSibling.classList.contains('unit')
-               ? el.nextElementSibling : null;
+    const span = el.parentElement.querySelector('.unit') || el.nextElementSibling;
     if(span) span.textContent = lblMm;
   }
 }
@@ -2268,7 +2245,55 @@ function roofHeightAt(perpCoordMm, building){
 // rolls off past — is pushed outward by the roof's travel distance, modeling
 // the parked roof as an obstruction of its own rather than an open gap.
 
+// ---- what the walls do ------------------------------------------------------
+// The roof is only the panel that slides away. Whatever the walls are, they are
+// still there when it has gone, and they are what limits your sky every night.
+//
+//   flat   every wall the same height, as before
+//   raked  walls cut to the roof slope: tall at one end, low at the other, and
+//          the two walls between them cut on the slope. This is the ordinary
+//          shed observatory, and its raked tops are permanent - they do not
+//          leave with the roof.
+//   drop   one wall hinges down out of the way, giving that side its own much
+//          lower height while the rest stay put.
+function wallTypeMode(){
+  const e = document.getElementById('wallType');
+  return e ? e.value : 'flat';
+}
+function wallTypeFields(){
+  const mm = id => {
+    const e = document.getElementById(id);
+    if(!e) return 0;
+    const v = parseFloat(e.value);
+    return isFinite(v) ? v * (useImperial ? IN_TO_MM : 10) : 0;
+  };
+  const deg = id => { const e = document.getElementById(id); return e ? parseFloat(e.value) || 0 : 0; };
+  return { low: mm('rakeLow'), high: mm('rakeHigh'), highDir: deg('rakeHighDir'),
+           dropDir: deg('dropWallDir'), dropHeight: mm('dropHeight') };
+}
 
+// Height of the fixed wall a sightline meets, looking along this azimuth.
+function wallHeightTowards(azDeg, building){
+  const b = building || getBuildingConfig();
+  const base = b.wallHeight;
+  const mode = wallTypeMode();
+  if(mode === 'flat') return base;
+  const f = wallTypeFields();
+  const norm = a => ((a % 360) + 360) % 360;
+  if(mode === 'drop'){
+    // Only the wall facing that way is lowered; everything else is unchanged.
+    const d = Math.abs(norm(azDeg) - norm(f.dropDir));
+    const sep = Math.min(d, 360 - d);
+    return sep <= 45 ? f.dropHeight : base;
+  }
+  // Raked: full height at the high end, falling to the low end opposite, and
+  // linear across the two walls between - which is exactly what a wall cut to
+  // the slope does as you turn.
+  const d = Math.abs(norm(azDeg) - norm(f.highDir));
+  const sep = Math.min(d, 360 - d);          // 0 at the high end, 180 at the low
+  const t = sep / 180;
+  return f.high + (f.low - f.high) * t;
+}
 
   function wallRoofObstructionAlt(azDeg, mx, my, mountHeightMm, building){
   if(building.customWalls){
@@ -2289,23 +2314,12 @@ function roofHeightAt(perpCoordMm, building){
       const perpCoord = crossX*Math.cos(wa) - crossY*Math.sin(wa);
       structureHeight = roofHeightAtCustom(perpCoord, building);
     } else {
-      structureHeight = building.wallHeight;
+      structureHeight = wallHeightTowards(azDeg, building);
     }
     // Clear the whole beam, not just the centre ray: the bottom edge of the
     // light cone is what the wall top clips first.
-    //
-    // Adding the aperture radius to the wall height is not the same thing. The
-    // beam is tilted, so a vertical gap projects shorter across it: clearing the
-    // lower edge needs r/cos(alt) of vertical room, not r. Solving
-    //     d.sin(a) - H.cos(a) = r
-    // gives the exact limit below, which the old form under-stated by nearly
-    // three degrees where the wall is close and high.
-    const H = structureHeight - mountHeightMm;
-    const r = rorApertureRadiusMm();
-    const hyp = Math.hypot(dist, H);
-    const altRad = (hyp > 1e-6 && r < hyp)
-      ? Math.atan2(H, dist) + Math.asin(r / hyp)
-      : Math.atan2(H + r, dist);   // degenerate: aperture wider than the reach
+    const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
+    const altRad = Math.atan2(heightAboveMount, dist);
     return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist,
       blockedBy: isRoofWall ? 'Parked roof' : ('Wall ' + (wallIndex+1)) };
   }
@@ -2337,17 +2351,11 @@ function roofHeightAt(perpCoordMm, building){
     const perpCoord = (building.rollDir === 'N' || building.rollDir === 'S') ? (mx + dist*dx) : (my + dist*dy);
     structureHeight = roofHeightAt(perpCoord, building);
   } else {
-    structureHeight = building.wallHeight;
+    structureHeight = wallHeightTowards(azDeg, building);
   }
-  // Clear the whole beam, not just the centre ray. Same exact form as the
-  // custom-wall branch: the beam is tilted, so clearing its lower edge needs
-  // r/cos(alt) of vertical room rather than r.
-  const _H = structureHeight - mountHeightMm;
-  const _r = rorApertureRadiusMm();
-  const _hyp = Math.hypot(dist, _H);
-  const altRad = (_hyp > 1e-6 && _r < _hyp)
-    ? Math.atan2(_H, dist) + Math.asin(_r / _hyp)
-    : Math.atan2(_H + _r, dist);
+  // Clear the whole beam, not just the centre ray.
+  const heightAboveMount = structureHeight - mountHeightMm + rorApertureRadiusMm();
+  const altRad = Math.atan2(heightAboveMount, dist);
   return { altDeg: Math.max(0, altRad * 180/Math.PI), distMm: dist, blockedBy: (side === building.rollDir) ? 'Parked roof' : (side + ' wall') };
 }
 // Peaked/wedge-roof taper for custom wall shapes: same interpolation as the
@@ -2590,8 +2598,8 @@ function buildWallRows(){
     row.innerHTML = `
       <div><label>Wall ${i+1}</label></div>
       <div class="field">
-        <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit-fixed">°</span>
-        <input type="number" id="wallDist${i}" value="${(DEFAULT_WALLS[i].dist / (useImperial ? IN_TO_MM : 10)).toFixed(1)}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
+        <input type="number" id="wallAngle${i}" value="${DEFAULT_WALLS[i].angle}" style="width:70px;"><span class="unit">°</span>
+        <input type="number" id="wallDist${i}" value="${DEFAULT_WALLS[i].dist}" style="width:80px;"><span class="unit">mm</span><span class="frac-hint" id="hint_wallDist${i}" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap;"></span>
       </div>`;
     container.appendChild(row);
     row.querySelectorAll('input').forEach(el => el.addEventListener('input', compute));
@@ -3376,6 +3384,7 @@ const SAVE_FIELD_IDS = [
   'horizonMinAlt','horizonCustomData','showHorizon3D','showMeridian3D',
   'lat','ha','dec','targetAlt','targetAz','pierSide',
   'useCustomWalls','useExtraWalls','rollWallIndex','customRoofSpan',
+      'wallType','rakeLow','rakeHigh','rakeHighDir','dropWallDir','dropHeight',
   'wedgeLowHeight','wedgeHighHeight','wedgeFlip',
   'wallAngle0','wallDist0','wallAngle1','wallDist1','wallAngle2','wallDist2',
   'wallAngle3','wallDist3','wallAngle4','wallDist4','wallAngle5','wallDist5',
@@ -4985,8 +4994,6 @@ function selectedAltAxisMm(defaultMm){
 
 const MOUNT_FIELD_SET = {
   head: inches => { const e=document.getElementById('rorMountHead');
-                    // re-derive the intersection height from the new stack
-                    setTimeout(() => { if(window.__syncMountStack) window.__syncMountStack(); }, 0);
                     if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
   gem:  inches => { const e=document.getElementById('gemAxis');
                     if(e){ e.value = (useImperial ? inches : inches*2.54).toFixed(2); } },
@@ -6084,12 +6091,7 @@ function initThree(){
   function animate(){ requestAnimationFrame(animate); renderer.render(scene, camera); }
   animate();
 
-  const rorApertureRingMesh = new THREE.Mesh(new THREE.BufferGeometry(),
-    new THREE.MeshBasicMaterial({ color: 0xfff2df, transparent:true, opacity:0.85, side: THREE.DoubleSide }));
-  rorApertureRingMesh.visible = false;
-  scene.add(rorApertureRingMesh);
-  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, roofFramingBox, roofFramingEdges, ota, ray,
-    rorApertureRing: rorApertureRingMesh, mountMarker,
+  three = { scene, camera, renderer, walls, wallEdges, floor, roofBox, roofEdges, roofFramingBox, roofFramingEdges, ota, ray, mountMarker,
             rorPierGroup, rorPier, rorFlange, rorMountHead, rorRaPivot, swingSpheres,
     cardinalN, cardinalE, cardinalS, cardinalW, meridianLine, poleMarker, skyHorizonLine, horizonBand };
     window.__three = three;   // so the roof-closing animation can reach the roof mesh
@@ -6285,11 +6287,13 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
     three.floor.geometry = floorGeo;
     three.floor.scale.set(1,1,1); three.floor.rotation.set(0,0,0); three.floor.position.set(0,0,0);
   } else {
-    three.walls.geometry = new THREE.BoxGeometry(1,1,1);
-    three.wallEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
-    three.walls.scale.set(halfNS*2, wallHmm, halfEW*2);
-    three.walls.position.set(0, floorY + wallHmm/2, 0);
-    three.wallEdges.scale.copy(three.walls.scale);
+    const rectGeo = buildRectWallGeometry(halfNS, halfEW,
+      pt => wallHeightAtCorner(pt.x / sceneScale, pt.z / sceneScale, building) * sceneScale);
+    three.walls.geometry = rectGeo;
+    three.wallEdges.geometry = new THREE.EdgesGeometry(rectGeo);
+    three.walls.scale.set(1,1,1);
+    three.walls.position.set(0, floorY, 0);
+    three.wallEdges.scale.set(1,1,1);
     three.wallEdges.position.copy(three.walls.position);
 
     three.floor.geometry = new THREE.PlaneGeometry(1,1);
@@ -6334,26 +6338,16 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
         three.roofBox.position.copy(roofPos).setY(floorY + loH);
         three.roofEdges.position.copy(three.roofBox.position);
       } else {
-        // Flat roof on a custom footprint: the panel is the footprint's own
-        // shape, shifted out along the roll direction by the travel. A rectangle
-        // here ignored angled corners entirely and floated clear of the walls.
         const roofH = building.roofHeight*sceneScale;
-        // Recomputed here: the wall block's vertices are in another scope.
-        const roofVerts = polygonVertices(building.walls)
-          .map(v => new THREE.Vector3(v.y*sceneScale, 0, v.x*sceneScale));
-        const slabGeo = buildPolygonSlabGeometry(roofVerts, roofH);
-        three.roofBox.geometry = slabGeo;
-        three.roofEdges.geometry = new THREE.EdgesGeometry(slabGeo);
-        three.roofBox.scale.set(1,1,1); three.roofEdges.scale.set(1,1,1);
-        three.roofBox.position.copy(normal.clone().multiplyScalar(travel)).setY(floorY + wallH);
+        three.roofBox.geometry = new THREE.BoxGeometry(1,1,1);
+        three.roofEdges.geometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(1,1,1));
+        three.roofBox.scale.set(roofSpan, roofH, travel);
+        three.roofBox.position.copy(roofPos).setY(floorY + wallH + roofH/2);
+        three.roofEdges.scale.copy(three.roofBox.scale);
         three.roofEdges.position.copy(three.roofBox.position);
-        three.roofBox.quaternion.identity();
-        three.roofEdges.quaternion.identity();
       }
-      // The prisms are built in the wall's local frame and need the rotation; the
-      // polygon slab is already in world axes, so it must not be rotated again.
-      if(building.roofShape !== 'flat') three.roofBox.quaternion.copy(quat);
-      if(building.roofShape !== 'flat') three.roofEdges.quaternion.copy(quat);
+      three.roofBox.quaternion.copy(quat);
+      three.roofEdges.quaternion.copy(quat);
     }
     three.roofBox.visible = travel > 0.001 && !!wall;
     three.roofEdges.visible = travel > 0.001 && !!wall;
@@ -6661,27 +6655,45 @@ function updateThreeScene(mx, my, mountHeightMm, building, otaOrigin, otaDir, sc
 // rake, or one side dropped. Each corner post takes the taller of the two walls
 // meeting there, so a rake reads as a slope rather than a step.
 
-
-
-
-// A roll-off roof has to cover the building, so on a custom footprint it takes
-// the footprint's shape rather than a rectangle. Built flat at the origin and
-// then slid along the roll direction, the same as the box it replaces.
-function buildPolygonSlabGeometry(verts3D, thickness){
-  const n = verts3D.length;
-  const positions = [];
-  const push = (a,b,c2) => positions.push(...a, ...b, ...c2);
-  const lo = v => [v.x, 0, v.z], hi = v => [v.x, thickness, v.z];
-  // top and bottom faces, fanned from the first vertex
-  for(let i = 1; i < n - 1; i++){
-    push(hi(verts3D[0]), hi(verts3D[i]), hi(verts3D[i+1]));
-    push(lo(verts3D[0]), lo(verts3D[i+1]), lo(verts3D[i]));
+// Height of the wall top at a point on the footprint, in millimetres. Sightlines
+// ask by direction; the drawing asks by position, and a rake has to agree with
+// itself either way.
+function wallHeightAtCorner(northMm, eastMm, building){
+  const b = building || getBuildingConfig();
+  const mode = wallTypeMode();
+  if(mode === 'flat') return b.wallHeight;
+  const f = wallTypeFields();
+  if(mode === 'drop'){
+    // The dropped wall is the one that side of the building; a corner belongs to
+    // it when it lies on that half and nearer that wall than the ones beside it.
+    const a = f.dropDir * Math.PI / 180;
+    const along = northMm * Math.cos(a) + eastMm * Math.sin(a);
+    const half  = Math.abs(Math.cos(a)) > 0.5 ? b.length/2 : b.width/2;
+    return along > half * 0.5 ? f.dropHeight : b.wallHeight;
   }
-  // and the edge band
-  for(let i = 0; i < n; i++){
-    const a = verts3D[i], b = verts3D[(i+1) % n];
-    push(lo(a), lo(b), hi(a));
-    push(hi(a), lo(b), hi(b));
+  const a = f.highDir * Math.PI / 180;
+  const along = northMm * Math.cos(a) + eastMm * Math.sin(a);
+  const half  = Math.abs(Math.cos(a)) > 0.5 ? b.length/2 : b.width/2;
+  const t = Math.max(0, Math.min(1, (along / Math.max(half, 1) + 1) / 2));
+  return f.low + (f.high - f.low) * t;
+}
+
+function buildRectWallGeometry(halfNS, halfEW, heightAtCorner){
+  const corners = [
+    { x:  halfNS, z: -halfEW }, { x:  halfNS, z:  halfEW },
+    { x: -halfNS, z:  halfEW }, { x: -halfNS, z: -halfEW }
+  ];
+  const positions = [];
+  // Height is taken at each corner rather than per wall. Taking the taller of
+  // the two walls meeting at a corner sounds right and is not: on a raked shed
+  // it lifted the low wall to the mid height of the slopes beside it, so the low
+  // end came out most of a foot too tall and perfectly level.
+  const h = corners.map(heightAtCorner);
+  for(let i = 0; i < 4; i++){
+    const a = corners[i], b = corners[(i+1) % 4];
+    const ha = h[i], hb = h[(i+1) % 4];
+    positions.push(a.x,0,a.z,  b.x,0,b.z,  a.x,ha,a.z);
+    positions.push(a.x,ha,a.z, b.x,0,b.z,  b.x,hb,b.z);
   }
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
@@ -6940,7 +6952,6 @@ function compute(){
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
   if(typeof updateSweptVolume === 'function') updateSweptVolume();
   if(window.__keepReachable) window.__keepReachable();
-  if(typeof rorApertureRing === 'function') rorApertureRing();
   if(typeof syncRoofFraming === 'function') syncRoofFraming();
   if(typeof clampUsableField === 'function') clampUsableField();
   if(window.__recheckBlockedRoof) window.__recheckBlockedRoof();
@@ -7001,7 +7012,6 @@ refreshUnitLabels();
 updateFracHints();
 document.getElementById('btnUnitMetric').classList.remove('active');
 document.getElementById('btnUnitImperial').classList.add('active');
-  if(typeof paintUnitButtons === 'function') paintUnitButtons();
 
 // Event handlers are bound here rather than written as onclick attributes in
 // the markup. Inline handlers cannot be covered by a Content-Security-Policy
@@ -7788,21 +7798,24 @@ function updateRiseCeiling(){
                + 'that is the ceiling, not a promise.';
 }
 
-
-// Colour the pair on every unit change: amber for the system in force, yellow
-// for the one you can switch to.
-function paintUnitButtons(){
-  const m = document.getElementById('btnUnitMetric');
-  const i = document.getElementById('btnUnitImperial');
-  if(!m || !i) return;
-  m.classList.toggle('unit-on',  !useImperial);
-  m.classList.toggle('unit-off',  useImperial);
-  i.classList.toggle('unit-on',   useImperial);
-  i.classList.toggle('unit-off', !useImperial);
-}
-
-// once at load, so the pair is coloured before anything is clicked
-if(typeof paintUnitButtons === 'function') paintUnitButtons();
+(function(){
+  function updateWallTypeFields(){
+    const m = (document.getElementById('wallType') || {}).value || 'flat';
+    const r = document.getElementById('wallRakedFields');
+    const d = document.getElementById('wallDropFields');
+    if(r) r.style.display = (m === 'raked') ? 'block' : 'none';
+    if(d) d.style.display = (m === 'drop')  ? 'block' : 'none';
+  }
+  window.__updateWallTypeFields = updateWallTypeFields;
+  const sel = document.getElementById('wallType');
+  if(sel) sel.addEventListener('change', () => { updateWallTypeFields(); if(typeof compute === 'function') compute(); });
+  ['rakeLow','rakeHigh','rakeHighDir','dropWallDir','dropHeight'].forEach(id => {
+    const e = document.getElementById(id);
+    if(e) e.addEventListener('input',  () => { if(typeof compute === 'function') compute(); });
+    if(e) e.addEventListener('change', () => { if(typeof compute === 'function') compute(); });
+  });
+  updateWallTypeFields();
+})();
 
 // ---- roof pitch: rise:run or degrees ---------------------------------------
 // Builders quote a roof either way and plans use both, so the tool takes both
@@ -8011,144 +8024,6 @@ function worstParkForRoof(){
   _worstParkCache = worst ? worst.name : null;
   return _worstParkCache;
 }
-
-// ---- the mount height is one measurement, expressed twice -------------------
-// "Mount RA/Dec intersection height above floor" is the same thing as pier
-// height plus mount head height. Nothing kept them in step, and they fed
-// different consumers: the intersection height drove the obstruction arithmetic
-// while pier+head drove the drawing. A 60in pier against a 47in intersection put
-// the picture 838mm above the numbers, with no warning either way.
-//
-// The relationship is derived, not symmetric, so the two directions differ:
-//   edit pier or head  -> the intersection height follows, unambiguously
-//   edit the intersection height -> the pier absorbs it, because the head height
-//                                   comes from the mount library and is not
-//                                   yours to choose
-(function(){
-  let syncing = false;
-  const el = id => document.getElementById(id);
-  const val = id => { const e = el(id); const v = e ? parseFloat(e.value) : NaN;
-                      return isFinite(v) ? v : 0; };
-
-  function pushFromStack(){
-    if(syncing) return;
-    const m = el('mountHeight');
-    if(!m) return;
-    syncing = true;
-    m.value = +(val('rorPierHeight') + val('rorMountHead')).toFixed(2);
-    syncing = false;
-  }
-  function pushToPier(){
-    if(syncing) return;
-    const p = el('rorPierHeight');
-    if(!p) return;
-    const pier = val('mountHeight') - val('rorMountHead');
-    syncing = true;
-    // A mount head taller than the intersection height would need a pier below
-    // the floor; clamp at zero and let the stack tell the truth instead.
-    p.value = +Math.max(pier, 0).toFixed(2);
-    syncing = false;
-  }
-
-  ['rorPierHeight','rorMountHead'].forEach(id => {
-    const e = el(id);
-    if(e) e.addEventListener('input', () => { pushFromStack(); if(typeof compute === 'function') compute(); });
-  });
-  const m = el('mountHeight');
-  if(m) m.addEventListener('input', () => { pushToPier(); if(typeof compute === 'function') compute(); });
-
-  // The mount library writes the head height directly, so the stack has to be
-  // re-derived after a mount is chosen as well as after a hand edit.
-  window.__syncMountStack = pushFromStack;
-  setTimeout(pushFromStack, 400);
-})();
-
-// A ring drawn as separate arcs with gaps, matching the dome tool. A solid
-// annulus reads as hardware; a broken line says "this is where the aperture
-// lands", which is what it means.
-function buildDashedRingGeometry(innerR, outerR, dashes, duty, stepsPerDash){
-  const positions = [];
-  const N = Math.max(4, dashes | 0), steps = Math.max(2, stepsPerDash | 0);
-  const span = (Math.PI * 2) / N;
-  const arc  = span * Math.max(0.05, Math.min(0.95, duty));
-  for(let d = 0; d < N; d++){
-    const a0 = d * span;
-    for(let s = 0; s < steps; s++){
-      const t0 = a0 + arc * (s / steps), t1 = a0 + arc * ((s + 1) / steps);
-      const i0=[Math.cos(t0)*innerR, Math.sin(t0)*innerR, 0], o0=[Math.cos(t0)*outerR, Math.sin(t0)*outerR, 0];
-      const i1=[Math.cos(t1)*innerR, Math.sin(t1)*innerR, 0], o1=[Math.cos(t1)*outerR, Math.sin(t1)*outerR, 0];
-      positions.push(...i0, ...o0, ...i1);
-      positions.push(...i1, ...o0, ...o1);
-    }
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  g.computeVertexNormals();
-  return g;
-}
-
-// Where the sightline leaves the building, and how much of the aperture is
-// still in the clear when it does. A roll-off roof has no shell to project on,
-// so the useful place for the ring is the plane of whatever is binding - the
-// wall top on most pointings. The centre line can clear a wall while the lower
-// edge of the aperture does not, and the axis alone never showed that.
-function rorApertureRing(){
-  const t = window.__three || (typeof three !== 'undefined' ? three : null);
-  const m = (typeof gemMount !== 'undefined') ? gemMount : null;
-  if(!t || !t.rorApertureRing || !m) return;
-  try {
-    const b = getBuildingConfig();
-    const s = window.__sceneScale;
-    const oa = m.opticalAxis();
-    const dir = oa.direction.clone().normalize();
-    // Rising sightlines only; level or downward never leaves the walls.
-    if(dir.y < 0.02 || !s || !b){ t.rorApertureRing.visible = false; return; }
-    const wallTopY = (b.wallHeight || 0) * s;
-    const dist = (wallTopY - oa.origin.y) / dir.y;
-    if(!(dist > 0)){ t.rorApertureRing.visible = false; return; }
-    const at = oa.origin.clone().addScaledVector(dir, dist);
-    const rad = Math.max(rorApertureRadiusMm(), 1) * s;
-    t.rorApertureRing.geometry.dispose();
-    // Eight dashes, not the dome's sixteen. The ring lands at the wall plane,
-    // close to the mount, so at default zoom it is about ten pixels across -
-    // sixteen dashes there are sub-pixel and blur into a smudge.
-    t.rorApertureRing.geometry = buildDashedRingGeometry(rad * 0.78, rad, 8, 0.6, 3);
-    // Nudge it a little further along the sightline. Sitting exactly in the wall
-    // plane it is coplanar with the wall mesh and renders nothing at all - the
-    // same trap the dome tool hit, where the ring vanished into the shell.
-    t.rorApertureRing.position.copy(at).addScaledVector(dir, rad * 0.6);
-    t.rorApertureRing.quaternion.setFromUnitVectors(new THREE.Vector3(0,0,1), dir);
-    t.rorApertureRing.material.depthTest = false;   // always readable, never buried
-    t.rorApertureRing.renderOrder = 5;
-    t.rorApertureRing.visible = true;
-  } catch(e){ t.rorApertureRing.visible = false; }
-}
-</script>
-
-<script>
-// The Lab menu. Click to open, click away or press Escape to close - the same
-// behaviour anywhere it appears, so it is added once here rather than per page.
-(function(){
-  document.querySelectorAll('.nav-lab').forEach(function(box){
-    var btn = box.querySelector('.nav-lab-btn');
-    if(!btn) return;
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      var open = box.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
-  document.addEventListener('click', function(){
-    document.querySelectorAll('.nav-lab.open').forEach(function(b){
-      b.classList.remove('open');
-      var t = b.querySelector('.nav-lab-btn');
-      if(t) t.setAttribute('aria-expanded','false');
-    });
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
-  });
-})();
 </script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dome Geometry — CygnusWave</title>
+<title>Dome Geometry — lab build (model verification)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
@@ -140,27 +140,6 @@
     color: #9fe0ac; border-color: #3d5c42; background: rgba(127,216,143,0.10); font-weight:600; }
   #btnResetDefaults:hover {
     color: #c6f0cf; border-color: #7fd88f; background: rgba(127,216,143,0.18); }
-
-  /* The NINA block is the answer, so it opens expanded - but on a short screen
-     it pushes the measurement steps below the fold, and once the values are
-     copied it is just taking up room. Collapsing it leaves a one-line summary
-     so the numbers are still there at a glance. */
-
-  /* The NINA panel uses the same head as the step cards, so opening and closing
-     it feels like everything else in the rail rather than a second convention. */
-  .pinned .step-head { width:100%; min-width:0; }
-  .pinned:not(.active) .nina { display:none; }
-  .pinned.active .step-sum { display:none; }
-
-  /* The label must never wrap: squeezed to 67px it broke "NINA values" across
-     two lines and stretched the whole header to 58px. The summary is the part
-     that should give way, and it already ellipsises. */
-  .pinned .step-name { white-space:nowrap; flex:0 0 auto; }
-  .pinned .step-sum  { flex:1 1 auto; min-width:0; overflow:hidden;
-                       text-overflow:ellipsis; white-space:nowrap; }
-  /* Formulas explains values you cannot see while it is shut, so it stands down
-     and gives the summary its room back. Copy still works on the figures. */
-  .pinned:not(.active) .formulas-btn { display:none; }
   .preset-btn:hover{ border-color: var(--amber); color: var(--text); }
 
   /* Save / Load are the two actions people hunt for, so they carry the accent
@@ -605,35 +584,17 @@
     .answer-cols #skyCoverageBody > div:first-child > div[style*="240px"] {
       flex:0 0 132px !important; width:132px; }
   }
-
-  /* Lab builds sit behind their own menu rather than in the main run of links:
-     they are work in progress, and a reader should have to choose to go there. */
-  .nav-lab { position:relative; display:inline-block; }
-  /* Match the nav links exactly rather than inheriting the body font: a button
-     does not pick up the anchor styling, so it stood 16px against their 12.5 and
-     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
-     progress without shouting. */
-  .nav-lab-btn { background:none; border:none; cursor:pointer;
-    font-family:inherit; font-size:12.5px; padding:14px 8px;
-    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
-  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
-  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }
-  .nav-lab.open .nav-lab-caret { transform:rotate(180deg); }
-  .nav-lab-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px;
-    background:var(--panel); border:1px solid #6d5a2c; border-radius:6px; padding:5px;
-    min-width:160px; z-index:60; box-shadow:0 8px 26px #0009; }
-  .nav-lab.open .nav-lab-menu { display:block; }
-  .nav-lab-menu a { display:block; padding:7px 12px; border-radius:4px; white-space:nowrap; }
-  .nav-lab-menu a { color:#d8b455; }
-  .nav-lab-menu a:hover { background:var(--panel-2); color:#f0cf74; }
-  @media(max-width:680px){
-    .nav-lab { display:block; width:100%; }
-    .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
-    .nav-lab-menu { position:static; box-shadow:none; margin:0 0 6px; }
-  }
 </style>
 </head>
 <body class="app">
+<div style="background:#1f2d3a; border-bottom:2px solid #5b8fd6; color:var(--text);
+     padding:7px 16px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <strong style="color:#8fb8ea;">Lab build &mdash; model verification</strong>
+  <span>Checks that the numbers and the picture agree. Add <code>?verify</code> to the URL
+  for a live panel, or call <code>verifyModel()</code> in the console.</span>
+  <a href="index.html" class="lab-back-link" style="margin-left:auto; color:#8fb8ea; font-size:12px; white-space:nowrap;">&larr; back to the site</a>
+</div>
+
 
 
 <div class="appbar">
@@ -655,7 +616,6 @@
     <a href="dome-manual.html">Manual</a>
     <a href="help.html">Help</a>
     <a href="contact.html">Contact</a>
-        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome-verify.html">Dome Lab</a><a href="lab-ror-walltypes.html">ROR Lab</a></div></div>
   </nav>
   <span class="spacer"></span>
   <button class="preset-btn" id="btnUnitMetric">Metric</button>
@@ -664,12 +624,12 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.10.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;da25</span></span>
+  <span class="chip">lab · verify</span>
 </div>
 
 <div class="stage">
   <aside class="rail">
-    <div class="pinned active" id="ninaPinned"><div class="pinned-head"><button class="step-head" type="button" id="btnNinaToggle" aria-expanded="true"><span class="step-num">1</span><span class="step-name">NINA values</span><span class="step-sum" id="ninaSummary"></span></button><button type="button" class="formulas-btn" id="btnFormulas">Formulas</button><button class="preset-btn nina-copy" id="btnCopySettings">Copy</button></div>
+    <div class="pinned"><div class="pinned-head"><span>NINA values</span><button type="button" class="formulas-btn" id="btnFormulas">Formulas</button><button class="preset-btn nina-copy" id="btnCopySettings">Copy</button></div>
 <div class="nina">
   <div class="nina-head">
     <span class="nina-title">NINA &middot; Options &rarr; Dome</span>
@@ -700,7 +660,7 @@
     <div class="steps">
       <div class="step" data-step="dome">
         <button class="step-head" type="button">
-          <span class="step-num">2</span>
+          <span class="step-num">1</span>
           <span class="step-name">Dome</span>
           <span class="step-sum"></span>
         </button>
@@ -736,7 +696,7 @@
       </div>
       <div class="step" data-step="mount">
         <button class="step-head" type="button">
-          <span class="step-num">3</span>
+          <span class="step-num">2</span>
           <span class="step-name">Mount position</span>
           <span class="step-sum"></span>
         </button>
@@ -835,7 +795,7 @@
       </div>
       <div class="step" data-step="mountsys">
         <button class="step-head" type="button">
-          <span class="step-num">4</span>
+          <span class="step-num">3</span>
           <span class="step-name">Mount</span>
           <span class="step-sum"></span>
         </button>
@@ -1037,7 +997,7 @@
       </div>
       <div class="step" data-step="optics">
         <button class="step-head" type="button">
-          <span class="step-num">5</span>
+          <span class="step-num">4</span>
           <span class="step-name">Optical System</span>
           <span class="step-sum"></span>
         </button>
@@ -1118,7 +1078,7 @@
       </div>
       <div class="step" data-step="horizon">
         <button class="step-head" type="button">
-          <span class="step-num">6</span>
+          <span class="step-num">5</span>
           <span class="step-name">Horizon</span>
           <span class="step-sum"></span>
         </button>
@@ -1353,7 +1313,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.10.000</span>
+    flex-shrink:0;">v8.09.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1888,26 +1848,10 @@ function updateStatusBanner(){
     // message used to win and blame the dome for a limit the observer had set.
     banner.classList.add('status-warn');
     icon.textContent = '⚠';
-    // Quote the limit that is actually binding. With a custom horizon loaded the
-    // flat minimum is not it: a profile can stand at 36 degrees where the field
-    // says 15, and naming the 15 made a correct warning read as a false alarm -
-    // the pointing was above 15 and still behind a hill.
     const minAlt = (typeof num === 'function') ? num('horizonMinAlt') : null;
-    let limitTxt = (minAlt !== null) ? ' (minimum observation altitude ' + minAlt + '\u00b0)' : '';
-    try {
-      const shown = (document.getElementById('outTargetAltAz') || {}).textContent || '';
-      const nums = shown.match(/-?\d+(?:\.\d+)?/g);
-      if(nums && nums.length >= 2 && typeof horizonAltAt === 'function'){
-        const azHere = parseFloat(nums[1]);
-        const terrain = horizonAltAt(azHere);
-        if(isFinite(terrain) && terrain > (minAlt === null ? -1 : minAlt) + 0.05){
-          limitTxt = ' (your terrain reaches ' + terrain.toFixed(1) + '\u00b0 at azimuth '
-                   + azHere.toFixed(0) + '\u00b0)';
-        }
-      }
-    } catch(e){ /* keep the flat figure rather than risk a wrong one */ }
     text.textContent = horizonBad
-      ? 'This pointing is below your local horizon' + limitTxt
+      ? 'This pointing is below your local horizon'
+        + (minAlt !== null ? ' (minimum observation altitude ' + minAlt + '\u00b0)' : '')
         + ' — raise the declination or choose a later hour angle.'
       : 'Declination was adjusted to stay within what\u2019s observable at this latitude.';
   } else if(!lastShutterFits){
@@ -5886,7 +5830,6 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     if(old){ three.scene.remove(old); old.geometry.dispose(); old.material.dispose(); three.setSlit(null); }
     document.getElementById('shutterAngleNote').textContent = '';
     document.getElementById('outClearance').textContent = '—';
-  if(typeof updateNinaSummary === 'function') updateNinaSummary();
   }
 }
 
@@ -6879,53 +6822,109 @@ if(typeof paintUnitButtons === 'function') paintUnitButtons();
   };
 })();
 
-// The NINA panel folds away like the step cards below it, and leaves the three
-// offsets on the header line when it does - collapsed should still answer
-// "what were my numbers again" without a click.
-(function(){
-  const box = document.getElementById('ninaPinned');
-  const btn = document.getElementById('btnNinaToggle');
-  if(!box || !btn) return;
-  btn.addEventListener('click', () => {
-    const open = box.classList.toggle('active');
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if(!open && typeof updateNinaSummary === 'function') updateNinaSummary();
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
-  });
-})();
+// ============================================================================
+// verifyModel - does the picture agree with the numbers?
+// ============================================================================
+// The tool works out its geometry twice: computeAperture() produces the figures
+// the user acts on, and the scene code draws the mount. They are independent, so
+// they drift, and every drift shows up as "the 3D looks wrong" long after the
+// change that caused it. Each check below corresponds to a bug that reached a
+// user rather than a hypothetical one.
+//
+// Returns a list of disagreements, each with the two values and the gap, so a
+// failure names a number rather than a feeling.
+function verifyModel(){
+  const out = [];
+  const add = (what, expected, actual, tol, unit) => {
+    const gap = actual - expected;
+    if(Math.abs(gap) > tol){
+      out.push({ check: what, expected: +expected.toFixed(2), actual: +actual.toFixed(2),
+                 gap: +gap.toFixed(2), unit: unit || 'mm' });
+    }
+  };
+  try {
+    if(typeof gemMount === 'undefined' || !gemMount || !three) return out;
+    const scale = three.domeWire.scale.x / (numMmDome('domeDiameter') / 2);
+    if(!(scale > 0)) return out;
+    const mm = v => v / scale;
 
-function updateNinaSummary(){
-  const el = document.getElementById('ninaSummary');
-  if(!el) return;
-  const g = id => { const e = document.getElementById(id); return e ? e.textContent.trim() : ''; };
-  const ns = g('outNS'), ew = g('outEW'), ud = g('outUD');
-  el.textContent = (ns && ew && ud) ? (ns + '  ' + ew + '  ' + ud) : '';
+    // 1. The dome centre is the origin. Everything is measured from it, and a
+    //    scene drawn from the floor instead put the mount 584mm out.
+    add('dome centre at scene origin', 0, mm(three.domeWire.position.y), 1);
+
+    // 2. The floor sits hDome below the centre. Drawn at the wall height, it
+    //    dragged the whole mount with it.
+    add('floor below dome centre', -numMmDome('hDome'), mm(three.floor.position.y), 2);
+
+    // 3. The drawn pivot is where the offsets say it is. This is the check that
+    //    would have caught the ghost drifting off the telescope.
+    // Against the REPORTED Up/Down, not the input box: in measured mode the box
+    // is not the live figure, and comparing to it raised a false alarm on a
+    // perfectly healthy setup - which is exactly how a check like this loses
+    // its authority.
+    const udTxt = (document.getElementById('outUD') || {}).textContent || '';
+    const udM = udTxt.match(/-?\d+(?:\.\d+)?/);
+    if(udM) add('mount pivot at the reported Up/Down', parseFloat(udM[0]),
+                mm(gemMount.group.position.y), 3);
+
+    // 4. The ghost aperture lies on the optical axis the mount model draws.
+    //    They came from different origins for months.
+    const oa = gemMount.opticalAxis();
+    const g = three.ghostAperture;
+    if(g && g.visible){
+      const v = g.position.clone().sub(oa.origin);
+      const along = v.dot(oa.direction);
+      const off = v.clone().addScaledVector(oa.direction, -along).length();
+      add('ghost aperture on the optical axis', 0, mm(off), 40);
+    }
+
+    // 5. The two heights that are one measurement.
+    const hD = parseFloat((document.getElementById('hDome') || {}).value);
+    const wH = parseFloat((document.getElementById('wallHeight') || {}).value);
+    if(isFinite(hD) && isFinite(wH)) add('dome centre = wall springline', wH, hD, 0.01, 'display units');
+
+    // 6. The pointing the mount draws matches the pointing reported. A rotation
+    //    applied twice, or an axis convention crossed, shows up here.
+    const shown = (document.getElementById('outTargetAltAz') || {}).textContent || '';
+    const m = shown.match(/-?\d+(?:\.\d+)?/g);
+    if(m && m.length >= 2){
+      const altDrawn = Math.asin(Math.max(-1, Math.min(1, oa.direction.y))) * 180 / Math.PI;
+      add('drawn altitude = reported altitude', parseFloat(m[0]), altDrawn, 0.5, 'degrees');
+    }
+  } catch(e){
+    out.push({ check: 'verifyModel threw', expected: 0, actual: 0, gap: 0, unit: String(e).slice(0, 60) });
+  }
+  return out;
 }
-</script>
 
-<script>
-// The Lab menu. Click to open, click away or press Escape to close - the same
-// behaviour anywhere it appears, so it is added once here rather than per page.
+// A panel, shown only with ?verify in the URL, so it costs nothing in normal use.
 (function(){
-  document.querySelectorAll('.nav-lab').forEach(function(box){
-    var btn = box.querySelector('.nav-lab-btn');
-    if(!btn) return;
-    btn.addEventListener('click', function(e){
-      e.stopPropagation();
-      var open = box.classList.toggle('open');
-      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    });
-  });
-  document.addEventListener('click', function(){
-    document.querySelectorAll('.nav-lab.open').forEach(function(b){
-      b.classList.remove('open');
-      var t = b.querySelector('.nav-lab-btn');
-      if(t) t.setAttribute('aria-expanded','false');
-    });
-  });
-  document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
-  });
+  if(!/[?&]verify\b/.test(location.search)) return;
+  const box = document.createElement('div');
+  box.id = 'verifyPanel';
+  box.style.cssText = 'position:fixed; right:10px; bottom:10px; z-index:9999; max-width:430px;'
+    + 'background:#0d1117; border:1px solid #5b8fd6; border-radius:6px; padding:10px 12px;'
+    + 'font:12px/1.5 ui-monospace,monospace; color:#c9d4e4; box-shadow:0 6px 24px #0009;';
+  document.body.appendChild(box);
+  function paint(){
+    let rows;
+    try { rows = verifyModel(); } catch(e){ rows = [{check:'threw', unit:String(e)}]; }
+    if(!rows.length){
+      box.innerHTML = '<b style="color:#7fd88f;">model verified</b> &mdash; '
+        + 'the picture agrees with the numbers';
+      box.style.borderColor = '#3d5c42';
+      return;
+    }
+    box.style.borderColor = '#e0685c';
+    box.innerHTML = '<b style="color:#e0685c;">' + rows.length + ' disagreement'
+      + (rows.length > 1 ? 's' : '') + '</b><br>'
+      + rows.map(r => '<div style="margin-top:5px;">' + r.check
+          + '<br><span style="color:#8b93a3;">expected ' + r.expected
+          + ', drawn ' + r.actual + ' &mdash; out by <b style="color:#e0685c;">'
+          + r.gap + ' ' + r.unit + '</b></span></div>').join('');
+  }
+  setInterval(paint, 900);
+  setTimeout(paint, 700);
 })();
 </script>
 </body>

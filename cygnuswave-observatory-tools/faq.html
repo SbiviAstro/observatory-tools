@@ -95,6 +95,32 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
   border:1px solid #3d5c42; color:#9fe0ac; padding:4px 10px;
   border-radius:5px; font-size:12px; margin-bottom:20px; }
 
+
+  /* Lab builds sit behind their own menu rather than in the main run of links:
+     they are work in progress, and a reader should have to choose to go there. */
+  .nav-lab { position:relative; display:inline-block; }
+  /* Match the nav links exactly rather than inheriting the body font: a button
+     does not pick up the anchor styling, so it stood 16px against their 12.5 and
+     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
+     progress without shouting. */
+  .nav-lab-btn { background:none; border:none; cursor:pointer;
+    font-family:inherit; font-size:12.5px; padding:14px 8px;
+    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
+  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
+  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }
+  .nav-lab.open .nav-lab-caret { transform:rotate(180deg); }
+  .nav-lab-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px;
+    background:var(--panel); border:1px solid #6d5a2c; border-radius:6px; padding:5px;
+    min-width:160px; z-index:60; box-shadow:0 8px 26px #0009; }
+  .nav-lab.open .nav-lab-menu { display:block; }
+  .nav-lab-menu a { display:block; padding:7px 12px; border-radius:4px; white-space:nowrap; }
+  .nav-lab-menu a { color:#d8b455; }
+  .nav-lab-menu a:hover { background:var(--panel-2); color:#f0cf74; }
+  @media(max-width:680px){
+    .nav-lab { display:block; width:100%; }
+    .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
+    .nav-lab-menu { position:static; box-shadow:none; margin:0 0 6px; }
+  }
 </style>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -141,8 +167,9 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="about.html">About</a>
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
+        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome-verify.html">Dome Lab</a><a href="lab-ror-walltypes.html">ROR Lab</a></div></div>
   </div>
-  <span class="nav-version">v8.09.000</span>
+  <span class="nav-version">v8.10.000</span>
 </nav>
 <script>
 document.getElementById('navToggle').addEventListener('click',function(){
@@ -192,5 +219,31 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </footer>
 
 </div>
+
+<script>
+// The Lab menu. Click to open, click away or press Escape to close - the same
+// behaviour anywhere it appears, so it is added once here rather than per page.
+(function(){
+  document.querySelectorAll('.nav-lab').forEach(function(box){
+    var btn = box.querySelector('.nav-lab-btn');
+    if(!btn) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = box.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.nav-lab.open').forEach(function(b){
+      b.classList.remove('open');
+      var t = b.querySelector('.nav-lab-btn');
+      if(t) t.setAttribute('aria-expanded','false');
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
+  });
+})();
+</script>
 </body>
 </html>

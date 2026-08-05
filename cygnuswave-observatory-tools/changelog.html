@@ -95,6 +95,32 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
   border:1px solid #3d5c42; color:#9fe0ac; padding:4px 10px;
   border-radius:5px; font-size:12px; margin-bottom:20px; }
 
+
+  /* Lab builds sit behind their own menu rather than in the main run of links:
+     they are work in progress, and a reader should have to choose to go there. */
+  .nav-lab { position:relative; display:inline-block; }
+  /* Match the nav links exactly rather than inheriting the body font: a button
+     does not pick up the anchor styling, so it stood 16px against their 12.5 and
+     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
+     progress without shouting. */
+  .nav-lab-btn { background:none; border:none; cursor:pointer;
+    font-family:inherit; font-size:12.5px; padding:14px 8px;
+    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
+  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
+  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }
+  .nav-lab.open .nav-lab-caret { transform:rotate(180deg); }
+  .nav-lab-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px;
+    background:var(--panel); border:1px solid #6d5a2c; border-radius:6px; padding:5px;
+    min-width:160px; z-index:60; box-shadow:0 8px 26px #0009; }
+  .nav-lab.open .nav-lab-menu { display:block; }
+  .nav-lab-menu a { display:block; padding:7px 12px; border-radius:4px; white-space:nowrap; }
+  .nav-lab-menu a { color:#d8b455; }
+  .nav-lab-menu a:hover { background:var(--panel-2); color:#f0cf74; }
+  @media(max-width:680px){
+    .nav-lab { display:block; width:100%; }
+    .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
+    .nav-lab-menu { position:static; box-shadow:none; margin:0 0 6px; }
+  }
 </style>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMzQwIDM0MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM0MCIgaGVpZ2h0PSIzNDAiIGZpbGw9IiNEODVBMzAiIHJ4PSI0OCIvPgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgxNzAsMTQwKSBzY2FsZSgxLjcpIHJvdGF0ZSgtNDUpIj4KICA8ZyBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIj4KICAgIDxsaW5lIHgxPSIwIiB5MT0iLTUyIiB4Mj0iMCIgeTI9IjUiLz4KICAgIDxsaW5lIHgxPSIwIiB5MT0iNSIgeDI9IjAiIHkyPSIzMCIvPgogICAgPGxpbmUgeDE9IjAiIHkxPSIzMCIgeDI9IjAiIHkyPSI1NCIvPgogICAgPGxpbmUgeDE9Ii00MiIgeTE9Ii0xMiIgeDI9IjAiIHkyPSI1Ii8+CiAgICA8bGluZSB4MT0iMCIgeTE9IjUiIHgyPSIzNiIgeTI9Ii04Ii8+CiAgPC9nPgogIDxnIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgb3BhY2l0eT0iMC43NSI+CiAgICA8bGluZSB4MT0iMzYiIHkxPSItOCIgeDI9IjUwIiB5Mj0iLTIwIi8+CiAgICA8bGluZSB4MT0iLTQyIiB5MT0iLTEyIiB4Mj0iLTU0IiB5Mj0iLTIiLz4KICA8L2c+CiAgPGNpcmNsZSBjeD0iMCIgY3k9Ii01MiIgcj0iNyIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSI1IiByPSIxMCIgZmlsbD0iI0ZGRkZGRiIvPgogIDxjaXJjbGUgY3g9IjAiIGN5PSIzMCIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIgb3BhY2l0eT0iMC45Ii8+CiAgPGNpcmNsZSBjeD0iMCIgY3k9IjU0IiByPSI3LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSItNDIiIGN5PSItMTIiIHI9IjYiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSIzNiIgY3k9Ii04IiByPSI1LjUiIGZpbGw9IiNGRkZGRkYiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9Ii0yMCIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSItNTQiIGN5PSItMiIgcj0iMy41IiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjgiLz4KICA8Y2lyY2xlIGN4PSIxMiIgY3k9IjIwIiByPSIzIiBmaWxsPSIjRkZGRkZGIiBvcGFjaXR5PSIwLjciLz4KPC9nPgo8L3N2Zz4K">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -141,6 +167,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="about.html">About</a>
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
+        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome-verify.html">Dome Lab</a><a href="lab-ror-walltypes.html">ROR Lab</a></div></div>
   </div>
   <span class="nav-version">v7.14.000</span>
 </nav>
@@ -172,7 +199,25 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.09.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.10.000 — Current</div>
+
+<p><strong>Lab builds are reachable from the site.</strong> A <em>Lab</em> menu in the header opens onto <em>Dome Lab</em> and <em>ROR Lab</em>. They sit behind their own menu rather than in the main run of links, because they are work in progress and someone should have to choose to go there; each carries a blue banner saying so and a link back.</p>
+<p><strong>Dome Lab</strong> adds a model-verification harness. It compares the geometry the tool draws against the figures it reports &mdash; the dome centre, the floor datum, the mount pivot, the ghost aperture, the locked height pair, and the drawn altitude &mdash; and names the gap in millimetres or degrees rather than passing or failing silently. Add <code>?verify</code> to the URL for a live panel. Most of the faults found this month were the drawing and the arithmetic disagreeing; this is the check that catches them at the moment they diverge.</p>
+<p><strong>ROR Lab</strong> holds the wall-type work: flat, raked and drop-down walls. It calculates and draws correctly but changes sky-coverage figures for anyone with a sloped-wall building, so it wants testing against real observatories before it lands.</p>
+<p><strong>The NINA values panel folds away, and joins the numbered sequence.</strong> It had its own header and its own way of opening; it now uses the same head as every card beneath it, numbered <b>1</b>, with the measurement steps shifted to 2&ndash;6. The rail reads straight down as one list rather than a panel followed by a separate set of steps.</p>
+<p>Collapsed, the label had been squeezed to 67&nbsp;pixels and wrapped &ldquo;NINA values&rdquo; onto two lines while the summary ran past its edge and the Formulas button clipped. The label now never wraps, the summary gives way instead, and Formulas stands down while the panel is shut &mdash; it explains figures you cannot see. Copy still works on them.</p>
+<p><em>Note for the manual:</em> the dome manual&rsquo;s step numbers already did not match the tool before this change &mdash; it calls Mount Position &ldquo;Step 1&rdquo; where the tool showed Dome. That needs its own pass.</p>
+<p><strong>Folding away.</strong> It opens expanded, because it is the answer &mdash; but on a short screen it pushed the measurement steps below the fold, and once the figures are copied it is mostly taking up room. It now collapses like the step cards beneath it, from 280&nbsp;pixels to 54.</p>
+<p>Collapsed, the three offsets stay on the header line, so &ldquo;what were my numbers again&rdquo; does not need a click, and they follow every change rather than freezing at whatever they were when you folded it.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.09.001</div>
+
+<p><strong>Fixed: a correct horizon warning read as a false alarm.</strong> With a custom horizon profile loaded, the banner still quoted the flat <em>minimum observation altitude</em> field. A reported case pointed at 28.9&deg; altitude and was told the minimum was 15&deg; &mdash; so the warning looked plainly wrong, and the red shutter with it.</p>
+<p>It was not wrong. The terrain profile stands at <b>36.2&deg;</b> at that azimuth, and the pointing really was behind a hill. The banner now names the limit that is actually binding: <em>&ldquo;your terrain reaches 36.2&deg; at azimuth 67&deg;&rdquo;</em>. With a flat horizon it reads as before.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.09.000</div>
 
 <p><strong>Fixed: the roll-off tool under-stated its obstruction limits.</strong> It did account for the width of the beam rather than just the centre ray, but by adding the aperture radius to the wall height &mdash; and that is not the same thing. The beam is tilted, so a vertical gap projects shorter across it: clearing the lower edge needs <em>r&thinsp;/&thinsp;cos(altitude)</em> of vertical room, not <em>r</em>.</p>
 <p>Solving <em>d&thinsp;sin(a) &minus; H&thinsp;cos(a) = r</em> gives the limit exactly, and that is what both the rectangular and custom-wall paths now use. The old form was optimistic by up to <b>2.8&deg;</b> where a wall is close and high &mdash; sky the tool said you had and you did not.</p>
@@ -1201,5 +1246,31 @@ document.getElementById('navToggle').addEventListener('click',function(){
 </footer>
 
 </div>
+
+<script>
+// The Lab menu. Click to open, click away or press Escape to close - the same
+// behaviour anywhere it appears, so it is added once here rather than per page.
+(function(){
+  document.querySelectorAll('.nav-lab').forEach(function(box){
+    var btn = box.querySelector('.nav-lab-btn');
+    if(!btn) return;
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      var open = box.classList.toggle('open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  });
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.nav-lab.open').forEach(function(b){
+      b.classList.remove('open');
+      var t = b.querySelector('.nav-lab-btn');
+      if(t) t.setAttribute('aria-expanded','false');
+    });
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
+  });
+})();
+</script>
 </body>
 </html>
