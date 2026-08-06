@@ -629,13 +629,11 @@
     </svg>
   </a>
   <span class="title">Roll-Off-Roof Observatory</span>
-  <div style="background:#1f2d3a; border-bottom:2px solid #5b8fd6; color:var(--text);
-     padding:7px 16px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-  <b>Lab build</b> &mdash; roll-off-roof sandbox.
-  <span style="opacity:.8">No model-verification harness yet: this build carries the v8.10 fixes and nothing else. There is no <code>verifyModel()</code> and no <code>?verify</code> panel until the ROR checks are agreed.</span>
+  <div style="background:#1f2d3a;border-bottom:1px solid #2f4356;padding:10px 16px;font-size:12.5px;color:#cfe0ee;">
+  <b>Lab build</b> &mdash; roll-off-roof sandbox. Carries the v8.10 fixes <i>plus parked control changes</i>.
+  <span style="opacity:.85">RA slider re-centred on the counterweight-lowest pose (park 3 at slider centre). Verified on the <b>east</b> side only &mdash; the pier-side select does not persist in this tool, so the west mapping is unverified. Parked for a future version; not in the shipping calculator. No <code>verifyModel()</code> here yet.</span>
   <a href="index.html" class="lab-back-link" style="margin-left:auto; color:#8fb8ea; font-size:12px; white-space:nowrap;">&larr; back to the site</a>
 </div>
-
 <nav class="appnav">
     <a href="index.html">Home</a>
     <a href="dome-calculator.html">Dome</a>
@@ -1356,7 +1354,7 @@
         <div id="haDecFields">
           <div class="row">
             <div><label>Right Ascension (RA)</label></div>
-            <div class="field"><input type="number" id="ha" value="0" min="-180" max="180" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="ha" value="-90" min="-180" max="0" step="1"><span class="unit">°</span></div>
           </div>
           
           <div class="row">
@@ -1879,13 +1877,65 @@ function raAxisDeg(){ return num('ha'); }
 // which gives roughly a twentieth of a degree per pixel at the meridian against
 // 1.2 before, and about five degrees per pixel out at the limits where that is
 // all anyone needs.
+// The RA control spans one pier side's 180 degrees of travel, centred on the
+// pose where the counterweight hangs lowest - AP Park 3, and the pose a mount
+// sits in whenever it is not observing. Centring on the meridian instead put
+// the parked pose at the extreme end of the travel and level weights in the
+// middle, which is backwards.
+//
+// The counterweight shaft is perpendicular to the polar axis: level at the
+// meridian, lowest a quarter turn either side. It is never truly vertical below
+// the pole - at latitude L the best it manages is 90 - L below horizontal.
+//
+// WHICH quarter turn is not a constant. The library draws the shaft at -cwSide
+// along the declination axis, and cwSide follows the sign of the GEM axis
+// length - which is negative in the dome tool and positive here. Hardcoding
+// "+90 on the east side" is therefore right in one file and inverted in the
+// other. The centre is derived from the same sign the model draws with, so the
+// two cannot disagree; if the axis sign ever changes, this follows it.
+const HA_HALF_SPAN_DEG = 90;
+function cwShaftSign(){
+  try {
+    if(typeof gemMount !== 'undefined' && gemMount && gemMount.params)
+      return (gemMount.params.gemAxisLength < 0) ? -1 : 1;
+  } catch(e){}
+  return 1;
+}
+function haCentreDeg(){
+  const sel = document.getElementById('pierSide');
+  const west = !!sel && String(sel.value || '').toLowerCase() === 'west';
+  return -cwShaftSign() * HA_HALF_SPAN_DEG * (west ? -1 : 1);
+}
 function haFromSlider(pos){
   const x = Math.max(-100, Math.min(100, parseFloat(pos) || 0)) / 100;
-  return Math.round(Math.sign(x) * x * x * 180 * 10) / 10;
+  const off = Math.sign(x) * x * x * HA_HALF_SPAN_DEG;
+  return Math.round((haCentreDeg() + off) * 10) / 10;
 }
 function sliderFromHa(ha){
-  const v = Math.max(-180, Math.min(180, parseFloat(ha) || 0));
-  return Math.round(Math.sign(v) * Math.sqrt(Math.abs(v) / 180) * 200) / 2;
+  const c = haCentreDeg();
+  const d = Math.max(-HA_HALF_SPAN_DEG,
+                     Math.min(HA_HALF_SPAN_DEG, (parseFloat(ha) || 0) - c));
+  return Math.round(Math.sign(d) * Math.sqrt(Math.abs(d) / HA_HALF_SPAN_DEG) * 200) / 2;
+}
+// The reachable span moves with the resolved pier side, so the field's bounds
+// and the slider have to follow it. This is driven from syncPierSideDisplay -
+// the point where the RESOLVED side is written back - rather than from the
+// select's change event. Hooking the select left the bounds describing the side
+// the user picked while the mapping used the side the tool settled on, and the
+// two silently disagreed.
+function syncHaBoundsToSide(){
+  const c = haCentreDeg(), ha = document.getElementById('ha');
+  const sl = document.getElementById('haSlider');
+  if(ha){
+    ha.min = c - HA_HALF_SPAN_DEG;
+    ha.max = c + HA_HALF_SPAN_DEG;
+    // Number.isFinite, not `|| c`: an hour angle of exactly 0 is a real
+    // value and falsy, so the || fallback snapped it to the centre - the
+    // slider appeared dead because every move through 0 sprang back.
+    const cur = parseFloat(ha.value);
+    ha.value = Math.max(+ha.min, Math.min(+ha.max, Number.isFinite(cur) ? cur : c));
+  }
+  if(sl && ha) sl.value = sliderFromHa(ha.value);
 }
 
 function haHours(){ return raAxisDeg() / 15; }
@@ -3207,6 +3257,20 @@ document.querySelectorAll('input, select').forEach(el => el.addEventListener('in
 document.getElementById('lat').addEventListener('input', clampDecToVisible);
 
 document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = haFromSlider(this.value); compute(); });
+// Re-seat the RA bounds when the USER changes pier side. Deliberately not
+// driven from syncPierSideDisplay: that runs inside every compute(), including
+// the one wallFloorFromParks triggers while it sweeps park poses through the
+// live RA field - which re-seated the slider from whatever park the sweep had
+// left behind, so the control looked dead.
+(function(){
+  const sel = document.getElementById('pierSide');
+  if(sel) sel.addEventListener('change', function(){
+    if(window.__parkSearching || window.__wallFloorSweeping) return;
+    syncHaBoundsToSide();
+    if(typeof compute === 'function') compute();
+  });
+  if(typeof syncHaBoundsToSide === 'function') syncHaBoundsToSide();
+})();
 document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = sliderFromHa(this.value); });
 
 function clampDecToVisible(){
@@ -7887,6 +7951,10 @@ function wallFloorFromParks(){
   if(_wallFloorBusy) return _wallFloorCache;
   const btns = document.querySelectorAll('[data-park]');
   if(!btns.length || typeof mountEnvelope !== 'function') return null;
+  // This sweep drives the live RA field and pier-side select through five park
+  // poses before putting them back (see the restore below). Flag it so
+  // side-driven UI ignores the scratch values it passes through.
+  window.__wallFloorSweeping = true;
   _wallFloorBusy = true;
   const haEl = document.getElementById('ha'), decEl = document.getElementById('dec');
   const sideEl = document.getElementById('pierSide');
@@ -7917,6 +7985,7 @@ function wallFloorFromParks(){
   } catch(e){ /* fall through and restore */ }
   haEl.value = keep.ha; decEl.value = keep.dec;
   if(sideEl && keep.side) sideEl.value = keep.side;
+  window.__wallFloorSweeping = false;
   if(typeof compute === 'function') compute();
   _wallFloorBusy = false;
   _wallFloorCache = worst;

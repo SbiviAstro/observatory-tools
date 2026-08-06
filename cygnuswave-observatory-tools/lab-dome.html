@@ -1755,7 +1755,11 @@ function syncHaBoundsToSide(){
   if(ha){
     ha.min = c - HA_HALF_SPAN_DEG;
     ha.max = c + HA_HALF_SPAN_DEG;
-    ha.value = Math.max(+ha.min, Math.min(+ha.max, parseFloat(ha.value) || c));
+    // Number.isFinite, not `|| c`: an hour angle of exactly 0 is a real
+    // value and falsy, so the || fallback snapped it to the centre - the
+    // slider appeared dead because every move through 0 sprang back.
+    const cur = parseFloat(ha.value);
+    ha.value = Math.max(+ha.min, Math.min(+ha.max, Number.isFinite(cur) ? cur : c));
   }
   if(sl && ha) sl.value = sliderFromHa(ha.value);
 }
