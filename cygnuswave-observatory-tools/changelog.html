@@ -199,7 +199,13 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.10.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.11.000 — Current</div>
+
+<p><strong>The model-verification harness ships with the dome calculator.</strong> It has earned its place in the lab: it checks that the geometry the tool draws agrees with the figures it reports &mdash; the dome centre, the floor datum, the mount pivot, the ghost aperture, the locked height pair, and the drawn altitude &mdash; and names the gap in millimetres or degrees rather than passing or failing silently.</p>
+<p>Most of the faults found this month were the drawing and the arithmetic disagreeing while each looked right on its own. Add <code>?verify</code> to the calculator&rsquo;s URL for a live panel, or call <code>verifyModel()</code> in the browser console. It is inert otherwise, so it costs nothing in normal use &mdash; and if you report something odd, that panel tells us in one line what would otherwise take an evening to find.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.10.000</div>
 
 <p><strong>Lab builds are reachable from the site.</strong> A <em>Lab</em> menu in the header opens onto <em>Dome Lab</em> and <em>ROR Lab</em>. They sit behind their own menu rather than in the main run of links, because they are work in progress and someone should have to choose to go there; each carries a blue banner saying so and a link back.</p>
 <p><strong>Dome Lab</strong> adds a model-verification harness. It compares the geometry the tool draws against the figures it reports &mdash; the dome centre, the floor datum, the mount pivot, the ghost aperture, the locked height pair, and the drawn altitude &mdash; and names the gap in millimetres or degrees rather than passing or failing silently. Add <code>?verify</code> to the URL for a live panel. Most of the faults found this month were the drawing and the arithmetic disagreeing; this is the check that catches them at the moment they diverge.</p>

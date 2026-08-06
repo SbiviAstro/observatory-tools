@@ -664,7 +664,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.10.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;da25</span></span>
+  <span class="chip">v8.11.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;da25</span></span>
 </div>
 
 <div class="stage">
@@ -1353,7 +1353,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.10.000</span>
+    flex-shrink:0;">v8.11.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -6926,6 +6926,131 @@ function updateNinaSummary(){
   document.addEventListener('keydown', function(e){
     if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
   });
+})();
+// ============================================================================
+// verifyModel - does the picture agree with the numbers?
+// ============================================================================
+// The tool works out its geometry twice: computeAperture() produces the figures
+// the user acts on, and the scene code draws the mount. They are independent, so
+// they drift, and every drift shows up as "the 3D looks wrong" long after the
+// change that caused it. Each check below corresponds to a bug that reached a
+// user rather than a hypothetical one.
+//
+// Returns a list of disagreements, each with the two values and the gap, so a
+// failure names a number rather than a feeling.
+function verifyModel(){
+  const out = [];
+  const add = (what, expected, actual, tol, unit) => {
+    const gap = actual - expected;
+    if(Math.abs(gap) > tol){
+      out.push({ check: what, expected: +expected.toFixed(2), actual: +actual.toFixed(2),
+                 gap: +gap.toFixed(2), unit: unit || 'mm' });
+    }
+  };
+  try {
+    if(typeof gemMount === 'undefined' || !gemMount || !three) return out;
+    const scale = three.domeWire.scale.x / (numMmDome('domeDiameter') / 2);
+    if(!(scale > 0)) return out;
+    const mm = v => v / scale;
+
+    // 1. The dome centre is the origin. Everything is measured from it, and a
+    //    scene drawn from the floor instead put the mount 584mm out.
+    add('dome centre at scene origin', 0, mm(three.domeWire.position.y), 1);
+
+    // 2. The floor sits hDome below the centre. Drawn at the wall height, it
+    //    dragged the whole mount with it.
+    add('floor below dome centre', -numMmDome('hDome'), mm(three.floor.position.y), 2);
+
+    // 3. The drawn pivot is where the offsets say it is. This is the check that
+    //    would have caught the ghost drifting off the telescope.
+    // Against the REPORTED Up/Down, not the input box: in measured mode the box
+    // is not the live figure, and comparing to it raised a false alarm on a
+    // perfectly healthy setup - which is exactly how a check like this loses
+    // its authority.
+    const udTxt = (document.getElementById('outUD') || {}).textContent || '';
+    const udM = udTxt.match(/-?\d+(?:\.\d+)?/);
+    if(udM) add('mount pivot at the reported Up/Down', parseFloat(udM[0]),
+                mm(gemMount.group.position.y), 3);
+
+    // 4. The ghost aperture lies on the optical axis the mount model draws.
+    //    They came from different origins for months.
+    const oa = gemMount.opticalAxis();
+    const g = three.ghostAperture;
+    if(g && g.visible){
+      const v = g.position.clone().sub(oa.origin);
+      const along = v.dot(oa.direction);
+      const off = v.clone().addScaledVector(oa.direction, -along).length();
+      add('ghost aperture on the optical axis', 0, mm(off), 40);
+    }
+
+    // 5. The two heights that are one measurement.
+    const hD = parseFloat((document.getElementById('hDome') || {}).value);
+    const wH = parseFloat((document.getElementById('wallHeight') || {}).value);
+    if(isFinite(hD) && isFinite(wH)) add('dome centre = wall springline', wH, hD, 0.01, 'display units');
+
+    // 6. The pointing the mount draws matches the pointing reported. A rotation
+    //    applied twice, or an axis convention crossed, shows up here.
+    const shown = (document.getElementById('outTargetAltAz') || {}).textContent || '';
+    const m = shown.match(/-?\d+(?:\.\d+)?/g);
+    if(m && m.length >= 2){
+      const altDrawn = Math.asin(Math.max(-1, Math.min(1, oa.direction.y))) * 180 / Math.PI;
+      add('drawn altitude = reported altitude', parseFloat(m[0]), altDrawn, 0.5, 'degrees');
+    }
+
+    // 7. The pier is drawn where it was poured, not under the pivot.
+    //    The group origin is the RA/Dec pivot. On a GEM the pivot stands a
+    //    polar-axis run toward the elevated pole, so the pier belongs that far
+    //    back. Drawn straight from the origin it followed the pivot north and
+    //    the picture showed a pier that had got up and moved - which no other
+    //    check could see, because all six look at the pivot or above it.
+    if(typeof gemPivotNorthShiftMm === 'function' && gemMount.pierBins
+       && gemMount.group.visible){
+      const run = gemPivotNorthShiftMm();
+      const nsTxt = (document.getElementById('outNS') || {}).textContent || '';
+      const nsM = nsTxt.match(/-?\d+(?:\.\d+)?/);
+      if(nsM && Math.abs(run) > 0.5){
+        const bins = gemMount.pierBins;
+        const bin = bins.hi.visible ? bins.hi : bins.lo;
+        const w = new THREE.Vector3();
+        bin.getWorldPosition(w);
+        add('pier drawn at the pier, not under the pivot',
+            parseFloat(nsM[0]) - run, mm(w.x), 3);
+      }
+    }
+  } catch(e){
+    out.push({ check: 'verifyModel threw', expected: 0, actual: 0, gap: 0, unit: String(e).slice(0, 60) });
+  }
+  return out;
+}
+
+// A panel, shown only with ?verify in the URL, so it costs nothing in normal use.
+(function(){
+  if(!/[?&]verify\b/.test(location.search)) return;
+  const box = document.createElement('div');
+  box.id = 'verifyPanel';
+  box.style.cssText = 'position:fixed; right:10px; bottom:10px; z-index:9999; max-width:430px;'
+    + 'background:#0d1117; border:1px solid #5b8fd6; border-radius:6px; padding:10px 12px;'
+    + 'font:12px/1.5 ui-monospace,monospace; color:#c9d4e4; box-shadow:0 6px 24px #0009;';
+  document.body.appendChild(box);
+  function paint(){
+    let rows;
+    try { rows = verifyModel(); } catch(e){ rows = [{check:'threw', unit:String(e)}]; }
+    if(!rows.length){
+      box.innerHTML = '<b style="color:#7fd88f;">model verified</b> &mdash; '
+        + 'the picture agrees with the numbers';
+      box.style.borderColor = '#3d5c42';
+      return;
+    }
+    box.style.borderColor = '#e0685c';
+    box.innerHTML = '<b style="color:#e0685c;">' + rows.length + ' disagreement'
+      + (rows.length > 1 ? 's' : '') + '</b><br>'
+      + rows.map(r => '<div style="margin-top:5px;">' + r.check
+          + '<br><span style="color:#8b93a3;">expected ' + r.expected
+          + ', drawn ' + r.actual + ' &mdash; out by <b style="color:#e0685c;">'
+          + r.gap + ' ' + r.unit + '</b></span></div>').join('');
+  }
+  setInterval(paint, 900);
+  setTimeout(paint, 700);
 })();
 </script>
 </body>
