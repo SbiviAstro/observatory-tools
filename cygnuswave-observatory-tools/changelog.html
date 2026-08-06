@@ -167,7 +167,7 @@ table td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:t
     <a href="about.html">About</a>
     <a href="faq.html">FAQ</a>
     <a href="contact.html">Contact</a>
-        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome-verify.html">Dome Lab</a><a href="lab-ror-walltypes.html">ROR Lab</a></div></div>
+        <div class="nav-lab"><button type="button" class="nav-lab-btn" aria-expanded="false">Lab <span class="nav-lab-caret">▾</span></button><div class="nav-lab-menu"><a href="lab-dome.html">Dome Lab</a><a href="lab-ror.html">ROR Lab</a></div></div>
   </div>
   <span class="nav-version">v7.14.000</span>
 </nav>
@@ -203,7 +203,7 @@ document.getElementById('navToggle').addEventListener('click',function(){
 
 <p><strong>Lab builds are reachable from the site.</strong> A <em>Lab</em> menu in the header opens onto <em>Dome Lab</em> and <em>ROR Lab</em>. They sit behind their own menu rather than in the main run of links, because they are work in progress and someone should have to choose to go there; each carries a blue banner saying so and a link back.</p>
 <p><strong>Dome Lab</strong> adds a model-verification harness. It compares the geometry the tool draws against the figures it reports &mdash; the dome centre, the floor datum, the mount pivot, the ghost aperture, the locked height pair, and the drawn altitude &mdash; and names the gap in millimetres or degrees rather than passing or failing silently. Add <code>?verify</code> to the URL for a live panel. Most of the faults found this month were the drawing and the arithmetic disagreeing; this is the check that catches them at the moment they diverge.</p>
-<p><strong>ROR Lab</strong> holds the wall-type work: flat, raked and drop-down walls. It calculates and draws correctly but changes sky-coverage figures for anyone with a sloped-wall building, so it wants testing against real observatories before it lands.</p>
+<p><strong>ROR Lab</strong> is a roll-off-roof sandbox carrying the v8.10 fixes. It has no verification harness of its own yet &mdash; that is the next thing to port across.</p>
 <p><strong>The NINA values panel folds away, and joins the numbered sequence.</strong> It had its own header and its own way of opening; it now uses the same head as every card beneath it, numbered <b>1</b>, with the measurement steps shifted to 2&ndash;6. The rail reads straight down as one list rather than a panel followed by a separate set of steps.</p>
 <p>Collapsed, the label had been squeezed to 67&nbsp;pixels and wrapped &ldquo;NINA values&rdquo; onto two lines while the summary ran past its edge and the Formulas button clipped. The label now never wraps, the summary gives way instead, and Formulas stands down while the panel is shut &mdash; it explains figures you cannot see. Copy still works on them.</p>
 <p><em>Note for the manual:</em> the dome manual&rsquo;s step numbers already did not match the tool before this change &mdash; it calls Mount Position &ldquo;Step 1&rdquo; where the tool showed Dome. That needs its own pass.</p>

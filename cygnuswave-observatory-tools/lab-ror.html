@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Roll-Off-Roof Observatory — CygnusWave</title>
+<title>LAB — Roll-Off-Roof Observatory — CygnusWave</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
@@ -595,23 +595,18 @@
   /* Lab builds sit behind their own menu rather than in the main run of links:
      they are work in progress, and a reader should have to choose to go there. */
   .nav-lab { position:relative; display:inline-block; }
-  /* Match the nav links exactly rather than inheriting the body font: a button
-     does not pick up the anchor styling, so it stood 16px against their 12.5 and
-     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
-     progress without shouting. */
-  .nav-lab-btn { background:none; border:none; cursor:pointer;
-    font-family:inherit; font-size:12.5px; padding:14px 8px;
-    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
-  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
-  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }
+  .nav-lab-btn { background:none; border:none; font:inherit; color:var(--text-dim);
+    cursor:pointer; padding:6px 10px; display:inline-flex; align-items:center; gap:5px;
+    border-radius:5px; }
+  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:var(--text); }
+  .nav-lab-caret { font-size:10px; color:#8fb8ea; transition:transform .15s; }
   .nav-lab.open .nav-lab-caret { transform:rotate(180deg); }
   .nav-lab-menu { display:none; position:absolute; right:0; top:100%; margin-top:4px;
-    background:var(--panel); border:1px solid #6d5a2c; border-radius:6px; padding:5px;
+    background:var(--panel); border:1px solid #5b8fd6; border-radius:6px; padding:5px;
     min-width:160px; z-index:60; box-shadow:0 8px 26px #0009; }
   .nav-lab.open .nav-lab-menu { display:block; }
   .nav-lab-menu a { display:block; padding:7px 12px; border-radius:4px; white-space:nowrap; }
-  .nav-lab-menu a { color:#d8b455; }
-  .nav-lab-menu a:hover { background:var(--panel-2); color:#f0cf74; }
+  .nav-lab-menu a:hover { background:var(--panel-2); color:#8fb8ea; }
   @media(max-width:680px){
     .nav-lab { display:block; width:100%; }
     .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
@@ -634,7 +629,14 @@
     </svg>
   </a>
   <span class="title">Roll-Off-Roof Observatory</span>
-  <nav class="appnav">
+  <div style="background:#1f2d3a; border-bottom:2px solid #5b8fd6; color:var(--text);
+     padding:7px 16px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <b>Lab build</b> &mdash; roll-off-roof sandbox.
+  <span style="opacity:.8">No model-verification harness yet: this build carries the v8.10 fixes and nothing else. There is no <code>verifyModel()</code> and no <code>?verify</code> panel until the ROR checks are agreed.</span>
+  <a href="index.html" class="lab-back-link" style="margin-left:auto; color:#8fb8ea; font-size:12px; white-space:nowrap;">&larr; back to the site</a>
+</div>
+
+<nav class="appnav">
     <a href="index.html">Home</a>
     <a href="dome-calculator.html">Dome</a>
     <a href="ror-calculator.html">Roll-Off-Roof</a>
@@ -3260,7 +3262,10 @@ function jog(dx, dy){
     let dec = num('dec') + dy * jogStep;
     dec = Math.max(num('lat') - 90, Math.min(90, dec));
     document.getElementById('ha').value = ha.toFixed(3);
-    document.getElementById('haSlider').value = Math.max(-6, Math.min(6, ha));
+    // The slider is a -100..100 position, not an hour angle. Writing the raw
+    // hours here clamped every conversion into the middle few percent of the
+    // travel, so the handle barely moved however far the mount swung.
+    document.getElementById('haSlider').value = sliderFromHa(ha);
     document.getElementById('dec').value = dec.toFixed(2);
     document.getElementById('decSlider').value = dec;
   }
@@ -4995,10 +5000,18 @@ const MOUNT_FIELD_SET = {
 
 // A GEM preset's Dec-axis height depends on latitude, so re-apply it when the
 // site latitude changes - otherwise the mount head height silently goes stale.
+//
+// The re-apply used to skip the 'generic' entry, on the assumption that it meant
+// "no preset chosen, leave the fields alone". It does not: 'generic' is a real
+// GEM entry carrying its own A and B, and it is the DEFAULT selection - so the
+// one mount every new user starts on was the one mount whose head height did not
+// follow latitude, correcting itself only when A, B or C was next touched.
+// "Measure my own" (id 'custom') was never affected: it is not 'generic', so it
+// already re-applied. Dropping the exclusion makes all three paths agree.
 (function(){
   const el = document.getElementById('lat');
   if(el) el.addEventListener('input', function(){
-    if(typeof selectedMountId !== 'undefined' && selectedMountId !== 'generic'){
+    if(typeof selectedMountId !== 'undefined'){
       applyMountPreset(false);
     }
   });

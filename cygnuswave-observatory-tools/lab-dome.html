@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dome Geometry — CygnusWave</title>
+<title>Dome Geometry — lab build (model verification)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <style>
   :root{
@@ -631,7 +631,16 @@
     .nav-lab-btn { width:100%; justify-content:space-between; padding:9px 0; }
     .nav-lab-menu { position:static; box-shadow:none; margin:0 0 6px; }
   }
-</style>
+
+  /* Match the nav links exactly rather than inheriting the body font: a button
+     does not pick up the anchor styling, so it stood 16px against their 12.5 and
+     sat 30px tall in a 42px row. Yellow marks it out as the way to work in
+     progress without shouting. */
+  .nav-lab-btn { background:none; border:none; cursor:pointer;
+    font-family:inherit; font-size:12.5px; padding:14px 8px;
+    color:#d8b455; display:inline-flex; align-items:center; gap:5px; }
+  .nav-lab-btn:hover, .nav-lab.open .nav-lab-btn { color:#f0cf74; }
+  .nav-lab-caret { font-size:10px; color:#d8b455; transition:transform .15s; }</style>
 </head>
 <body class="app">
 
@@ -648,7 +657,15 @@
     </svg>
   </a>
   <span class="title">Dome Geometry</span>
-  <nav class="appnav">
+  <div style="background:#1f2d3a; border-bottom:2px solid #5b8fd6; color:var(--text);
+     padding:7px 16px; font-size:13px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+  <strong style="color:#8fb8ea;">Lab build &mdash; model verification</strong>
+  <span>Checks that the numbers and the picture agree. Add <code>?verify</code> to the URL
+  for a live panel, or call <code>verifyModel()</code> in the console.</span>
+  <a href="index.html" class="lab-back-link" style="margin-left:auto; color:#8fb8ea; font-size:12px; white-space:nowrap;">&larr; back to the site</a>
+</div>
+
+<nav class="appnav">
     <a href="index.html">Home</a>
     <a href="dome-calculator.html">Dome</a>
     <a href="ror-calculator.html">Roll-Off-Roof</a>
@@ -664,7 +681,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.10.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;da25</span></span>
+  <span class="chip">v8.10.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;cc51</span></span>
 </div>
 
 <div class="stage">
@@ -771,9 +788,9 @@
             </div>
             <div style="font-size:11px; color:#c8623f; margin-top:2px;">pier height + mount head height = height above floor</div>
           </div>
-          <p class="step-note" style="margin-top:6px; margin-bottom:10px;">Measure the distance from each wall to directly below the mount's RA/Dec pivot point on the floor.</p>
+          <p class="step-note" style="margin-top:6px; margin-bottom:10px;">Measure the distance from each wall to the <b>pier</b> &mdash; the same feature on all four sides. The offset to the RA/Dec pivot is worked out from your mount's geometry and added for you.</p>
           <div class="row" style="margin-top:6px;">
-            <div><label>North wall &rarr; mount</label><span class="hint">Measure to the <b>same feature on all four sides</b> &mdash; the near face of the pier is easiest. Only the difference between opposite walls is used, so measuring to the pier face rather than the unreachable centre gives an identical answer.</span></div>
+            <div><label>North wall &rarr; mount</label><span class="hint">Measure to the <b>same feature on all four sides</b> &mdash; the near face of the pier is easiest. Only the difference between opposite walls is used, so measuring to the pier face rather than its unreachable centre gives an identical answer &mdash; the pier radius cancels.</span></div>
             <div class="field"><input type="number" id="distN" value="39"><span class="unit">mm</span><span class="frac-hint" id="hint_distN" style="display:none; color:var(--text-dim); font-size:11px; margin-left:6px; white-space:nowrap; font-family:'Courier New',monospace;"></span></div>
           </div>
           <div class="row">
@@ -1207,7 +1224,7 @@
         <div id="haDecFields">
           <div class="row">
             <div><label>Right Ascension (RA)</label><span class="hint">0 = on the meridian, + = west of meridian</span></div>
-            <div class="field"><input type="number" id="ha" value="0" min="-180" max="180" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="ha" value="90" min="0" max="180" step="1"><span class="unit">°</span></div>
           </div>
           
           <div class="row">
@@ -1696,13 +1713,51 @@ function raAxisDeg(){ return num('ha'); }
 // which gives roughly a twentieth of a degree per pixel at the meridian against
 // 1.2 before, and about five degrees per pixel out at the limits where that is
 // all anyone needs.
+// The RA control spans one pier side's 180 degrees of travel, centred on the
+// pose where the counterweight hangs lowest - AP Park 3, and the pose a mount
+// sits in whenever it is not observing.
+//
+// That centre is HA -90 on the west side and +90 on the east, because the
+// counterweight shaft is perpendicular to the polar axis: it is level at the
+// meridian and lowest a quarter turn either side. It is never truly vertical
+// below the pole - at latitude L the best it manages is 90 - L below
+// horizontal, which is 51 degrees at latitude 39.
+//
+// Centring on the meridian instead put the parked pose at the extreme end of
+// the travel and level weights in the middle, which is backwards: the middle of
+// a control should be where the mount actually rests.
+//
+// The square keeps fine resolution at the centre and lets the ends move
+// quickly. Slider position stays -100..100 - a pure position, not an angle.
+const HA_HALF_SPAN_DEG = 90;
+function haCentreDeg(){
+  const sel = document.getElementById('pierSide');
+  const west = !!sel && String(sel.value || '').toLowerCase() === 'west';
+  return west ? -HA_HALF_SPAN_DEG : HA_HALF_SPAN_DEG;
+}
 function haFromSlider(pos){
   const x = Math.max(-100, Math.min(100, parseFloat(pos) || 0)) / 100;
-  return Math.round(Math.sign(x) * x * x * 180 * 10) / 10;
+  const off = Math.sign(x) * x * x * HA_HALF_SPAN_DEG;
+  return Math.round((haCentreDeg() + off) * 10) / 10;
 }
 function sliderFromHa(ha){
-  const v = Math.max(-180, Math.min(180, parseFloat(ha) || 0));
-  return Math.round(Math.sign(v) * Math.sqrt(Math.abs(v) / 180) * 200) / 2;
+  const c = haCentreDeg();
+  const d = Math.max(-HA_HALF_SPAN_DEG,
+                     Math.min(HA_HALF_SPAN_DEG, (parseFloat(ha) || 0) - c));
+  return Math.round(Math.sign(d) * Math.sqrt(Math.abs(d) / HA_HALF_SPAN_DEG) * 200) / 2;
+}
+// The reachable span moves with the pier side, so the numeric field's bounds
+// and the slider position have to follow it - otherwise a flip leaves the
+// slider pointing at an hour angle the mount can no longer hold.
+function syncHaBoundsToSide(){
+  const c = haCentreDeg(), ha = document.getElementById('ha');
+  const sl = document.getElementById('haSlider');
+  if(ha){
+    ha.min = c - HA_HALF_SPAN_DEG;
+    ha.max = c + HA_HALF_SPAN_DEG;
+    ha.value = Math.max(+ha.min, Math.min(+ha.max, parseFloat(ha.value) || c));
+  }
+  if(sl && ha) sl.value = sliderFromHa(ha.value);
 }
 
 function haHours(){ return raAxisDeg() / 15; }
@@ -1820,6 +1875,42 @@ function setUnitSystem(imperial){
 }
 
 
+// Horizontal offset of the RA/Dec pivot from the pier axis, in mm, signed north.
+//
+// B lies ALONG the polar axis, which is tilted to the latitude. So B resolves
+// into a vertical rise of B*sin(lat) - which the mount head height already
+// carries - and a horizontal run of B*cos(lat) toward the elevated pole, which
+// nothing carried at all. On a GEM at 39 degrees with B = 15 inches that run is
+// 296 mm, and the tool reported the pivot as sitting directly over the pier.
+//
+// It matters because of what the four wall measurements actually locate. Users
+// are told to measure to the same feature on all four sides - the near face of
+// the pier - and the pier radius then cancels in (distS - distN) / 2, leaving
+// the PIER AXIS. NINA wants the offset to the RA/Dec PIVOT. Those are the same
+// point only at the pole; everywhere else they differ by exactly this run.
+//
+// Sign follows the hemisphere: the polar axis points at the elevated pole, so
+// the pivot sits north of the pier above the equator and south of it below.
+// Latitude 0 is treated as northern, which is arbitrary but has to be something.
+//
+// Returns 0 when B is unknown rather than guessing. A 'partial' preset leaves
+// genB holding whatever the previously selected mount wrote there, so the
+// preset's own B is read directly rather than trusting the field.
+function gemPivotNorthShiftMm(){
+  if(typeof mountType !== 'undefined' && mountType !== 'GEM') return 0;
+  let bIn = null;
+  if(typeof mountCustomOn === 'function' && mountCustomOn()){
+    const d = genericDims();
+    if(d.B > 0) bIn = d.B;
+  } else {
+    const m = mountById(typeof selectedMountId !== 'undefined' ? selectedMountId : 'generic');
+    if(m && m.B !== null && m.B !== undefined) bIn = m.B;
+  }
+  if(!(bIn > 0)) return 0;
+  const lat = Math.max(-89.9, Math.min(89.9, num('lat')));
+  return bIn * IN_TO_MM * Math.cos(Math.abs(lat) * Math.PI / 180) * (lat < 0 ? -1 : 1);
+}
+
 // Derive signed NS and EW offsets from four wall-to-mount measurements.
 // ns = (distN - distS) / 2  — positive = North of dome center
 // ew = (distE - distW) / 2  — positive = East of dome center
@@ -1830,7 +1921,9 @@ function getNsEwFromWalls(){
   // If mount is closer to the north wall than the south wall, it is north of center.
   // ns positive = north:  ns = (distS - distN) / 2
   // ew positive = east:   ew = (distW - distE) / 2
-  return { ns: (dS - dN) / 2, ew: (dW - dE) / 2 };
+  // The tape locates the pier; the pivot sits a polar-axis run further toward
+  // the elevated pole, so that run is added to reach the point NINA asks for.
+  return { ns: (dS - dN) / 2 + gemPivotNorthShiftMm(), ew: (dW - dE) / 2 };
 }
 
 // Override num() for dome mm fields to return mm regardless of mode
@@ -2326,6 +2419,19 @@ function horizonAltAt(azDeg){
 
 // ---- keep HA/Dec sliders and number fields in sync ----
 document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = haFromSlider(this.value); compute(); });
+// A pier-side change moves the whole reachable span, so re-bound the field and
+// re-seat the slider. Runs on the auto-flip path too, since that also writes
+// the select. Guarded so it cannot fire mid-park-search, where the side is
+// deliberately being tried and measured.
+(function(){
+  const sel = document.getElementById('pierSide');
+  if(sel) sel.addEventListener('change', function(){
+    if(window.__parkSearching) return;
+    syncHaBoundsToSide();
+    if(typeof compute === 'function') compute();
+  });
+  if(typeof syncHaBoundsToSide === 'function') syncHaBoundsToSide();
+})();
 document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = sliderFromHa(this.value); });
 
 function clampDecToVisible(){
@@ -3040,6 +3146,15 @@ function createGEMMount(THREE, options) {
   function update(s) {
     if (s) Object.assign(state, s);
     head.rotation.x = (state.latitude - 90) * DEG;
+    // The group's origin is the RA/Dec pivot, and on a GEM the pivot does not
+    // sit over the pier: B lies along the polar axis, so the pivot stands a run
+    // of B*cos(lat) toward the elevated pole. The offsets place the pivot
+    // correctly, which means the pier - drawn from the same origin - has to be
+    // pushed back the other way or it follows the pivot and leaves the ground
+    // where it was poured. The caller passes the same run it fed into the N/S
+    // offset, so the picture and the number cannot disagree.
+    var _pierRun = state.pierNorthOffset || 0;
+    if (bFrame) { bFrame.lo.position.y = -_pierRun; bFrame.hi.position.y = -_pierRun; }
     var haDeg = state.hourAngle * 15;
     var flip = (state.pierSide === 'west') ? 180 : 0;
     // This form keeps the rendered azimuth matching the calculated sky
@@ -3106,6 +3221,9 @@ function createGEMMount(THREE, options) {
   var api = null;
   api = {
     group: group, frame: frame, head: head, raRotor: raRotor,
+    // The pier bins are exposed so a check can measure where the pier is
+    // actually drawn. Nothing in the model reads this back.
+    pierBins: bFrame,
     decGroup: decGroup, decRotor: decRotor, optics: optics,
     params: P, reach: reach,
     update: update, setDetail: setDetail, setOptics: setOptics, showPier: showPier,
@@ -3758,10 +3876,21 @@ const MOUNT_FIELD_SET = {
 
 // A GEM preset's Dec-axis height depends on latitude, so re-apply it when the
 // site latitude changes - otherwise the mount head height silently goes stale.
+//
+// The re-apply used to skip the 'generic' entry, on the assumption that it meant
+// "no preset chosen, leave the fields alone". It does not: 'generic' is a real
+// GEM entry carrying its own A and B, and it is the DEFAULT selection - so the
+// one mount every new user starts on was the one mount whose head height did not
+// follow latitude. Worse, the value only corrected itself when A, B or C was next
+// touched, so anyone who set latitude last kept a figure for the wrong latitude
+// with nothing on screen to say so (A 5.5 / B 11.0 read 12.4225" at both 39 and
+// 15 degrees, against 8.3470" correct for 15 - an error of 103 mm).
+// "Measure my own" (id 'custom') was never affected: it is not 'generic', so it
+// already re-applied. Dropping the exclusion makes all three paths agree.
 (function(){
   const el = document.getElementById('lat');
   if(el) el.addEventListener('input', function(){
-    if(typeof selectedMountId !== 'undefined' && selectedMountId !== 'generic'){
+    if(typeof selectedMountId !== 'undefined'){
       applyMountPreset(false);
     }
   });
@@ -5640,7 +5769,10 @@ function updateThreeScene(originMm, directionCalc, hit, radiusMm, shutterWidthMm
     // mount model compares lowercase, so normalise or the flip silently never fires.
     gemMount.update({
       latitude: latDeg, hourAngle: effectivePointing().ha, dec: effectivePointing().dec,
-      pierSide: (document.getElementById('pierSide').value || 'East').toLowerCase()
+      pierSide: (document.getElementById('pierSide').value || 'East').toLowerCase(),
+      // Same figure the N/S offset is built from - one source, so the drawn
+      // pier and the reported offset cannot drift apart.
+      pierNorthOffset: gemPivotNorthShiftMm()
     });
     gemMount.group.visible = true;
     if(gemMount.showPier) gemMount.showPier(_havePier);
@@ -6901,8 +7033,134 @@ function updateNinaSummary(){
   const ns = g('outNS'), ew = g('outEW'), ud = g('outUD');
   el.textContent = (ns && ew && ud) ? (ns + '  ' + ew + '  ' + ud) : '';
 }
-</script>
 
+// ============================================================================
+// verifyModel - does the picture agree with the numbers?
+// ============================================================================
+// The tool works out its geometry twice: computeAperture() produces the figures
+// the user acts on, and the scene code draws the mount. They are independent, so
+// they drift, and every drift shows up as "the 3D looks wrong" long after the
+// change that caused it. Each check below corresponds to a bug that reached a
+// user rather than a hypothetical one.
+//
+// Returns a list of disagreements, each with the two values and the gap, so a
+// failure names a number rather than a feeling.
+function verifyModel(){
+  const out = [];
+  const add = (what, expected, actual, tol, unit) => {
+    const gap = actual - expected;
+    if(Math.abs(gap) > tol){
+      out.push({ check: what, expected: +expected.toFixed(2), actual: +actual.toFixed(2),
+                 gap: +gap.toFixed(2), unit: unit || 'mm' });
+    }
+  };
+  try {
+    if(typeof gemMount === 'undefined' || !gemMount || !three) return out;
+    const scale = three.domeWire.scale.x / (numMmDome('domeDiameter') / 2);
+    if(!(scale > 0)) return out;
+    const mm = v => v / scale;
+
+    // 1. The dome centre is the origin. Everything is measured from it, and a
+    //    scene drawn from the floor instead put the mount 584mm out.
+    add('dome centre at scene origin', 0, mm(three.domeWire.position.y), 1);
+
+    // 2. The floor sits hDome below the centre. Drawn at the wall height, it
+    //    dragged the whole mount with it.
+    add('floor below dome centre', -numMmDome('hDome'), mm(three.floor.position.y), 2);
+
+    // 3. The drawn pivot is where the offsets say it is. This is the check that
+    //    would have caught the ghost drifting off the telescope.
+    // Against the REPORTED Up/Down, not the input box: in measured mode the box
+    // is not the live figure, and comparing to it raised a false alarm on a
+    // perfectly healthy setup - which is exactly how a check like this loses
+    // its authority.
+    const udTxt = (document.getElementById('outUD') || {}).textContent || '';
+    const udM = udTxt.match(/-?\d+(?:\.\d+)?/);
+    if(udM) add('mount pivot at the reported Up/Down', parseFloat(udM[0]),
+                mm(gemMount.group.position.y), 3);
+
+    // 4. The ghost aperture lies on the optical axis the mount model draws.
+    //    They came from different origins for months.
+    const oa = gemMount.opticalAxis();
+    const g = three.ghostAperture;
+    if(g && g.visible){
+      const v = g.position.clone().sub(oa.origin);
+      const along = v.dot(oa.direction);
+      const off = v.clone().addScaledVector(oa.direction, -along).length();
+      add('ghost aperture on the optical axis', 0, mm(off), 40);
+    }
+
+    // 5. The two heights that are one measurement.
+    const hD = parseFloat((document.getElementById('hDome') || {}).value);
+    const wH = parseFloat((document.getElementById('wallHeight') || {}).value);
+    if(isFinite(hD) && isFinite(wH)) add('dome centre = wall springline', wH, hD, 0.01, 'display units');
+
+    // 6. The pointing the mount draws matches the pointing reported. A rotation
+    //    applied twice, or an axis convention crossed, shows up here.
+    const shown = (document.getElementById('outTargetAltAz') || {}).textContent || '';
+    const m = shown.match(/-?\d+(?:\.\d+)?/g);
+    if(m && m.length >= 2){
+      const altDrawn = Math.asin(Math.max(-1, Math.min(1, oa.direction.y))) * 180 / Math.PI;
+      add('drawn altitude = reported altitude', parseFloat(m[0]), altDrawn, 0.5, 'degrees');
+    }
+
+    // 7. The pier is drawn where it was poured, not under the pivot.
+    //    The group origin is the RA/Dec pivot. On a GEM the pivot stands a
+    //    polar-axis run toward the elevated pole, so the pier belongs that far
+    //    back. Drawn straight from the origin it followed the pivot north and
+    //    the picture showed a pier that had got up and moved - which no other
+    //    check could see, because all six look at the pivot or above it.
+    if(typeof gemPivotNorthShiftMm === 'function' && gemMount.pierBins
+       && gemMount.group.visible){
+      const run = gemPivotNorthShiftMm();
+      const nsTxt = (document.getElementById('outNS') || {}).textContent || '';
+      const nsM = nsTxt.match(/-?\d+(?:\.\d+)?/);
+      if(nsM && Math.abs(run) > 0.5){
+        const bins = gemMount.pierBins;
+        const bin = bins.hi.visible ? bins.hi : bins.lo;
+        const w = new THREE.Vector3();
+        bin.getWorldPosition(w);
+        add('pier drawn at the pier, not under the pivot',
+            parseFloat(nsM[0]) - run, mm(w.x), 3);
+      }
+    }
+  } catch(e){
+    out.push({ check: 'verifyModel threw', expected: 0, actual: 0, gap: 0, unit: String(e).slice(0, 60) });
+  }
+  return out;
+}
+
+// A panel, shown only with ?verify in the URL, so it costs nothing in normal use.
+(function(){
+  if(!/[?&]verify\b/.test(location.search)) return;
+  const box = document.createElement('div');
+  box.id = 'verifyPanel';
+  box.style.cssText = 'position:fixed; right:10px; bottom:10px; z-index:9999; max-width:430px;'
+    + 'background:#0d1117; border:1px solid #5b8fd6; border-radius:6px; padding:10px 12px;'
+    + 'font:12px/1.5 ui-monospace,monospace; color:#c9d4e4; box-shadow:0 6px 24px #0009;';
+  document.body.appendChild(box);
+  function paint(){
+    let rows;
+    try { rows = verifyModel(); } catch(e){ rows = [{check:'threw', unit:String(e)}]; }
+    if(!rows.length){
+      box.innerHTML = '<b style="color:#7fd88f;">model verified</b> &mdash; '
+        + 'the picture agrees with the numbers';
+      box.style.borderColor = '#3d5c42';
+      return;
+    }
+    box.style.borderColor = '#e0685c';
+    box.innerHTML = '<b style="color:#e0685c;">' + rows.length + ' disagreement'
+      + (rows.length > 1 ? 's' : '') + '</b><br>'
+      + rows.map(r => '<div style="margin-top:5px;">' + r.check
+          + '<br><span style="color:#8b93a3;">expected ' + r.expected
+          + ', drawn ' + r.actual + ' &mdash; out by <b style="color:#e0685c;">'
+          + r.gap + ' ' + r.unit + '</b></span></div>').join('');
+  }
+  setInterval(paint, 900);
+  setTimeout(paint, 700);
+})();
+
+</script>
 <script>
 // The Lab menu. Click to open, click away or press Escape to close - the same
 // behaviour anywhere it appears, so it is added once here rather than per page.
@@ -6927,6 +7185,5 @@ function updateNinaSummary(){
     if(e.key === 'Escape') document.querySelectorAll('.nav-lab.open').forEach(function(b){ b.classList.remove('open'); });
   });
 })();
-</script>
-</body>
+</script></body>
 </html>
