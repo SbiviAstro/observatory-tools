@@ -199,7 +199,19 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.11.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.12.000 — Current</div>
+
+<p><strong>The pointing slider is the counterweight&rsquo;s swing.</strong> Its centre is the shaft hanging straight down &mdash; where a mount actually sits at rest &mdash; and each end is a quarter turn from there, which puts the weight level with the ground. It will not go past that, so the pose real hardware does not adopt is no longer reachable by dragging. The finest steps now fall around the rest position rather than at the meridian.</p>
+<p>The RA field keeps its own meaning throughout: zero on the meridian, and still accepting the full &plusmn;180&deg; if you type into it.</p>
+
+<p><strong>Both tools open with the counterweight down.</strong> They opened at hour angle zero, where the shaft sits level east-west rather than hanging &mdash; not where anyone leaves a mount. They now open at the pole with the weight down, which is Astro-Physics park 3. The dome tool opens on the west side and the roll-off on the east, because the two have carried opposite east/west conventions since before this release; that inconsistency is worth resolving but would disturb saved setups, so it is left for now.</p>
+
+<p><strong>The automatic pier-side flip is gone.</strong> The mount used to change sides on its own to keep the counterweight down, which meant it jumped mid-drag. It now stays on the side you chose. With the slider limited to a quarter turn either way, the flip is no longer doing work the range does not already do.</p>
+
+<p><strong>Dome Lab and ROR Lab are landing pages.</strong> The work that was in them has been folded into the main build, so each now says so and points at the current calculator. When something new is being tested they will carry it again.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.11.000</div>
 
 <p><strong>The model-verification harness ships with the dome calculator.</strong> It has earned its place in the lab: it checks that the geometry the tool draws agrees with the figures it reports &mdash; the dome centre, the floor datum, the mount pivot, the ghost aperture, the locked height pair, and the drawn altitude &mdash; and names the gap in millimetres or degrees rather than passing or failing silently.</p>
 <p>Most of the faults found this month were the drawing and the arithmetic disagreeing while each looked right on its own. Add <code>?verify</code> to the calculator&rsquo;s URL for a live panel, or call <code>verifyModel()</code> in the browser console. It is inert otherwise, so it costs nothing in normal use &mdash; and if you report something odd, that panel tells us in one line what would otherwise take an evening to find.</p>

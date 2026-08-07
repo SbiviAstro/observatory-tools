@@ -664,7 +664,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.11.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;da25</span></span>
+  <span class="chip">v8.12.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;0cfc</span></span>
 </div>
 
 <div class="stage">
@@ -1207,7 +1207,7 @@
         <div id="haDecFields">
           <div class="row">
             <div><label>Right Ascension (RA)</label><span class="hint">0 = on the meridian, + = west of meridian</span></div>
-            <div class="field"><input type="number" id="ha" value="0" min="-180" max="180" step="1"><span class="unit">°</span></div>
+            <div class="field"><input type="number" id="ha" value="-90" min="-180" max="180" step="1"><span class="unit">°</span></div>
           </div>
           
           <div class="row">
@@ -1272,7 +1272,7 @@
 
         <div class="row" id="pierRow" style="margin-top:14px;">
           <div><label>Pier side</label></div>
-          <div class="field"><select id="pierSide"><option value="East">East</option><option value="West">West</option></select></div>
+          <div class="field"><select id="pierSide"><option value="East">East</option><option value="West" selected>West</option></select></div>
         </div>
     <div class="slider-stack" id="sHaDec"><div class="sl"><span>RA</span><input type="range" id="haSlider" min="-100" max="100" step="0.5" value="0" style="width:100%; margin:0;"></div><div class="sl"><span>Dec</span><input type="range" id="decSlider" min="-90" max="180" step="1" value="90" style="width:100%; margin:0;"></div></div><div class="slider-stack" id="sAltAz"><div class="sl"><span>Alt</span><input type="range" id="altSlider" min="0" max="90" step="1" value="45" style="width:100%; margin:0;"></div><div class="sl"><span>Az</span><input type="range" id="azSlider" min="0" max="360" step="1" value="180" style="width:100%; margin:0;"></div></div></div>
     <div class="answer" id="answerStrip">
@@ -1353,7 +1353,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.11.000</span>
+    flex-shrink:0;">v8.12.000</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -1696,13 +1696,35 @@ function raAxisDeg(){ return num('ha'); }
 // which gives roughly a twentieth of a degree per pixel at the meridian against
 // 1.2 before, and about five degrees per pixel out at the limits where that is
 // all anyone needs.
+// The slider is the counterweight's swing, not the hour angle directly. Its
+// centre is the shaft hanging straight down - where a mount sits at rest - and
+// each end is a quarter turn from there, which puts the weight level with the
+// ground. It cannot be driven past that, so the pose a real mount will not adopt
+// is simply not reachable by dragging.
+//
+//   left end   +90 degrees of swing   weight level
+//   centre       0                    weight down
+//   right end  -90 degrees of swing   weight level
+//
+// The RA field keeps its own meaning throughout - zero on the meridian - and
+// still accepts the full plus or minus 180 by typing.
+const HA_CENTRE = -90;      // the hour angle at which the shaft hangs lowest
+const HA_SWING  =  90;      // how far either way before the weight is level
+function normHa(v){
+  while(v >  180) v -= 360;
+  while(v < -180) v += 360;
+  return v;
+}
 function haFromSlider(pos){
   const x = Math.max(-100, Math.min(100, parseFloat(pos) || 0)) / 100;
-  return Math.round(Math.sign(x) * x * x * 180 * 10) / 10;
+  // squared response: fine near the rest position, coarse toward level
+  const swing = Math.sign(x) * x * x * HA_SWING;
+  return Math.round(normHa(HA_CENTRE + swing) * 10) / 10;
 }
 function sliderFromHa(ha){
-  const v = Math.max(-180, Math.min(180, parseFloat(ha) || 0));
-  return Math.round(Math.sign(v) * Math.sqrt(Math.abs(v) / 180) * 200) / 2;
+  const off = normHa((parseFloat(ha) || 0) - HA_CENTRE);
+  const v = Math.max(-HA_SWING, Math.min(HA_SWING, off));
+  return Math.round(Math.sign(v) * Math.sqrt(Math.abs(v) / HA_SWING) * 200) / 2;
 }
 
 function haHours(){ return raAxisDeg() / 15; }
@@ -2172,7 +2194,9 @@ function compute(){
   if(typeof updateSetupCheck === 'function') updateSetupCheck();
   if(typeof updateHorizonFloor === 'function') updateHorizonFloor();
   if(typeof updateSweptVolume === 'function') updateSweptVolume();
-  if(window.__keepReachable) window.__keepReachable();
+  // The automatic pier-side flip is gone: the mount stays on the side you
+  // chose. It was jumping sides mid-drag, which is disorienting and hides
+  // what a fixed-side mount would really do.
 }
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
