@@ -199,7 +199,23 @@ document.getElementById('navToggle').addEventListener('click',function(){
 <p>Two cases get called out rather than decided quietly. A <em>fix that changes your numbers</em> &mdash; such as adding the aperture radius to the wall limit in v7.00.025 &mdash; is still a patch, but the entry will say so plainly, because a correct result can still differ from the one you planned against. A <em>fix that arrives with a new input</em> counts as a feature, since there is something new to fill in.</p>
 </div>
 
-<div class="card"><div class="eyebrow">v8.12.000 — Current</div>
+<div class="card"><div class="eyebrow">v8.13.001 — Current</div>
+
+<p><strong>Fixed: changing your latitude did not recompute the mount head height.</strong> The height is derived from the A and B measurements and the latitude &mdash; <em>A + B&nbsp;sin(latitude)</em> &mdash; but only the A/B/C fields triggered the recalculation. Setting the latitude left the figure showing the answer for the previous one, so anyone who entered their latitude last, which is natural, got a height for whatever had been there before. Reported by a user who noticed their Paramount ME&nbsp;II figures did not match the library.</p>
+
+<p><strong>Known issue, same report:</strong> the north shift is not modelled. As a German equatorial tips for a lower latitude, the RA/Dec intersection moves north by <em>B&nbsp;cos(latitude)</em> as well as down &mdash; for a 15&Prime; B that is 7.5&Prime; at latitude 60 rising to 14.5&Prime; at 15. The tool reports a N/S offset of zero at every latitude, so that displacement reaches NINA as nothing. The wall measurements are taken to the pier face, and the intersection sits north of it by that amount. This is a change to a reported value rather than a display, and is being left for its own session rather than rushed.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.13.000</div>
+
+<p><strong>Saved setups record which build wrote them.</strong> A <code>version</code> and a <code>schema</code> now go into every file. The version is for diagnosis; the schema is bumped only when the meaning of the saved fields changes, so a loader can test one number rather than parse a version string and guess.</p>
+
+<p><strong>Setups written before this are brought to the rest position.</strong> They stored a pointing under the old rules, when the mount changed pier sides on its own, and often land with the counterweight level or raised &mdash; which is not where any mount sits, and reads as the preview being broken. The pointing is moved to the shaft-down position on load. Measurements are untouched, and files carrying a schema are left exactly as stored.</p>
+
+<p><strong>Fixed: the hour-angle slider was ninety degrees out after loading a setup.</strong> The load routine synced sliders by copying the number field across, which is right for declination and wrong for hour angle &mdash; that slider holds a position on the counterweight&rsquo;s swing, not degrees. The roll-off tool&rsquo;s jog buttons had the same fault, still clamping to a range left over from when the slider held hours.</p>
+</div>
+
+<div class="card"><div class="eyebrow">v8.12.000</div>
 
 <p><strong>The pointing slider is the counterweight&rsquo;s swing.</strong> Its centre is the shaft hanging straight down &mdash; where a mount actually sits at rest &mdash; and each end is a quarter turn from there, which puts the weight level with the ground. It will not go past that, so the pose real hardware does not adopt is no longer reachable by dragging. The finest steps now fall around the rest position rather than at the meridian.</p>
 <p>The RA field keeps its own meaning throughout: zero on the meridian, and still accepting the full &plusmn;180&deg; if you type into it.</p>

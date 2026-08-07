@@ -650,7 +650,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.12.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;be2a</span></span>
+  <span class="chip">v8.13.001<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;8ece</span></span>
 </div>
 
 <div class="stage">
@@ -1493,7 +1493,7 @@
     <a href="contact.html" style="color:#8b93a3; font-size:12px; padding:10px 14px; white-space:nowrap; text-decoration:none;">Contact</a>
     </div>
 
-  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.12.000</span>
+  <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace; font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em; flex-shrink:0;">v8.13.001</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><span class="stat-val" id="outFootprint">—</span><span class="stat-val" id="outWallHeight">—</span><span class="stat-val" id="outRoofTravel">—</span><span class="stat-val" id="outRollDir">—</span><span class="stat-val" id="outMountOffset">—</span><button id="btnCopySettings" style="margin-top:12px; width:100%; padding:9px 10px; font-size:12.5px; font-weight:700; background:var(--amber); color:#1a0f0a; border:1px solid var(--amber); border-radius:4px; cursor:pointer;">Copy Building Summary</button><div id="geomWarning" style="display:none; font-size:12px; color:#c86b6b; margin-top:8px; line-height:1.5;">
         ⚠ Mount position falls outside the building footprint — check your offset measurements.
       </div><div id="horizonWarning" style="display:none; font-size:12px; color:#d9a066; margin-top:8px; line-height:1.5;">
@@ -3225,6 +3225,14 @@ document.getElementById('horizonMinAlt').addEventListener('input', function(){
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
 document.getElementById('lat').addEventListener('input', clampDecToVisible);
+  // The mount head height is derived from A, B and the latitude, but only the
+  // A/B/C fields triggered the recompute - so changing the latitude left the
+  // height showing the answer for the previous one, and anyone who set their
+  // latitude last got a figure for whatever was there before.
+  document.getElementById('lat').addEventListener('input', function(){
+    if(typeof mountCustomOn === 'function' && mountCustomOn()
+       && typeof applyGenericDims === 'function') applyGenericDims();
+  });
 
 document.getElementById('haSlider').addEventListener('input', function(){ document.getElementById('ha').value = haFromSlider(this.value); compute(); });
 document.getElementById('ha').addEventListener('input', function(){ document.getElementById('haSlider').value = sliderFromHa(this.value); });
@@ -3282,7 +3290,9 @@ function jog(dx, dy){
     let dec = num('dec') + dy * jogStep;
     dec = Math.max(num('lat') - 90, Math.min(90, dec));
     document.getElementById('ha').value = ha.toFixed(3);
-    document.getElementById('haSlider').value = Math.max(-6, Math.min(6, ha));
+    // through sliderFromHa: the slider holds a position on the counterweight's
+    // swing, not degrees. The old clamp to six was left from when it held hours.
+    document.getElementById('haSlider').value = sliderFromHa(ha);
     document.getElementById('dec').value = dec.toFixed(2);
     document.getElementById('decSlider').value = dec;
   }
@@ -3427,7 +3437,22 @@ function saveSetup(){
   data._scope2MountType = scopeMountTypes[2];
   data._scope3MountType = scopeMountTypes[3];
   data._scope4MountType = scopeMountTypes[4];
-  data._meta = { tool: 'ROR Observatory Workbench', savedAt: new Date().toISOString() };
+  data._meta = {
+      tool: 'ROR Observatory Workbench',
+      savedAt: new Date().toISOString(),
+      // The version that wrote the file. Conventions change - the pier-side flip
+      // was removed in 8.12, so a setup saved before it holds a pose that used to
+      // be corrected on load and now is not. Without knowing which build wrote a
+      // file, a loader can only guess; with it, it can say so, or adapt.
+      version: (function(){
+        const chip = document.querySelector('.chip');
+        const m = chip && chip.textContent.match(/v?(\d+\.\d+\.\d+)/);
+        return m ? m[1] : null;
+      })(),
+      // Bumped only when the meaning of the saved fields changes, not on every
+      // release, so a loader can test one number rather than parse a version.
+      schema: 2
+    };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -3475,11 +3500,48 @@ function loadSetupFromFile(file){
     if(data._scope2MountType) setScopeMountType(2, data._scope2MountType);
     if(data._scope3MountType) setScopeMountType(3, data._scope3MountType);
     if(data._scope4MountType) setScopeMountType(4, data._scope4MountType);
-    const syncPairs = [['ha','haSlider'], ['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
-    syncPairs.forEach(([numId, sliderId]) => {
-      const numEl = document.getElementById(numId), sliderEl = document.getElementById(sliderId);
-      if(numEl && sliderEl) sliderEl.value = numEl.value;
-    });
+      // The hour-angle slider holds a position on the counterweight's swing, not
+      // degrees, so it cannot be copied straight from the field.
+      const syncPairs = [['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
+      syncPairs.forEach(([numId, sliderId]) => {
+        const numEl = document.getElementById(numId), sliderEl = document.getElementById(sliderId);
+        if(numEl && sliderEl) sliderEl.value = numEl.value;
+      });
+      (function(){
+        const numEl = document.getElementById('ha'), sliderEl = document.getElementById('haSlider');
+        if(numEl && sliderEl && typeof sliderFromHa === 'function') sliderEl.value = sliderFromHa(numEl.value);
+      })();
+    // A setup written before 8.12 stored a pointing under the old rules, when the
+    // mount changed pier sides on its own. People save these for the measurements,
+    // not the pointing, and an old file often lands with the counterweight level or
+    // raised - which is not where any mount rests, and reads as the model being
+    // broken. So the pointing is brought to the rest position: shaft hanging, scope
+    // on the polar axis. The measurements, which are the point of the file, are
+    // untouched. Files carrying a schema were saved under the current rules and are
+    // left exactly as stored.
+    (function(){
+      if(data && data._meta && data._meta.schema) return;
+      setTimeout(() => {
+        try {
+          if(typeof shaftRise === 'function' && shaftRise() < -40) return;  // already hanging
+          const ha = document.getElementById('ha'), sl = document.getElementById('haSlider');
+          if(!ha) return;
+          ha.value = -90;
+          if(sl && typeof sliderFromHa === 'function') sl.value = sliderFromHa(-90);
+          ha.dispatchEvent(new Event('input', { bubbles: true }));
+          // and if that still leaves the weights up, it is the wrong side of the pier
+          setTimeout(() => {
+            try {
+              if(typeof shaftRise !== 'function' || shaftRise() <= 1) return;
+              const sel = document.getElementById('pierSide');
+              if(!sel) return;
+              sel.value = (sel.value === 'East') ? 'West' : 'East';
+              sel.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch(e){ /* leave it */ }
+          }, 60);
+        } catch(e){ /* leave it as stored rather than guess */ }
+      }, 60);
+    })();
     clampAltToHorizon();
     clampDecToVisible();
     compute();

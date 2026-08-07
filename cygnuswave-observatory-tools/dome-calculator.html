@@ -664,7 +664,7 @@
   <button class="preset-btn" id="btnLoadSetup">Load Setup</button>
   <button class="preset-btn" id="btnResetDefaults" title="Reload the page with every field back to its default value">Reset to Defaults</button>
   <input type="file" id="loadSetupFile" accept=".json" style="display:none;">
-  <span class="chip">v8.12.000<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;0cfc</span></span>
+  <span class="chip">v8.13.001<span class="build-stamp" title="Build identifier — changes whenever the file does, whether or not the version number moves">&nbsp;9c08</span></span>
 </div>
 
 <div class="stage">
@@ -1353,7 +1353,7 @@
   </div>
   <span id="cw-version" style="margin-left:auto; padding:10px 16px; font-family:'Courier New',monospace;
     font-size:11px; color:#8b93a3; opacity:.75; white-space:nowrap; letter-spacing:.05em;
-    flex-shrink:0;">v8.12.000</span>
+    flex-shrink:0;">v8.13.001</span>
 </div><button class="preset-btn" id="btnThemeToggle" title="Switch between dark and light mode">🌙 Dark</button><div id="ninaPanel" class="header-readout panel-bar">
     <div class="header-stats">
       <div class="eyebrow" style="margin-bottom:4px;">NINA · Options → Dome</div>
@@ -2201,6 +2201,14 @@ function compute(){
 
 document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', compute));
 document.getElementById('lat').addEventListener('input', clampDecToVisible);
+  // The mount head height is derived from A, B and the latitude, but only the
+  // A/B/C fields triggered the recompute - so changing the latitude left the
+  // height showing the answer for the previous one, and anyone who set their
+  // latitude last got a figure for whatever was there before.
+  document.getElementById('lat').addEventListener('input', function(){
+    if(typeof mountCustomOn === 'function' && mountCustomOn()
+       && typeof applyGenericDims === 'function') applyGenericDims();
+  });
 
 // ---- keep HA/Dec sliders and number fields in sync ----
 let pointingMode = 'HADec';
@@ -5947,7 +5955,22 @@ function saveSetup(){
   data._ninaFieldsMm = true;
   if(typeof getViewHeight === 'function') data._viewHeight = getViewHeight();
   if(horizonSourceName) data._horizonSource = horizonSourceName;
-  data._meta = { tool: 'NINA Dome Geometry Workbench', savedAt: new Date().toISOString() };
+  data._meta = {
+      tool: 'NINA Dome Geometry Workbench',
+      savedAt: new Date().toISOString(),
+      // The version that wrote the file. Conventions change - the pier-side flip
+      // was removed in 8.12, so a setup saved before it holds a pose that used to
+      // be corrected on load and now is not. Without knowing which build wrote a
+      // file, a loader can only guess; with it, it can say so, or adapt.
+      version: (function(){
+        const chip = document.querySelector('.chip');
+        const m = chip && chip.textContent.match(/v?(\d+\.\d+\.\d+)/);
+        return m ? m[1] : null;
+      })(),
+      // Bumped only when the meaning of the saved fields changes, not on every
+      // release, so a loader can test one number rather than parse a version.
+      schema: 2
+    };
 
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -6028,11 +6051,49 @@ function loadSetupFromFile(file){
     }
 
     // Sliders mirror their number-input counterparts and need an explicit sync.
-    const syncPairs = [['ha','haSlider'], ['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
+    // The hour-angle slider is the exception: it holds a position on the
+    // counterweight's swing, not degrees, so copying the field straight across
+    // left the two ninety degrees apart.
+    const syncPairs = [['dec','decSlider'], ['targetAlt','altSlider'], ['targetAz','azSlider']];
     syncPairs.forEach(([numId, sliderId]) => {
       const numEl = document.getElementById(numId), sliderEl = document.getElementById(sliderId);
       if(numEl && sliderEl) sliderEl.value = numEl.value;
     });
+    (function(){
+      const numEl = document.getElementById('ha'), sliderEl = document.getElementById('haSlider');
+      if(numEl && sliderEl && typeof sliderFromHa === 'function') sliderEl.value = sliderFromHa(numEl.value);
+    })();
+    // A setup written before 8.12 stored a pointing under the old rules, when the
+    // mount changed pier sides on its own. People save these for the measurements,
+    // not the pointing, and an old file often lands with the counterweight level or
+    // raised - which is not where any mount rests, and reads as the model being
+    // broken. So the pointing is brought to the rest position: shaft hanging, scope
+    // on the polar axis. The measurements, which are the point of the file, are
+    // untouched. Files carrying a schema were saved under the current rules and are
+    // left exactly as stored.
+    (function(){
+      if(data && data._meta && data._meta.schema) return;
+      setTimeout(() => {
+        try {
+          if(typeof shaftRise === 'function' && shaftRise() < -40) return;  // already hanging
+          const ha = document.getElementById('ha'), sl = document.getElementById('haSlider');
+          if(!ha) return;
+          ha.value = -90;
+          if(sl && typeof sliderFromHa === 'function') sl.value = sliderFromHa(-90);
+          ha.dispatchEvent(new Event('input', { bubbles: true }));
+          // and if that still leaves the weights up, it is the wrong side of the pier
+          setTimeout(() => {
+            try {
+              if(typeof shaftRise !== 'function' || shaftRise() <= 1) return;
+              const sel = document.getElementById('pierSide');
+              if(!sel) return;
+              sel.value = (sel.value === 'East') ? 'West' : 'East';
+              sel.dispatchEvent(new Event('input', { bubbles: true }));
+            } catch(e){ /* leave it */ }
+          }, 60);
+        } catch(e){ /* leave it as stored rather than guess */ }
+      }, 60);
+    })();
 
     clampAltToHorizon();
     clampDecToVisible();
